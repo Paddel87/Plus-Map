@@ -2,9 +2,6 @@
 
 Legt an:
   - Equipment-Katalog (RestraintType, Status `approved`) mit ~10 Outdoor-Items.
-  - Je ein Platzhalter-Eintrag in ArmPosition/HandPosition/HandOrientation
-    (für DB-Foreign-Key-Constraints; im UI sind diese Felder ohnehin
-    ausgeblendet).
   - 5 Personen (Erfasser + 4 Begleiter).
   - 1 Editor-User, verknüpft mit der ersten Person.
   - 8 Touren über die letzten 90 Tage gestreut.
@@ -33,10 +30,7 @@ from app.auth.manager import _password_helper
 from app.db import get_engine, get_sessionmaker
 from app.models.application import Application
 from app.models.catalog import (
-    ArmPosition,
     CatalogStatus,
-    HandOrientation,
-    HandPosition,
     RestraintCategory,
     RestraintType,
 )
@@ -159,10 +153,6 @@ async def _seed(tester_email: str, tester_password: str, tester_name: str) -> in
                 session.add(rt)
                 equipment_objs.append(rt)
 
-            # Platzhalter für Position-Tabellen (im UI ausgeblendet, FK-Stub)
-            session.add(ArmPosition(name="-", status=CatalogStatus.APPROVED))
-            session.add(HandPosition(name="-", status=CatalogStatus.APPROVED))
-            session.add(HandOrientation(name="-", status=CatalogStatus.APPROVED))
             await session.flush()
 
             # --- Touren + Stopps ---
@@ -215,9 +205,6 @@ async def _seed(tester_email: str, tester_password: str, tester_name: str) -> in
                         event_id=tour.id,
                         performer_id=tester_person.id,
                         recipient_id=recipient.id,
-                        arm_position_id=None,
-                        hand_position_id=None,
-                        hand_orientation_id=None,
                         sequence_no=seq,
                         started_at=stop_started,
                         ended_at=stop_ended if stop_ended <= ended else ended,

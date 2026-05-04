@@ -31,13 +31,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.auth.manager import _password_helper
 from app.deps import get_rls_session, require_role
 from app.models.application import Application, ApplicationRestraint
-from app.models.catalog import (
-    ArmPosition,
-    CatalogStatus,
-    HandOrientation,
-    HandPosition,
-    RestraintType,
-)
+from app.models.catalog import CatalogStatus, RestraintType
 from app.models.event import Event, EventParticipant
 from app.models.person import Person, PersonOrigin
 from app.models.user import User, UserRole
@@ -50,7 +44,6 @@ from app.schemas.admin import (
     MonthlyEventCount,
     PersonMergeRequest,
     PersonMergeResponse,
-    PositionCount,
     RestraintCount,
 )
 from app.schemas.common import Page
@@ -290,9 +283,6 @@ async def get_stats(
         for r in (await session.execute(top_restraints_q)).all()
     ]
 
-    top_arm = await _top_position(session, ArmPosition, Application.arm_position_id, 5)
-    top_hand = await _top_position(session, HandPosition, Application.hand_position_id, 5)
-
     users_by_role_q = select(User.role, func.count()).group_by(User.role)
     users_by_role: dict[UserRole, int] = {
         cast(UserRole, role): int(c) for role, c in (await session.execute(users_by_role_q)).all()
@@ -309,48 +299,24 @@ async def get_stats(
         .where(Person.origin == PersonOrigin.ON_THE_FLY)
         .where(User.id.is_(None))  # type: ignore[attr-defined]
     )
-    pending_proposals = 0
-    for catalog in (RestraintType, ArmPosition, HandPosition, HandOrientation):
-        pending_proposals += int(
-            await session.scalar(
-                select(func.count())
-                .select_from(catalog)
-                .where(catalog.status == CatalogStatus.PENDING)
-            )
-            or 0
+    pending_proposals = int(
+        await session.scalar(
+            select(func.count())
+            .select_from(RestraintType)
+            .where(RestraintType.status == CatalogStatus.PENDING)
         )
+        or 0
+    )
 
     return AdminStats(
         events_total=int(events_total or 0),
         events_per_month_last_12=monthly,
         top_restraints=top_restraints,
-        top_arm_positions=top_arm,
-        top_hand_positions=top_hand,
         users_by_role=users_by_role,
         persons_total=int(persons_total or 0),
         persons_on_the_fly_unlinked=int(on_the_fly_unlinked or 0),
         pending_catalog_proposals=pending_proposals,
     )
-
-
-async def _top_position(
-    session: AsyncSession,
-    model: Any,
-    fk_col: Any,
-    limit: int,
-) -> list[PositionCount]:
-    q = (
-        select(model.id, model.name, func.count().label("c"))
-        .join(Application, fk_col == model.id)
-        .where(Application.is_deleted.is_(False))
-        .group_by(model.id, model.name)
-        .order_by(func.count().desc())
-        .limit(limit)
-    )
-    return [
-        PositionCount(id=r.id, name=r.name, count=int(r.c))
-        for r in (await session.execute(q)).all()
-    ]
 
 
 # ---------------------------------------------------------------------------
@@ -376,9 +342,6 @@ async def export_all(
         event_participants=await _dump(session, EventParticipant),
         application_restraints=await _dump(session, ApplicationRestraint),
         restraint_types=await _dump(session, RestraintType),
-        arm_positions=await _dump(session, ArmPosition),
-        hand_positions=await _dump(session, HandPosition),
-        hand_orientations=await _dump(session, HandOrientation),
     )
 
 

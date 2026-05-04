@@ -66,21 +66,6 @@ class Application(Base, TimestampMixin, CreatedByMixin, SoftDeleteMixin):
         ForeignKey("person.id", ondelete="RESTRICT"),
         nullable=False,
     )
-    arm_position_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("arm_position.id", ondelete="RESTRICT"),
-        nullable=True,
-    )
-    hand_position_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("hand_position.id", ondelete="RESTRICT"),
-        nullable=True,
-    )
-    hand_orientation_id: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("hand_orientation.id", ondelete="RESTRICT"),
-        nullable=True,
-    )
     sequence_no: Mapped[int] = mapped_column(Integer, nullable=False)
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     ended_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

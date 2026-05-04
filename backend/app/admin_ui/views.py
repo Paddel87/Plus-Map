@@ -11,12 +11,7 @@ from __future__ import annotations
 from sqladmin import ModelView
 
 from app.models.application import Application, ApplicationRestraint
-from app.models.catalog import (
-    ArmPosition,
-    HandOrientation,
-    HandPosition,
-    RestraintType,
-)
+from app.models.catalog import RestraintType
 from app.models.event import Event, EventParticipant
 from app.models.person import Person
 from app.models.user import User
@@ -78,40 +73,6 @@ class RestraintTypeAdmin(ModelView, model=RestraintType):
         RestraintType.created_at,
     ]
     form_excluded_columns = [RestraintType.created_at, RestraintType.updated_at]
-
-
-class ArmPositionAdmin(ModelView, model=ArmPosition):
-    name = "Arm position"
-    name_plural = "Arm positions"
-    icon = "fa-solid fa-arrows-up-down"
-    column_list = [ArmPosition.name, ArmPosition.status, ArmPosition.created_at]
-    column_searchable_list = [ArmPosition.name]
-    column_sortable_list = [ArmPosition.name, ArmPosition.status]
-    form_excluded_columns = [ArmPosition.created_at, ArmPosition.updated_at]
-
-
-class HandPositionAdmin(ModelView, model=HandPosition):
-    name = "Hand position"
-    name_plural = "Hand positions"
-    icon = "fa-solid fa-hand"
-    column_list = [HandPosition.name, HandPosition.status, HandPosition.created_at]
-    column_searchable_list = [HandPosition.name]
-    column_sortable_list = [HandPosition.name, HandPosition.status]
-    form_excluded_columns = [HandPosition.created_at, HandPosition.updated_at]
-
-
-class HandOrientationAdmin(ModelView, model=HandOrientation):
-    name = "Hand orientation"
-    name_plural = "Hand orientations"
-    icon = "fa-solid fa-rotate"
-    column_list = [
-        HandOrientation.name,
-        HandOrientation.status,
-        HandOrientation.created_at,
-    ]
-    column_searchable_list = [HandOrientation.name]
-    column_sortable_list = [HandOrientation.name, HandOrientation.status]
-    form_excluded_columns = [HandOrientation.created_at, HandOrientation.updated_at]
 
 
 class EventAdmin(ModelView, model=Event):
@@ -183,9 +144,6 @@ ALL_MODEL_VIEWS: list[type[ModelView]] = [
     EventAdmin,
     ApplicationAdmin,
     RestraintTypeAdmin,
-    ArmPositionAdmin,
-    HandPositionAdmin,
-    HandOrientationAdmin,
 ]
 
 # Re-export the join models so future ADR amendments can opt to surface
@@ -194,11 +152,8 @@ __all__ = [
     "ALL_MODEL_VIEWS",
     "ApplicationAdmin",
     "ApplicationRestraint",
-    "ArmPositionAdmin",
     "EventAdmin",
     "EventParticipant",
-    "HandOrientationAdmin",
-    "HandPositionAdmin",
     "PersonAdmin",
     "RestraintTypeAdmin",
     "UserAdmin",

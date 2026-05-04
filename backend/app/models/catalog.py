@@ -1,10 +1,9 @@
 """Catalog models with proposal workflow.
 
-RestraintType, ArmPosition, HandPosition, HandOrientation share the
-``status`` and ``suggested_by`` / ``approved_by`` proposal flow described
-in fahrplan.md M7. Visibility rules (admin sees all, editors see approved
-+ own pending, viewers see approved) are enforced via RLS policies set up
-in M2.
+RestraintType carries the ``status`` and ``suggested_by`` /
+``approved_by`` proposal flow described in fahrplan.md M7. Visibility
+rules (admin sees all, editors see approved + own pending, viewers see
+approved) are enforced via RLS policies set up in M2.
 """
 
 from __future__ import annotations
@@ -138,59 +137,3 @@ class RestraintType(Base, TimestampMixin):
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
-class _LookupBase(TimestampMixin):
-    """Shared columns for ArmPosition / HandPosition / HandOrientation."""
-
-    id: Mapped[uuid.UUID] = pk_column()
-    name: Mapped[str] = mapped_column(String(120), nullable=False)
-    description: Mapped[str | None] = mapped_column(Text, nullable=True)
-    status: Mapped[CatalogStatus] = mapped_column(
-        _CATALOG_STATUS,
-        nullable=False,
-        default=CatalogStatus.PENDING,
-        server_default=CatalogStatus.PENDING.value,
-    )
-    suggested_by: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("user.id", ondelete="SET NULL"),
-        nullable=True,
-    )
-    approved_by: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("user.id", ondelete="SET NULL"),
-        nullable=True,
-    )
-    rejected_by: Mapped[uuid.UUID | None] = mapped_column(
-        UUID(as_uuid=True),
-        ForeignKey("user.id", ondelete="SET NULL"),
-        nullable=True,
-    )
-    rejected_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True),
-        nullable=True,
-    )
-    reject_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
-
-
-class ArmPosition(Base, _LookupBase):
-    __tablename__ = "arm_position"
-    __table_args__ = (
-        UniqueConstraint("name", name="uq_arm_position_name"),
-        Index("ix_arm_position_status", "status"),
-    )
-
-
-class HandPosition(Base, _LookupBase):
-    __tablename__ = "hand_position"
-    __table_args__ = (
-        UniqueConstraint("name", name="uq_hand_position_name"),
-        Index("ix_hand_position_status", "status"),
-    )
-
-
-class HandOrientation(Base, _LookupBase):
-    __tablename__ = "hand_orientation"
-    __table_args__ = (
-        UniqueConstraint("name", name="uq_hand_orientation_name"),
-        Index("ix_hand_orientation_status", "status"),
-    )
