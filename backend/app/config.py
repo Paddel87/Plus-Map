@@ -23,6 +23,10 @@ class Settings(BaseSettings):
         env_file=None,
         case_sensitive=False,
         extra="ignore",
+        # Compose passes optional vars as ${HCMAP_X:-} (empty string when unset).
+        # Treat empty values as missing so Field defaults apply — required for
+        # smtp_from: EmailStr | None to accept the unset case.
+        env_ignore_empty=True,
     )
 
     environment: Literal["development", "test", "production"] = "development"
