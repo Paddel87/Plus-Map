@@ -1,21 +1,15 @@
 name: CI
 
-# M10.7, ADR-051 §E. Three jobs:
-#   1. backend-lint-test  — ruff + format-check + mypy --strict + pytest
-#                           against a Postgres+PostGIS service container.
-#   2. frontend-lint-test — typecheck + lint + format:check + vitest run.
-#   3. build-push         — multi-arch (amd64/arm64) build of backend,
-#                           frontend, and backup images. Pushes to GHCR
-#                           only on `main` and `v*.*.*` tags.
+# Plus-Map CI: nur Lint und Typecheck. Tests und Image-Build sind bewusst
+# weggelassen — Plus-Map ist eine Test-Instanz, deployt wird lokal aus
+# dem Repo (docker compose ... up -d --build), nicht via GHCR.
 
 on:
   push:
     branches: [main]
-    tags: ["v*.*.*"]
   pull_request:
     branches: [main]
 
-# Allow only one concurrent run per ref; cancel older queued runs on push.
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -25,32 +19,12 @@ permissions:
 
 jobs:
   # ------------------------------------------------------------------
-  # Backend: lint, format-check, type-check, pytest against Postgres.
+  # Backend: lint, format-check, type-check.
   # ------------------------------------------------------------------
-  backend-lint-test:
-    name: Backend (lint + test)
+  backend-lint:
+    name: Backend (lint)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-
-    services:
-      db:
-        image: postgis/postgis:16-3.5
-        env:
-          POSTGRES_USER: hcmap
-          POSTGRES_PASSWORD: hcmap
-          POSTGRES_DB: hcmap_test
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U hcmap -d hcmap_test"
-          --health-interval 5s
-          --health-timeout 3s
-          --health-retries 12
-
-    env:
-      # Skip testcontainers fallback in conftest.py — use the service DB.
-      HCMAP_TEST_DATABASE_URL: postgresql+psycopg://hcmap:hcmap@localhost:5432/hcmap_test
-      UV_NO_PROGRESS: "1"
+    timeout-minutes: 10
 
     defaults:
       run:
@@ -61,9 +35,6 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Install uv
-        # M10.7.1: pinned to immutable v8.1.0 — astral-sh/setup-uv@v8
-        # dropped floating major/minor tags as a supply-chain hardening
-        # measure (see release notes for v8.0.0). Bump deliberately.
         uses: astral-sh/setup-uv@v8.1.0
         with:
           version: "0.11.8"
@@ -85,26 +56,13 @@ jobs:
       - name: Mypy strict
         run: uv run mypy --strict app
 
-      - name: Wait for Postgres
-        run: |
-          for _ in $(seq 1 30); do
-            if pg_isready -h localhost -p 5432 -U hcmap >/dev/null 2>&1; then
-              echo "postgres ready"; exit 0
-            fi
-            sleep 1
-          done
-          echo "postgres did not become ready"; exit 1
-
-      - name: Pytest
-        run: uv run pytest -ra
-
   # ------------------------------------------------------------------
-  # Frontend: typecheck, lint, format-check, vitest.
+  # Frontend: typecheck, lint, format-check.
   # ------------------------------------------------------------------
-  frontend-lint-test:
-    name: Frontend (lint + test)
+  frontend-lint:
+    name: Frontend (lint)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 10
 
     defaults:
       run:
@@ -145,82 +103,3 @@ jobs:
 
       - name: Format check
         run: pnpm format:check
-
-      - name: Vitest
-        run: pnpm test --run
-
-  # ------------------------------------------------------------------
-  # Multi-arch image build + GHCR push. Only on main / v*.*.* tags.
-  # ------------------------------------------------------------------
-  build-push:
-    name: Build & push (${{ matrix.image }})
-    runs-on: ubuntu-latest
-    timeout-minutes: 45
-    needs: [backend-lint-test, frontend-lint-test]
-    if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
-
-    permissions:
-      contents: read
-      packages: write
-
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - image: backend
-            dockerfile: docker/backend.Dockerfile
-          - image: frontend
-            dockerfile: docker/frontend.Dockerfile
-          - image: backup
-            dockerfile: docker/backup.Dockerfile
-
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v6
-
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v4
-
-      - name: Set up Buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: Login to GHCR
-        uses: docker/login-action@v4
-        with:
-          registry: ghcr.io
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      # Tag schema (ADR-051 §E):
-      #   tag v0.1.0-rc.1   → :v0.1.0-rc.1, :rc
-      #   tag v0.1.0        → :v0.1.0, :v0.1, :0, :latest
-      #   push to main      → :main, :sha-<short>
-      # docker/metadata-action emits {{major}}.{{minor}} and {{major}} only
-      # for stable semver tags (no pre-release suffix), so :v0.1 and :0
-      # naturally show up only on the final tag, not on -rc.
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v6
-        with:
-          images: ghcr.io/paddel87/hc-map-${{ matrix.image }}
-          tags: |
-            type=ref,event=branch
-            type=sha,prefix=sha-,format=short
-            type=semver,pattern=v{{version}}
-            type=semver,pattern=v{{major}}.{{minor}}
-            type=semver,pattern={{major}}
-            type=raw,value=rc,enable=${{ contains(github.ref, '-rc.') }}
-            type=raw,value=latest,enable=${{ startsWith(github.ref, 'refs/tags/v') && !contains(github.ref, '-') }}
-
-      - name: Build & push
-        uses: docker/build-push-action@v7
-        with:
-          context: .
-          file: ${{ matrix.dockerfile }}
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha,scope=${{ matrix.image }}
-          cache-to: type=gha,scope=${{ matrix.image }},mode=max
-          provenance: false
