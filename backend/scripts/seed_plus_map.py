@@ -120,13 +120,13 @@ async def _seed(tester_email: str, tester_password: str, tester_name: str) -> in
                 return 1
 
             # --- Personen + Tester-User ---
-            tester_person = Person(name=tester_name, origin=PersonOrigin.LINKED, linkable=True)
+            tester_person = Person(name=tester_name, origin=PersonOrigin.MANAGED, linkable=True)
             session.add(tester_person)
             await session.flush()
 
             companions: list[Person] = []
             for name in PERSONS:
-                p = Person(name=name, origin=PersonOrigin.MANUAL, linkable=False)
+                p = Person(name=name, origin=PersonOrigin.ON_THE_FLY, linkable=False)
                 session.add(p)
                 companions.append(p)
             await session.flush()
@@ -160,9 +160,9 @@ async def _seed(tester_email: str, tester_password: str, tester_name: str) -> in
                 equipment_objs.append(rt)
 
             # Platzhalter für Position-Tabellen (im UI ausgeblendet, FK-Stub)
-            session.add(ArmPosition(label="-", status=CatalogStatus.APPROVED))
-            session.add(HandPosition(label="-", status=CatalogStatus.APPROVED))
-            session.add(HandOrientation(label="-", status=CatalogStatus.APPROVED))
+            session.add(ArmPosition(name="-", status=CatalogStatus.APPROVED))
+            session.add(HandPosition(name="-", status=CatalogStatus.APPROVED))
+            session.add(HandOrientation(name="-", status=CatalogStatus.APPROVED))
             await session.flush()
 
             # --- Touren + Stopps ---
