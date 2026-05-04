@@ -183,7 +183,7 @@ function addApplication(): void {
 }
 
 function submit(): void {
-  fireEvent.click(screen.getByRole("button", { name: /Event speichern/ }));
+  fireEvent.click(screen.getByRole("button", { name: /Tour speichern/ }));
 }
 
 describe("EventBackfillForm — submit guards (M5c.3, ADR-039 §E)", () => {
@@ -214,7 +214,7 @@ describe("EventBackfillForm — submit guards (M5c.3, ADR-039 §E)", () => {
     submit();
     expect(toastErrorMock).toHaveBeenCalled();
     const row = screen.getByTestId("event-backfill-application-row");
-    expect(row.textContent).toMatch(/Recipient ist Pflicht/);
+    expect(row.textContent).toMatch(/Begleitung ist Pflicht/);
     expect(eventInsertMock).not.toHaveBeenCalled();
   });
 });
