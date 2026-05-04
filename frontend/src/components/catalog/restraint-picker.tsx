@@ -24,7 +24,7 @@ import { Loader2, Plus, Search, X } from "lucide-react";
 import { useId, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { describeMutationError } from "@/components/catalog/lookup-form";
+import { describeMutationError } from "@/components/catalog/mutation-error";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -35,7 +35,6 @@ import {
   type RestraintTypeCreatePayload,
 } from "@/lib/catalog/api";
 import {
-  isRestraintTypeEntry,
   MECHANICAL_TYPE_LABELS,
   RESTRAINT_CATEGORY_LABELS,
   type RestraintCategory,
@@ -110,9 +109,7 @@ export function RestraintPicker({ value, onChange, isAdmin, id }: RestraintPicke
 
   const approved = useMemo(() => {
     const items = list.data?.items ?? [];
-    return items
-      .filter((entry): entry is RestraintTypeEntry => isRestraintTypeEntry(entry))
-      .filter((entry) => entry.status === "approved");
+    return items.filter((entry) => entry.status === "approved");
   }, [list.data]);
 
   const byId = useMemo(() => {
@@ -157,7 +154,7 @@ export function RestraintPicker({ value, onChange, isAdmin, id }: RestraintPicke
     };
     try {
       const entry = await create.mutateAsync(body);
-      if (isAdmin && isRestraintTypeEntry(entry) && entry.status === "approved") {
+      if (isAdmin && entry.status === "approved") {
         toast.success("Equipment-Typ freigegeben", {
           description: `„${entry.display_name}" ist jetzt auswählbar.`,
         });

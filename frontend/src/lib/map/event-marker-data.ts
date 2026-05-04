@@ -78,7 +78,7 @@ export function selectMappableEvents(docs: readonly EventDocType[]): MappableEve
  * MapLibre's clustering source can consume directly (M6.3, ADR-041 §C).
  *
  * Note the coordinate order: GeoJSON requires ``[longitude, latitude]``,
- * while the rest of HC-Map keeps the ``lat, lon`` order. The flip
+ * while the rest of Plus-Map keeps the ``lat, lon`` order. The flip
  * happens here and only here.
  */
 export function eventsToGeoJSON(events: readonly MappableEvent[]): MappableEventCollection {

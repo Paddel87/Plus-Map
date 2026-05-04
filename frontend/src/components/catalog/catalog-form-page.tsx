@@ -10,10 +10,9 @@
  * are tiny in Pfad A).
  */
 
-import { LookupForm } from "@/components/catalog/lookup-form";
 import { RestraintTypeForm } from "@/components/catalog/restraint-type-form";
 import { useCatalogEntry } from "@/lib/catalog/api";
-import { isRestraintTypeEntry, type CatalogKind } from "@/lib/catalog/types";
+import type { CatalogKind } from "@/lib/catalog/types";
 
 export function CatalogFormPage({
   kind,
@@ -47,21 +46,8 @@ export function CatalogFormPage({
         </div>
       );
     }
-    const entry = entryQuery.data;
-    if (kind === "restraint-types") {
-      if (!isRestraintTypeEntry(entry)) {
-        return null;
-      }
-      return <RestraintTypeForm mode={{ type: "edit", entry }} isAdmin={isAdmin} />;
-    }
-    if (isRestraintTypeEntry(entry)) {
-      return null;
-    }
-    return <LookupForm kind={kind} mode={{ type: "edit", entry }} isAdmin={isAdmin} />;
+    return <RestraintTypeForm mode={{ type: "edit", entry: entryQuery.data }} isAdmin={isAdmin} />;
   }
 
-  if (kind === "restraint-types") {
-    return <RestraintTypeForm mode={{ type: "create" }} isAdmin={isAdmin} />;
-  }
-  return <LookupForm kind={kind} mode={{ type: "create" }} isAdmin={isAdmin} />;
+  return <RestraintTypeForm mode={{ type: "create" }} isAdmin={isAdmin} />;
 }

@@ -97,7 +97,7 @@ export function ResetPasswordForm() {
     <Card className="w-full max-w-sm">
       <CardHeader>
         <CardTitle>Neues Passwort</CardTitle>
-        <CardDescription>Wähle ein neues Passwort für deinen HC-Map-Account.</CardDescription>
+        <CardDescription>Wähle ein neues Passwort für deinen Plus-Map-Account.</CardDescription>
       </CardHeader>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>

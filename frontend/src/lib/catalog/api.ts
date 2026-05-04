@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * TanStack-Query hooks for the four catalog tables (M7.2 ff.).
+ * TanStack-Query hooks for the RestraintType (equipment) catalog.
  *
  * Cache-Key shape: `["catalog", kind, { status }]` — mutations
  * invalidate `["catalog", kind]` to cover every filter variant.
@@ -12,13 +12,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import type { Page } from "@/lib/types";
 
-import type {
-  AnyCatalogEntry,
-  CatalogKind,
-  CatalogStatus,
-  LookupCatalogEntry,
-  RestraintTypeEntry,
-} from "./types";
+import type { AnyCatalogEntry, CatalogKind, CatalogStatus, RestraintTypeEntry } from "./types";
 
 export interface CatalogListParams {
   status?: CatalogStatus;
@@ -62,14 +56,6 @@ export function useCatalogList(kind: CatalogKind, params: CatalogListParams = {}
 }
 
 /**
- * Lookup-table create body (ArmPosition / HandPosition / HandOrientation).
- */
-export interface LookupCreatePayload {
-  name: string;
-  description?: string | null;
-}
-
-/**
  * RestraintType create body. The backend accepts the same body for
  * both editor proposals and admin direct-approve creates; the route
  * promotes admin-created entries to `status='approved'` automatically
@@ -86,13 +72,12 @@ export interface RestraintTypeCreatePayload {
 
 export type CatalogCreatePayload<K extends CatalogKind> = K extends "restraint-types"
   ? RestraintTypeCreatePayload
-  : LookupCreatePayload;
+  : never;
 
-export type LookupUpdatePayload = Partial<LookupCreatePayload>;
 export type RestraintTypeUpdatePayload = Partial<RestraintTypeCreatePayload>;
 export type CatalogUpdatePayload<K extends CatalogKind> = K extends "restraint-types"
   ? RestraintTypeUpdatePayload
-  : LookupUpdatePayload;
+  : never;
 
 export function useCreateCatalogEntry<K extends CatalogKind>(kind: K) {
   const qc = useQueryClient();
@@ -178,7 +163,7 @@ export function useWithdrawCatalogEntry<K extends CatalogKind>(kind: K) {
 export async function fetchCatalogEntry(
   kind: CatalogKind,
   id: string,
-): Promise<LookupCatalogEntry | RestraintTypeEntry> {
+): Promise<RestraintTypeEntry> {
   // The list endpoint is the only read path the API exposes, so we
   // page-scan with a status-agnostic call and pick the matching row.
   // Catalog tables are tiny (<200 rows in Pfad A), so a single

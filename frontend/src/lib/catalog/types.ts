@@ -1,31 +1,20 @@
 /**
- * Frontend types for the four catalog tables (M7.x).
+ * Frontend types for the RestraintType (equipment) catalog.
  *
  * Mirrors the backend `app/schemas/catalog.py` shape. Catalog data is
  * intentionally not synced via RxDB (ADR-042 §E); we read it via
- * TanStack-Query against `/api/<kind>` and re-fetch on mutations.
+ * TanStack-Query against `/api/restraint-types` and re-fetch on
+ * mutations.
  */
 
 export type CatalogStatus = "approved" | "pending" | "rejected";
 
-export type CatalogKind =
-  | "restraint-types"
-  | "arm-positions"
-  | "hand-positions"
-  | "hand-orientations";
+export type CatalogKind = "restraint-types";
 
-export const CATALOG_KINDS: readonly CatalogKind[] = [
-  "restraint-types",
-  "arm-positions",
-  "hand-positions",
-  "hand-orientations",
-] as const;
+export const CATALOG_KINDS: readonly CatalogKind[] = ["restraint-types"] as const;
 
 export const CATALOG_KIND_LABELS: Record<CatalogKind, string> = {
   "restraint-types": "Ausrüstung",
-  "arm-positions": "Armhaltung",
-  "hand-positions": "Handhaltung",
-  "hand-orientations": "Handausrichtung",
 };
 
 export type RestraintCategory =
@@ -54,11 +43,6 @@ interface CatalogAuditFields {
   updated_at: string | null;
 }
 
-export interface LookupCatalogEntry extends CatalogAuditFields {
-  name: string;
-  description: string | null;
-}
-
 export interface RestraintTypeEntry extends CatalogAuditFields {
   category: RestraintCategory;
   brand: string | null;
@@ -70,17 +54,13 @@ export interface RestraintTypeEntry extends CatalogAuditFields {
 
 export type CatalogEntry<K extends CatalogKind = CatalogKind> = K extends "restraint-types"
   ? RestraintTypeEntry
-  : LookupCatalogEntry;
+  : never;
 
-export type AnyCatalogEntry = LookupCatalogEntry | RestraintTypeEntry;
-
-export function isRestraintTypeEntry(entry: AnyCatalogEntry): entry is RestraintTypeEntry {
-  return "display_name" in entry;
-}
+export type AnyCatalogEntry = RestraintTypeEntry;
 
 /** Display label for an entry. */
 export function entryLabel(entry: AnyCatalogEntry): string {
-  return isRestraintTypeEntry(entry) ? entry.display_name : entry.name;
+  return entry.display_name;
 }
 
 export const STATUS_LABELS: Record<CatalogStatus, string> = {

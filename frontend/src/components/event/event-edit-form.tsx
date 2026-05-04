@@ -63,9 +63,6 @@ interface EditableApplication {
   recipientName: string;
   note: string;
   restraintTypeIds: string[];
-  armPositionId: string | null;
-  handPositionId: string | null;
-  handOrientationId: string | null;
   // Cached so the diff knows whether `ended_at` was originally null.
   endedAtWasLocked: boolean;
   // Snapshot for diff.
@@ -74,9 +71,6 @@ interface EditableApplication {
     recipientId: string;
     note: string;
     restraintTypeIds: string[];
-    armPositionId: string | null;
-    handPositionId: string | null;
-    handOrientationId: string | null;
   };
 }
 
@@ -162,18 +156,12 @@ export function EventEditForm({ user, initialEvent }: EventEditFormProps) {
           recipientName: matchingPerson?.name ?? json.recipient_id,
           note: json.note ?? "",
           restraintTypeIds: restraintIds,
-          armPositionId: json.arm_position_id,
-          handPositionId: json.hand_position_id,
-          handOrientationId: json.hand_orientation_id,
           endedAtWasLocked: json.ended_at !== null,
           initial: {
             endedAt: isoToLocal(json.ended_at),
             recipientId: json.recipient_id,
             note: json.note ?? "",
             restraintTypeIds: [...restraintIds],
-            armPositionId: json.arm_position_id,
-            handPositionId: json.hand_position_id,
-            handOrientationId: json.hand_orientation_id,
           },
         };
       });
@@ -276,15 +264,6 @@ export function EventEditForm({ user, initialEvent }: EventEditFormProps) {
         }
         if (!setEquals(app.restraintTypeIds, app.initial.restraintTypeIds)) {
           patch.restraint_type_ids = [...app.restraintTypeIds];
-        }
-        if (app.armPositionId !== app.initial.armPositionId) {
-          patch.arm_position_id = app.armPositionId;
-        }
-        if (app.handPositionId !== app.initial.handPositionId) {
-          patch.hand_position_id = app.handPositionId;
-        }
-        if (app.handOrientationId !== app.initial.handOrientationId) {
-          patch.hand_orientation_id = app.handOrientationId;
         }
         if (Object.keys(patch).length > 0) {
           patch.updated_at = new Date().toISOString();

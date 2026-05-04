@@ -5,7 +5,6 @@ import type { ReactNode } from "react";
 import { StatusBadge } from "@/components/catalog/status-badge";
 import {
   entryLabel,
-  isRestraintTypeEntry,
   MECHANICAL_TYPE_LABELS,
   RESTRAINT_CATEGORY_LABELS,
   type AnyCatalogEntry,
@@ -22,9 +21,6 @@ function formatDate(iso: string): string {
 }
 
 function metaSubtitle(entry: AnyCatalogEntry): string | null {
-  if (!isRestraintTypeEntry(entry)) {
-    return entry.description;
-  }
   const parts: string[] = [RESTRAINT_CATEGORY_LABELS[entry.category]];
   if (entry.brand) parts.push(entry.brand);
   if (entry.model) parts.push(entry.model);

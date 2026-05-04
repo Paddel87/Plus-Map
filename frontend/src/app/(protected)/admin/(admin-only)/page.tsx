@@ -44,7 +44,7 @@ export default function AdminPage() {
           <a
             className="text-blue-600 underline dark:text-blue-400"
             href={adminExportUrl()}
-            download="hc-map-export.json"
+            download="plus-map-export.json"
           >
             Export herunterladen
           </a>

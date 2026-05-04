@@ -55,9 +55,6 @@ interface ApplicationRow {
   recipient: PersonRead | null;
   note: string;
   restraintTypeIds: string[];
-  armPositionId: string | null;
-  handPositionId: string | null;
-  handOrientationId: string | null;
 }
 
 export interface EventBackfillFormProps {
@@ -100,9 +97,6 @@ export function EventBackfillForm({ user }: EventBackfillFormProps) {
         recipient: null,
         note: "",
         restraintTypeIds: [],
-        armPositionId: null,
-        handPositionId: null,
-        handOrientationId: null,
       },
     ]);
   }
@@ -198,9 +192,6 @@ export function EventBackfillForm({ user }: EventBackfillFormProps) {
           event_id: eventId,
           performer_id: user.person_id,
           recipient_id: original.recipient?.id ?? user.person_id,
-          arm_position_id: original.armPositionId,
-          hand_position_id: original.handPositionId,
-          hand_orientation_id: original.handOrientationId,
           sequence_no: i + 1,
           started_at: sorted.startedAt,
           ended_at: sorted.endedAt,
