@@ -109,7 +109,7 @@ async def create_application(
     if strict and payload.performer_id == payload.recipient_id:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="performer_id == recipient_id rejected in strict mode",
+            detail="erfasser und begleitung dürfen nicht identisch sein",
         )
     await _ensure_approved_catalog(
         session,
