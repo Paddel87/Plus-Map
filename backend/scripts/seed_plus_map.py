@@ -8,7 +8,7 @@ Legt an:
   - 5 Personen (Erfasser + 4 Begleiter).
   - 1 Editor-User, verknüpft mit der ersten Person.
   - 8 Touren über die letzten 90 Tage gestreut.
-  - 16 Stopps verteilt auf die Touren (1–3 pro Tour).
+  - 16 Stopps verteilt auf die Touren (1 bis 3 pro Tour).
   - EventParticipant-Verknüpfungen.
 
 Idempotent: bricht ab, wenn das Editor-Konto bereits existiert.
