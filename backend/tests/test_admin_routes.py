@@ -373,8 +373,6 @@ async def test_admin_stats_shape(
         "events_total",
         "events_per_month_last_12",
         "top_restraints",
-        "top_arm_positions",
-        "top_hand_positions",
         "users_by_role",
         "persons_total",
         "persons_on_the_fly_unlinked",
@@ -406,9 +404,6 @@ async def test_admin_export_all_returns_full_payload(
         "event_participants",
         "application_restraints",
         "restraint_types",
-        "arm_positions",
-        "hand_positions",
-        "hand_orientations",
     ]:
         assert key in body, key
     assert body["schema_version"] == 1
