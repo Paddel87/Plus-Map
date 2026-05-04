@@ -214,13 +214,13 @@ export function EventBackfillForm({ user }: EventBackfillFormProps) {
           restraint_type_ids: original.restraintTypeIds,
         });
       }
-      toast.success("Event erfasst", {
+      toast.success("Tour erfasst", {
         description: `${result.sortedApplications.length} Application${result.sortedApplications.length === 1 ? "" : "s"} gespeichert. Sync läuft im Hintergrund.`,
       });
       router.push(`/events/${eventId}`);
       router.refresh();
     } catch (error) {
-      toast.error("Event konnte nicht gespeichert werden", {
+      toast.error("Tour konnte nicht gespeichert werden", {
         description: error instanceof Error ? error.message : String(error),
       });
       setPending(false);
@@ -478,7 +478,7 @@ export function EventBackfillForm({ user }: EventBackfillFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Applications</CardTitle>
+          <CardTitle className="text-base">Stopps</CardTitle>
           <CardDescription>
             Mehrere Applications können nacheinander angelegt werden — Reihenfolge ergibt sich beim
             Speichern automatisch aus den Start-Zeiten.
@@ -487,7 +487,7 @@ export function EventBackfillForm({ user }: EventBackfillFormProps) {
         <CardContent className="flex flex-col gap-3">
           {applications.length === 0 ? (
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Noch keine Application erfasst. Mindestens null erlaubt — manche Events sind nur
+              Noch kein Stopp erfasst. Mindestens null erlaubt — manche Events sind nur
               Marker ohne Sequenz.
             </p>
           ) : null}
@@ -501,14 +501,14 @@ export function EventBackfillForm({ user }: EventBackfillFormProps) {
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    Application {index + 1}
+                    Stopp {index + 1}
                   </span>
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={() => removeApplication(row.uiId)}
-                    aria-label="Application entfernen"
+                    aria-label="Stopp entfernen"
                     data-testid="event-backfill-remove-application"
                   >
                     <Trash2 aria-hidden />
@@ -550,7 +550,7 @@ export function EventBackfillForm({ user }: EventBackfillFormProps) {
                   </div>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <Label>Recipient</Label>
+                  <Label>Begleitung</Label>
                   <RecipientPicker
                     value={row.recipient}
                     onChange={(next) => updateApplication(row.uiId, { recipient: next })}
@@ -558,7 +558,7 @@ export function EventBackfillForm({ user }: EventBackfillFormProps) {
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <Label>Restraints (optional)</Label>
+                  <Label>Ausrüstung (optional)</Label>
                   <RestraintPicker
                     value={row.restraintTypeIds}
                     onChange={(next) => updateApplication(row.uiId, { restraintTypeIds: next })}
@@ -624,7 +624,7 @@ export function EventBackfillForm({ user }: EventBackfillFormProps) {
 
       <div className="sticky bottom-0 flex flex-col gap-2 border-t border-slate-200 bg-slate-50/95 p-3 backdrop-blur dark:border-slate-800 dark:bg-slate-900/95 md:static md:border-0 md:bg-transparent md:p-0">
         <Button type="submit" size="lg" disabled={pending || !database}>
-          {pending ? "Speichere…" : "Event speichern"}
+          {pending ? "Speichere…" : "Tour speichern"}
         </Button>
         <Button type="button" variant="ghost" onClick={() => router.back()} disabled={pending}>
           Abbrechen

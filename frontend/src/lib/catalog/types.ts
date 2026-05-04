@@ -22,7 +22,7 @@ export const CATALOG_KINDS: readonly CatalogKind[] = [
 ] as const;
 
 export const CATALOG_KIND_LABELS: Record<CatalogKind, string> = {
-  "restraint-types": "Restraints",
+  "restraint-types": "Ausrüstung",
   "arm-positions": "Armhaltung",
   "hand-positions": "Handhaltung",
   "hand-orientations": "Handausrichtung",

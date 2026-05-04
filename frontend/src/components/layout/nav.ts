@@ -27,7 +27,7 @@ export const NAV_ITEMS: readonly NavItem[] = [
   },
   {
     href: "/events",
-    label: "Events",
+    label: "Touren",
     icon: Calendar,
     showInBottomNav: true,
   },

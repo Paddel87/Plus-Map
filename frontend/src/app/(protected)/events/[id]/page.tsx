@@ -177,7 +177,7 @@ export default function EventDetailPage() {
     <div className="mx-auto flex w-full max-w-3xl flex-col gap-4">
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold tracking-tight">
-          {initial.ended_at === null ? "Live-Event" : "Event"}
+          {initial.ended_at === null ? "Live-Tour" : "Tour"}
         </h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">
           Gestartet am {new Date(initial.started_at).toLocaleString("de-DE")}
@@ -290,7 +290,7 @@ function UnavailableCard() {
   return (
     <div className="mx-auto flex w-full max-w-2xl flex-col gap-4">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Event</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Tour</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">Konnte nicht geladen werden.</p>
       </header>
       <Card>

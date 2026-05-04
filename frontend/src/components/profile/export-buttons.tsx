@@ -13,12 +13,12 @@ const EXPORT_LINKS = [
   {
     href: "/api/export/me/events.csv",
     download: "events.csv",
-    label: "Events als CSV",
+    label: "Touren als CSV",
   },
   {
     href: "/api/export/me/applications.csv",
     download: "applications.csv",
-    label: "Applications als CSV",
+    label: "Stopps als CSV",
   },
 ] as const;
 

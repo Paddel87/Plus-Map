@@ -68,7 +68,7 @@ export function RestraintTypeForm({
     try {
       if (mode.type === "create") {
         await create.mutateAsync(body);
-        toast.success(isAdmin ? "Restraint-Type freigegeben" : "Vorschlag eingereicht");
+        toast.success(isAdmin ? "Equipment-Typ freigegeben" : "Vorschlag eingereicht");
       } else {
         await update.mutateAsync({ id: mode.entry.id, body });
         toast.success("Eintrag aktualisiert");
@@ -111,7 +111,7 @@ export function RestraintTypeForm({
           </select>
         </div>
         <div className="flex flex-col gap-1.5">
-          <Label htmlFor="rt-mechanical">Mechanik</Label>
+          <Label htmlFor="rt-mechanical">Bauart</Label>
           <select
             id="rt-mechanical"
             name="mechanical_type"

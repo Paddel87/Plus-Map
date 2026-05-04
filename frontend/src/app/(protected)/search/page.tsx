@@ -41,7 +41,7 @@ export default async function SearchPage({ searchParams }: PageProps) {
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-semibold tracking-tight">Suche</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Volltextsuche über Notizen sichtbarer Events und Applications. RLS-gefiltert.
+          Volltextsuche über Notizen sichtbarer Touren und Stopps. RLS-gefiltert.
         </p>
       </header>
 

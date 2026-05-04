@@ -86,7 +86,7 @@ export function EventDetailView({ user, initialEvent }: EventDetailViewProps) {
     if (!database) return;
     const doc = await database.applications.findOne(applicationId).exec();
     if (!doc) {
-      toast.error("Application nicht im lokalen Speicher gefunden");
+      toast.error("Stopp nicht im lokalen Speicher gefunden");
       return;
     }
     const now = new Date().toISOString();
@@ -97,13 +97,13 @@ export function EventDetailView({ user, initialEvent }: EventDetailViewProps) {
     if (!database) return;
     const doc = await database.events.findOne(initialEvent.id).exec();
     if (!doc) {
-      toast.error("Event nicht im lokalen Speicher gefunden");
+      toast.error("Tour nicht im lokalen Speicher gefunden");
       return;
     }
     const now = new Date().toISOString();
     await doc.patch({ reveal_participants: next, updated_at: now });
-    toast.success(next ? "Klarnamen für dich freigegeben" : "Klarnamen wieder verborgen", {
-      description: "Audit-pflichtige Aktion — wird über RxDB-Sync protokolliert.",
+    toast.success(next ? "Namen für dich freigegeben" : "Namen wieder verborgen", {
+      description: "Audit-pflichtige Aktion — wird über Sync protokolliert.",
     });
   }
 
@@ -111,12 +111,12 @@ export function EventDetailView({ user, initialEvent }: EventDetailViewProps) {
     if (!database) return;
     const doc = await database.events.findOne(initialEvent.id).exec();
     if (!doc) {
-      toast.error("Event nicht im lokalen Speicher gefunden");
+      toast.error("Tour nicht im lokalen Speicher gefunden");
       return;
     }
     const now = new Date().toISOString();
     await doc.patch({ ended_at: now, updated_at: now });
-    toast.success("Event beendet", { description: "Wakelock freigegeben." });
+    toast.success("Tour beendet", { description: "Wakelock freigegeben." });
     router.push("/");
     router.refresh();
   }
@@ -136,7 +136,7 @@ export function EventDetailView({ user, initialEvent }: EventDetailViewProps) {
             </p>
           ) : null}
           <CardTitle className="flex items-center justify-between gap-2 text-base">
-            <span>{isLive ? "Event läuft" : "Event beendet"}</span>
+            <span>{isLive ? "Tour läuft" : "Tour beendet"}</span>
             <span className="font-mono text-2xl tabular-nums">{formatDuration(totalSeconds)}</span>
           </CardTitle>
           <CardDescription>
@@ -170,7 +170,7 @@ export function EventDetailView({ user, initialEvent }: EventDetailViewProps) {
           <CardContent className="flex flex-col gap-2">
             <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
               <Button size="lg" onClick={() => setStartOpen(true)} disabled={!database}>
-                <Plus aria-hidden /> Neue Application
+                <Plus aria-hidden /> Neuer Stopp
               </Button>
               {activeApplication ? (
                 <Button
@@ -179,16 +179,16 @@ export function EventDetailView({ user, initialEvent }: EventDetailViewProps) {
                   onClick={() => handleEndApplication(activeApplication.id)}
                   disabled={!database}
                 >
-                  <Pause aria-hidden /> Aktuelle beenden
+                  <Pause aria-hidden /> Aktuellen beenden
                 </Button>
               ) : (
                 <Button size="lg" variant="secondary" disabled>
-                  <Play aria-hidden /> Keine laufende Application
+                  <Play aria-hidden /> Kein laufender Stopp
                 </Button>
               )}
             </div>
             <Button size="lg" variant="destructive" onClick={handleEndEvent} disabled={!database}>
-              <Flag aria-hidden /> Event beenden
+              <Flag aria-hidden /> Tour beenden
             </Button>
           </CardContent>
         ) : null}
@@ -196,11 +196,11 @@ export function EventDetailView({ user, initialEvent }: EventDetailViewProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Applications</CardTitle>
+          <CardTitle className="text-base">Stopps</CardTitle>
           <CardDescription>
             {applications.length === 0
-              ? "Noch keine Application erfasst."
-              : `${applications.length} Application${applications.length === 1 ? "" : "s"} in Reihenfolge.`}
+              ? "Noch kein Stopp erfasst."
+              : `${applications.length} Stopp${applications.length === 1 ? "" : "s"} in Reihenfolge.`}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -212,8 +212,8 @@ export function EventDetailView({ user, initialEvent }: EventDetailViewProps) {
           ) : applications.length === 0 ? (
             <p className="text-sm text-slate-500 dark:text-slate-400">
               {isLive
-                ? "Tippe auf „Neue Application“, um die erste zu starten."
-                : "In diesem Event wurden keine Applications erfasst."}
+                ? "Tippe auf „Neuer Stopp“, um den ersten zu starten."
+                : "In dieser Tour wurden keine Stopps erfasst."}
             </p>
           ) : (
             <ApplicationsTimeline
@@ -228,13 +228,13 @@ export function EventDetailView({ user, initialEvent }: EventDetailViewProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Beteiligte</CardTitle>
+          <CardTitle className="text-base">Mit dabei</CardTitle>
           <CardDescription>
             {maskedParticipants.length === 0
-              ? "Noch keine Beteiligten erfasst."
+              ? "Noch keine Begleitung erfasst."
               : event.reveal_participants
-                ? `${maskedParticipants.length} Beteiligte sichtbar.`
-                : "Andere Beteiligte werden verborgen."}
+                ? `${maskedParticipants.length} Personen sichtbar.`
+                : "Andere Begleitung wird verborgen."}
           </CardDescription>
           {editable ? (
             <RevealParticipantsToggle
@@ -458,7 +458,7 @@ function ApplicationsTimeline({
                   size="sm"
                   onClick={() => void onStop(application.id)}
                   data-testid="applications-timeline-stop"
-                  aria-label={`Application #${application.sequence_no} beenden`}
+                  aria-label={`Stopp #${application.sequence_no} beenden`}
                 >
                   <Square aria-hidden /> Stop
                 </Button>
@@ -490,10 +490,10 @@ function RevealParticipantsToggle({
           onChange={(event) => void onChange(event.target.checked)}
           data-testid="reveal-participants-checkbox"
         />
-        <span className="font-medium">Klarnamen sichtbar</span>
+        <span className="font-medium">Namen sichtbar</span>
       </span>
       <span className="text-xs italic text-slate-600 dark:text-slate-400">
-        Audit-pflichtige Aktion — wird protokolliert (ADR-059).
+        Audit-pflichtige Aktion — wird protokolliert.
       </span>
     </label>
   );
@@ -507,7 +507,7 @@ function ParticipantsList({
   currentPersonId: string;
 }) {
   if (participants.length === 0) {
-    return <p className="text-sm text-slate-500 dark:text-slate-400">Keine Beteiligten erfasst.</p>;
+    return <p className="text-sm text-slate-500 dark:text-slate-400">Keine Begleitung erfasst.</p>;
   }
   return (
     <ul className="flex flex-col gap-2" data-testid="participants-list">

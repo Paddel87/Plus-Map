@@ -158,7 +158,7 @@ export function RestraintPicker({ value, onChange, isAdmin, id }: RestraintPicke
     try {
       const entry = await create.mutateAsync(body);
       if (isAdmin && isRestraintTypeEntry(entry) && entry.status === "approved") {
-        toast.success("Restraint-Type freigegeben", {
+        toast.success("Equipment-Typ freigegeben", {
           description: `„${entry.display_name}" ist jetzt auswählbar.`,
         });
         // Auto-select the new entry so Admin can immediately use it.
@@ -179,7 +179,7 @@ export function RestraintPicker({ value, onChange, isAdmin, id }: RestraintPicke
       {selected.size > 0 ? (
         <ul
           className="flex flex-wrap gap-1.5"
-          aria-label="Ausgewählte Restraints"
+          aria-label="Ausgewählte Ausrüstung"
           data-testid="restraint-picker-selected"
         >
           {Array.from(selected).map((entryId) => {
@@ -233,8 +233,8 @@ export function RestraintPicker({ value, onChange, isAdmin, id }: RestraintPicke
           type="search"
           value={filter}
           onChange={(event) => setFilter(event.target.value)}
-          placeholder="Restraint suchen…"
-          aria-label="Restraint suchen"
+          placeholder="Ausrüstung suchen…"
+          aria-label="Ausrüstung suchen"
           className="h-9 pl-9"
         />
       </div>
@@ -263,7 +263,7 @@ export function RestraintPicker({ value, onChange, isAdmin, id }: RestraintPicke
             Keine Treffer{filter ? ` für „${filter}“` : ""}.
           </div>
         ) : (
-          <ul role="listbox" aria-multiselectable="true" aria-label="Restraint-Auswahl">
+          <ul role="listbox" aria-multiselectable="true" aria-label="Ausrüstungs-Auswahl">
             {filtered.map((entry) => {
               const isSelected = selected.has(entry.id);
               return (
@@ -362,7 +362,7 @@ export function RestraintPicker({ value, onChange, isAdmin, id }: RestraintPicke
               </select>
             </div>
             <div className="flex flex-col gap-1">
-              <Label htmlFor={`${baseId}-mechanical`}>Mechanik</Label>
+              <Label htmlFor={`${baseId}-mechanical`}>Bauart</Label>
               <select
                 id={`${baseId}-mechanical`}
                 value={quick.mechanicalType}

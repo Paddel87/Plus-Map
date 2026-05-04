@@ -23,7 +23,7 @@ export function SearchResults({ query, items, total }: SearchResultsProps) {
         <CardHeader>
           <CardTitle className="text-base">Keine Treffer</CardTitle>
           <CardDescription>
-            Für „{query}“ wurden keine Notizen in sichtbaren Events oder Applications gefunden.
+            Für „{query}“ wurden keine Notizen in sichtbaren Touren oder Stopps gefunden.
           </CardDescription>
         </CardHeader>
       </Card>
@@ -38,7 +38,7 @@ export function SearchResults({ query, items, total }: SearchResultsProps) {
             className="block rounded-md border border-slate-200 bg-white px-4 py-3 transition-colors hover:bg-slate-50 dark:border-slate-800 dark:bg-slate-950 dark:hover:bg-slate-900"
           >
             <div className="flex items-center gap-2 pb-1 text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-              <span>{hit.type === "event" ? "Event" : "Application"}</span>
+              <span>{hit.type === "event" ? "Tour" : "Stopp"}</span>
               <span aria-hidden>•</span>
               <span className="font-mono">{hit.event_id.slice(0, 8)}…</span>
             </div>

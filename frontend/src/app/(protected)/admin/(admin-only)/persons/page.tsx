@@ -312,7 +312,7 @@ function MergeDialog({
       setResult(res);
       toast.success(
         `Merge ok: ${res.affected_event_participants} Participants, ` +
-          `${res.affected_applications_performer + res.affected_applications_recipient} Applications.`,
+          `${res.affected_applications_performer + res.affected_applications_recipient} Stopps.`,
       );
     } catch (err) {
       const detail = err instanceof ApiError ? extractDetail(err.detail) : msg(err);
@@ -326,7 +326,7 @@ function MergeDialog({
         <DialogHeader>
           <DialogTitle>Personen mergen</DialogTitle>
           <DialogDescription>
-            Re-Pointing aller FKs (Event-Participants, Applications) von Source auf Target. Source
+            Re-Pointing aller FKs (Tour-Begleitung, Stopps) von Source auf Target. Source
             wird soft-deleted und mit Audit-Marker versehen. Konflikte bei
             <code className="mx-1 rounded bg-slate-100 px-1 dark:bg-slate-800">
               event_participant.UNIQUE
@@ -382,7 +382,7 @@ function MergeDialog({
               <div className="rounded bg-emerald-50 px-3 py-2 text-xs text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300">
                 Merge erfolgreich. Participants neu zugeordnet:{" "}
                 <strong>{result.affected_event_participants}</strong>, gelöschte Konflikte:{" "}
-                <strong>{result.deleted_event_participants}</strong>, Applications (Performer):{" "}
+                <strong>{result.deleted_event_participants}</strong>, Stopps (Erfasser):{" "}
                 <strong>{result.affected_applications_performer}</strong>, (Recipient):{" "}
                 <strong>{result.affected_applications_recipient}</strong>.
               </div>
@@ -452,7 +452,7 @@ function AnonymizeDialog({
             </code>
             und stempelt
             <code className="mx-1 rounded bg-slate-100 px-1 dark:bg-slate-800">deleted_at</code>.
-            Verknüpfungen zu Events und Applications bleiben erhalten.
+            Verknüpfungen zu Touren und Stopps bleiben erhalten.
           </DialogDescription>
         </DialogHeader>
 

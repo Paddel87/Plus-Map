@@ -96,7 +96,7 @@ export function validateBackfill(input: BackfillEventInput): BackfillValidationR
         kind: "application",
         uiId: app.uiId,
         field: "started_at",
-        message: "Application-Start ist Pflicht.",
+        message: "Stopp-Start ist Pflicht.",
       });
     }
     if (!app.recipientId) {
@@ -104,7 +104,7 @@ export function validateBackfill(input: BackfillEventInput): BackfillValidationR
         kind: "application",
         uiId: app.uiId,
         field: "recipient",
-        message: "Recipient ist Pflicht.",
+        message: "Begleitung ist Pflicht.",
       });
     }
     if (appStart !== null && appEnd !== null && appEnd < appStart) {
@@ -112,7 +112,7 @@ export function validateBackfill(input: BackfillEventInput): BackfillValidationR
         kind: "application",
         uiId: app.uiId,
         field: "duration",
-        message: "Application-Ende liegt vor dem Start.",
+        message: "Stopp-Ende liegt vor dem Start.",
       });
     }
     if (appStart !== null && eventStart !== null && appStart < eventStart) {
@@ -120,7 +120,7 @@ export function validateBackfill(input: BackfillEventInput): BackfillValidationR
         kind: "application",
         uiId: app.uiId,
         field: "bounds",
-        message: "Application beginnt vor dem Event-Start.",
+        message: "Stopp beginnt vor dem Tour-Start.",
       });
     }
     if (appEnd !== null && eventEnd !== null && appEnd > eventEnd) {
@@ -128,7 +128,7 @@ export function validateBackfill(input: BackfillEventInput): BackfillValidationR
         kind: "application",
         uiId: app.uiId,
         field: "bounds",
-        message: "Application endet nach dem Event-Ende.",
+        message: "Stopp endet nach dem Tour-Ende.",
       });
     }
   }

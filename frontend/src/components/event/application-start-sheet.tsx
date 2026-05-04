@@ -101,13 +101,13 @@ export function ApplicationStartSheet({
         _deleted: false,
         restraint_type_ids: restraintTypeIds,
       });
-      toast.success("Application gestartet", {
+      toast.success("Stopp gestartet", {
         description: `Sequenz #${localSeq} (lokal). Sync setzt die endgültige Nummer.`,
       });
       onCreated();
       onOpenChange(false);
     } catch (error) {
-      toast.error("Application konnte nicht gestartet werden", {
+      toast.error("Stopp konnte nicht gestartet werden", {
         description: error instanceof Error ? error.message : String(error),
       });
     } finally {
@@ -119,15 +119,14 @@ export function ApplicationStartSheet({
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="bottom" className="max-h-[85vh] overflow-y-auto">
         <SheetHeader>
-          <SheetTitle>Neue Application starten</SheetTitle>
+          <SheetTitle>Neuen Stopp starten</SheetTitle>
           <SheetDescription>
-            Performer = du. Recipient ohne Auswahl = Self-Bondage. Restraints und Positionen sind
-            optional.
+            Erfasser = du. Begleitung ohne Auswahl = solo unterwegs. Ausrüstung ist optional.
           </SheetDescription>
         </SheetHeader>
         <div className="mt-4 flex flex-col gap-4">
           <div className="flex flex-col gap-2">
-            <Label>Recipient</Label>
+            <Label>Begleitung</Label>
             <RecipientPicker
               value={recipient}
               onChange={setRecipient}
@@ -135,7 +134,7 @@ export function ApplicationStartSheet({
             />
           </div>
           <div className="flex flex-col gap-2">
-            <Label>Restraints (optional)</Label>
+            <Label>Ausrüstung (optional)</Label>
             <RestraintPicker
               value={restraintTypeIds}
               onChange={setRestraintTypeIds}
@@ -195,7 +194,7 @@ export function ApplicationStartSheet({
               onClick={submit}
               disabled={pending || !database}
             >
-              {pending ? "Starte…" : "Application starten"}
+              {pending ? "Starte…" : "Stopp starten"}
             </Button>
           </div>
         </div>

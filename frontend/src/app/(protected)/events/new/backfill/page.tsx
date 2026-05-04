@@ -14,7 +14,7 @@ export default async function NewEventBackfillPage() {
       <header>
         <h1 className="text-2xl font-semibold tracking-tight">Nachträglich erfassen</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">
-          Event und Applications mit selbst gewählten Zeitstempeln eintragen.
+          Tour und Stopps mit selbst gewählten Zeitstempeln eintragen.
         </p>
       </header>
       <EventBackfillForm user={user} />

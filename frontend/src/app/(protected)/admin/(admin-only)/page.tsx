@@ -64,7 +64,7 @@ export default function AdminPage() {
       ) : data ? (
         <>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <StatCard label="Events gesamt" value={data.events_total} />
+            <StatCard label="Touren gesamt" value={data.events_total} />
             <StatCard label="Personen" value={data.persons_total} />
             <StatCard
               label="On-the-fly, unverknüpft"
@@ -81,12 +81,12 @@ export default function AdminPage() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Events pro Monat (letzte 12)</CardTitle>
+                <CardTitle className="text-base">Touren pro Monat (letzte 12)</CardTitle>
                 <CardDescription>Chronologisch, ohne Soft-Deleted.</CardDescription>
               </CardHeader>
               <CardContent>
                 {data.events_per_month_last_12.length === 0 ? (
-                  <EmptyHint>Keine Events in den letzten 12 Monaten.</EmptyHint>
+                  <EmptyHint>Keine Touren in den letzten 12 Monaten.</EmptyHint>
                 ) : (
                   <ul className="divide-y divide-slate-100 dark:divide-slate-800">
                     {data.events_per_month_last_12.map((m) => (
@@ -124,7 +124,7 @@ export default function AdminPage() {
 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
             <TopList
-              title="Top Restraints"
+              title="Top Ausrüstung"
               items={data.top_restraints.map((r) => ({
                 id: r.id,
                 label: r.display_name,
@@ -132,7 +132,7 @@ export default function AdminPage() {
               }))}
             />
             <TopList
-              title="Top Arm-Positionen"
+              title="Top Trage-Modi"
               items={data.top_arm_positions.map((p) => ({
                 id: p.id,
                 label: p.name,
@@ -140,7 +140,7 @@ export default function AdminPage() {
               }))}
             />
             <TopList
-              title="Top Hand-Positionen"
+              title="Top Halte-Positionen"
               items={data.top_hand_positions.map((p) => ({
                 id: p.id,
                 label: p.name,

@@ -4,7 +4,7 @@ export default function EventsPage() {
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-col gap-4">
       <header>
-        <h1 className="text-2xl font-semibold tracking-tight">Events</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Touren</h1>
         <p className="text-sm text-slate-500 dark:text-slate-400">
           Liste, Filter und Bearbeitung folgen mit M5c.
         </p>

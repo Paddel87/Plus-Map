@@ -130,7 +130,7 @@ export function MapFilterPanel({ open, onOpenChange, filters, onChange }: MapFil
           </section>
 
           <section className="flex flex-col gap-2">
-            <h3 className="text-sm font-semibold">Beteiligte</h3>
+            <h3 className="text-sm font-semibold">Mit dabei</h3>
             <Input
               type="search"
               value={query}
@@ -160,7 +160,7 @@ export function MapFilterPanel({ open, onOpenChange, filters, onChange }: MapFil
                   Keine Treffer{query ? ` für „${query}“` : ""}.
                 </p>
               ) : (
-                <ul role="listbox" aria-label="Beteiligte filtern" className="flex flex-col">
+                <ul role="listbox" aria-label="Mit dabei filtern" className="flex flex-col">
                   {filteredPersons.map((person) => {
                     const checked = selectedSet.has(person.id);
                     return (

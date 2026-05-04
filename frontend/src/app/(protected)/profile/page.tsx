@@ -50,7 +50,7 @@ export default async function ProfilePage() {
         <CardHeader>
           <CardTitle className="text-base">Meine Daten exportieren</CardTitle>
           <CardDescription>
-            Datensouveränität: alle für dich sichtbaren Events und Applications als JSON oder CSV.
+            Datensouveränität: alle für dich sichtbaren Touren und Stopps als JSON oder CSV.
             Admins erhalten zusätzlich einen Vollexport.
           </CardDescription>
         </CardHeader>

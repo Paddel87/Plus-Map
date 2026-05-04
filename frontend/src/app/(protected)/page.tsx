@@ -72,7 +72,7 @@ export default async function DashboardPage() {
           <Button asChild size="lg" className="w-full md:w-auto">
             <Link href="/events/new" data-testid="dashboard-new-event">
               <Clock className="mr-2 h-5 w-5" />
-              Neues Event starten
+              Neue Tour starten
             </Link>
           </Button>
           <Button asChild variant="secondary" size="lg" className="w-full md:w-auto">
@@ -121,7 +121,7 @@ export default async function DashboardPage() {
               </ul>
             ) : (
               <p className="text-slate-500 dark:text-slate-400">
-                Noch keine Events sichtbar. Tippe oben auf „Neues Event starten“.
+                Noch keine Touren sichtbar. Tippe oben auf „Neue Tour starten“.
               </p>
             )}
           </CardContent>
@@ -131,7 +131,7 @@ export default async function DashboardPage() {
             <CardTitle className="flex items-center gap-2 text-lg">
               <MapIcon className="h-5 w-5" /> An diesem Tag
             </CardTitle>
-            <CardDescription>Events vom heutigen Datum in vergangenen Jahren</CardDescription>
+            <CardDescription>Touren vom heutigen Datum in vergangenen Jahren</CardDescription>
           </CardHeader>
           <CardContent className="text-sm">
             {throwbacks && throwbacks.length > 0 ? (
@@ -163,7 +163,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent className="flex flex-wrap gap-2 text-sm">
             <Button asChild variant="secondary">
-              <Link href="/events">Events</Link>
+              <Link href="/events">Touren</Link>
             </Button>
             <Button asChild variant="secondary">
               <Link href="/map">Karte</Link>

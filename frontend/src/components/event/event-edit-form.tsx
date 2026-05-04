@@ -202,24 +202,24 @@ export function EventEditForm({ user, initialEvent }: EventEditFormProps) {
 
   async function handleDeleteApplication(id: string): Promise<void> {
     if (!database) return;
-    if (!PLATFORM_CONFIRM_LOCK("Application endgültig löschen?")) return;
+    if (!PLATFORM_CONFIRM_LOCK("Stopp endgültig löschen?")) return;
     const doc = await database.applications.findOne(id).exec();
     if (!doc) return;
     const now = new Date().toISOString();
     await doc.patch({ _deleted: true, deleted_at: now, updated_at: now });
     setApplications((current) => current.filter((a) => a.id !== id));
-    toast.success("Application gelöscht");
+    toast.success("Stopp gelöscht");
   }
 
   async function handleDeleteEvent(): Promise<void> {
     if (!database) return;
-    if (!PLATFORM_CONFIRM_LOCK("Event endgültig löschen? Alle Applications werden mitgelöscht."))
+    if (!PLATFORM_CONFIRM_LOCK("Tour endgültig löschen? Alle Stopps werden mitgelöscht."))
       return;
     const doc = await database.events.findOne(initialEvent.id).exec();
     if (!doc) return;
     const now = new Date().toISOString();
     await doc.patch({ _deleted: true, deleted_at: now, updated_at: now });
-    toast.success("Event gelöscht");
+    toast.success("Tour gelöscht");
     router.push("/");
     router.refresh();
   }
@@ -319,7 +319,7 @@ export function EventEditForm({ user, initialEvent }: EventEditFormProps) {
     <form onSubmit={handleSubmit} className="flex flex-col gap-4">
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Event</CardTitle>
+          <CardTitle className="text-base">Tour</CardTitle>
           <CardDescription>
             Standort und Start-Zeitstempel sind aus Live-Modus-Konsistenz fixiert (ADR-029) und
             nicht editierbar.
@@ -417,16 +417,15 @@ export function EventEditForm({ user, initialEvent }: EventEditFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Applications</CardTitle>
+          <CardTitle className="text-base">Stopps</CardTitle>
           <CardDescription>
-            Start-Zeitstempel und Performer sind fixiert. Restraints und Positionen sind über die
-            Picker editierbar (LWW-Set-Replace bzw. LWW pro FK, ADR-046-Followup).
+            Start-Zeitstempel und Erfasser sind fixiert. Ausrüstung ist über den Picker editierbar.
           </CardDescription>
         </CardHeader>
         <CardContent className="flex flex-col gap-3">
           {applications.length === 0 ? (
             <p className="text-sm text-slate-500 dark:text-slate-400">
-              Keine Applications vorhanden.
+              Keine Stopps vorhanden.
             </p>
           ) : null}
           {applications.map((app, index) => {
@@ -439,14 +438,14 @@ export function EventEditForm({ user, initialEvent }: EventEditFormProps) {
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                    Application {index + 1}
+                    Stopp {index + 1}
                   </span>
                   <Button
                     type="button"
                     variant="ghost"
                     size="sm"
                     onClick={() => handleDeleteApplication(app.id)}
-                    aria-label="Application löschen"
+                    aria-label="Stopp löschen"
                     data-testid="event-edit-delete-application"
                   >
                     <Trash2 aria-hidden />
@@ -474,7 +473,7 @@ export function EventEditForm({ user, initialEvent }: EventEditFormProps) {
                   </div>
                 </div>
                 <div className="flex flex-col gap-1">
-                  <Label>Recipient</Label>
+                  <Label>Begleitung</Label>
                   <RecipientPicker
                     value={
                       {
@@ -499,7 +498,7 @@ export function EventEditForm({ user, initialEvent }: EventEditFormProps) {
                   />
                 </div>
                 <div className="flex flex-col gap-1">
-                  <Label>Restraints (optional)</Label>
+                  <Label>Ausrüstung (optional)</Label>
                   <RestraintPicker
                     value={app.restraintTypeIds}
                     onChange={(next) => patchApplication(app.id, { restraintTypeIds: next })}

@@ -93,20 +93,20 @@ export function EventCreateForm({ user }: EventCreateFormProps) {
           /* sessionStorage disabled — non-fatal. */
         }
       }
-      toast.success("Event gestartet", {
+      toast.success("Tour gestartet", {
         description: "Live-Erfassung läuft. Sync läuft im Hintergrund.",
       });
       router.push(`/events/${id}`);
       router.refresh();
     } catch (error) {
-      toast.error("Event konnte nicht gestartet werden", {
+      toast.error("Tour konnte nicht gestartet werden", {
         description: error instanceof Error ? error.message : String(error),
       });
       setPending(false);
     }
   }
 
-  const submitLabel = pending ? "Starte…" : "Event starten";
+  const submitLabel = pending ? "Starte…" : "Tour starten";
   const gpsLabel =
     geolocation.status === "requesting" ? "Standort wird ermittelt…" : "Standort erneut anfordern";
 
@@ -163,14 +163,13 @@ export function EventCreateForm({ user }: EventCreateFormProps) {
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">Recipient</CardTitle>
+          <CardTitle className="text-base">Begleitung</CardTitle>
           <CardDescription>
-            Wer ist Empfänger:in? Ohne Auswahl ist Self-Bondage Default (Performer = Recipient =
-            du).
+            Wer ist mit dabei? Ohne Auswahl bist du allein unterwegs (Erfasser = du).
             {recipient ? (
               <span className="mt-1 block text-xs text-slate-700 dark:text-slate-300">
-                Hinweis: {recipient.name} wird automatisch als Beteiligte:r erfasst und kann das
-                Event später einsehen (ADR-012).
+                Hinweis: {recipient.name} wird automatisch als Mit-dabei erfasst und kann die Tour
+                später einsehen.
               </span>
             ) : null}
           </CardDescription>
