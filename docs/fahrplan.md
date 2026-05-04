@@ -14,9 +14,9 @@ Status-Marker:
 
 ## Aktueller Stand
 
-- **Stand vom:** 2026-05-04 — Erst-Deployment-Befunde aus Issue #1 in Bearbeitung. Bugs 1–3 (Backend-Crash, Refactor-Lag im Seed-Script) im Autonomiebereich. Bug 4 (Tarnungs-Cut) freigabepflichtig.
+- **Stand vom:** 2026-05-04 — Erst-Deployment-Befunde aus Issue #1 abgearbeitet. Bugs 1–3 (M0.1) und vollständiger Tarnungs-Cut (M0.2, ADR-001) abgeschlossen. Migration `20260504_2200_drop_lookups` ist die neue Head-Revision.
 - **Laufende Phase:** Phase 0 (Test-Aufbau).
-- **Nächster Schritt:** Bugfixes M0.1.{1,2,3} abschließen, dann ADR-Vorschlag für Bug 4 zur Entscheidung vorlegen.
+- **Nächster Schritt:** M1 (UI-Anpassung Tour/Stopp/Erfasser/Ausrüstung) und M2 (Compose-Stack-Provisionierung) gemäß bestehender Phasen-Übersicht.
 
 ## Phasen-Übersicht
 
@@ -24,7 +24,7 @@ Status-Marker:
 |---------|-------------|-------------------------------------------------|------------|
 | 0 Test  | M0          | Plus-Map-Scaffolding aus Snapshot               | [IN ARBEIT] |
 | 0 Test  | M0.1        | Bugfixes aus Issue #1 (Bugs 1–3)                | [ERLEDIGT] 2026-05-04 |
-| 0 Test  | M0.2        | Tarnungs-Cut Backend/DB (Issue #1, Bug 4)       | [WARTET-AUF-FREIGABE] |
+| 0 Test  | M0.2        | Tarnungs-Cut Backend/DB (Issue #1, Bug 4)       | [ERLEDIGT] 2026-05-04 |
 | 0 Test  | M1          | UI-Anpassung Tour/Stopp/Erfasser/Ausrüstung     | [OFFEN]    |
 | 0 Test  | M2          | Compose-Stack-Provisionierung                   | [OFFEN]    |
 | 0 Test  | M3          | Demo-Daten-Seed + Tester-Account                | [OFFEN]    |
@@ -46,8 +46,19 @@ Quelle: [Issue #1](https://github.com/Paddel87/Plus-Map/issues/1), Befunde aus E
 
 **M0.1.3 — Bug 3.** `backend/scripts/seed_plus_map.py` Zeilen 163–165: Kwarg `label=` → `name=` (Schema-Spalte heißt `name`). Akzeptanz: Seed-Script legt Platzhalter-Einträge in `arm_position`, `hand_position`, `hand_orientation` an. Hinweis: das im Issue-Vorschlag erwähnte Entfernen des `HandOrientation`-Imports ist nicht nötig — das Modell existiert auf `c2d6016` (`backend/app/models/catalog.py:191`); die im Issue gemeldete `ImportError` stammte vermutlich aus einem stale gebauten Image.
 
-## M0.2 — Tarnungs-Cut (freigabepflichtig)
+## M0.2 — Tarnungs-Cut (Option A, ADR-001)
 
-Status [WARTET-AUF-FREIGABE]. Bug 4 aus Issue #1 berührt API-Verträge, Datenmodell, Migrationen und Frontend-Routing. Vorschlag wird im selben Turn als `ENTSCHEIDUNG ERFORDERLICH`-Block formuliert; Umsetzung erst nach Freigabe und ADR-001.
+Status [IN ARBEIT]. Freigabe für Option A erteilt am 2026-05-04, festgehalten in [ADR-001](decisions.md). Vollständiger Cut über Backend, Datenmodell, API, Frontend und Migration.
+
+| Schritt  | Titel                                                                  | Status      |
+|----------|------------------------------------------------------------------------|-------------|
+| M0.2.1   | Backend: 18 Routes + 3 SQLAdmin-Views + Router-Mounts entfernen        | [ERLEDIGT] 2026-05-04 |
+| M0.2.2   | Backend: FK-Spalten aus `application` + REST-/Sync-Schemas + Exports + Admin-Stats entfernen | [ERLEDIGT] 2026-05-04 |
+| M0.2.3   | Backend: 3 Lookup-Modelle aus `app/models/catalog.py` entfernen        | [ERLEDIGT] 2026-05-04 |
+| M0.2.4   | Backend: `seed_plus_map.py` + `app/seeds/positions.py` + `seeds/run.py` von Lookup-Daten befreien | [ERLEDIGT] 2026-05-04 |
+| M0.2.5   | Alembic-Migration `20260504_2200_drop_lookups`: DROP COLUMN × 3 + DROP TABLE × 3 | [ERLEDIGT] 2026-05-04 |
+| M0.2.6   | Frontend: Branding HC-Map → Plus-Map (acht UI-Stellen, plus package.json) | [ERLEDIGT] 2026-05-04 |
+| M0.2.7   | Frontend: `CatalogKind` reduziert + `lookup-form.tsx`/`lookup-picker.tsx` gelöscht + dependents refaktoriert | [ERLEDIGT] 2026-05-04 |
+| M0.2.8   | Verifikation: Backend 251 Tests grün, Frontend lint+typecheck grün, Browser-Smoke (Login zeigt Plus-Map) | [ERLEDIGT] 2026-05-04 |
 
 Detaillierte Meilenstein-Beschreibungen folgen, sobald die jeweilige Phase ansteht.
