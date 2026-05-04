@@ -97,30 +97,6 @@ vi.mock("@/components/catalog/restraint-picker", () => ({
   ),
 }));
 
-vi.mock("@/components/catalog/lookup-picker", () => ({
-  LookupPicker: ({
-    kind,
-    value,
-    onChange,
-    label,
-  }: {
-    kind: string;
-    value: string | null;
-    onChange: (id: string | null) => void;
-    label: string;
-  }) => (
-    <button
-      type="button"
-      data-testid={`lookup-picker-stub-${kind}`}
-      data-value={value ?? ""}
-      aria-label={label}
-      onClick={() => onChange(`fake-${kind}-id`)}
-    >
-      pick-{kind}
-    </button>
-  ),
-}));
-
 const EVENT_ID = "11111111-2222-3333-4444-555555555555";
 const APP_ID = "22222222-3333-4444-5555-666666666666";
 const PERSON_SELF = "00000000-0000-0000-0000-000000000010";
@@ -172,9 +148,6 @@ function makeApplication(overrides: Partial<ApplicationDocType> = {}): Applicati
     event_id: EVENT_ID,
     performer_id: PERSON_SELF,
     recipient_id: PERSON_SELF,
-    arm_position_id: null,
-    hand_position_id: null,
-    hand_orientation_id: null,
     sequence_no: 1,
     started_at: "2026-04-27T12:05:00.000Z",
     ended_at: null,
@@ -347,23 +320,6 @@ describe("EventEditForm — diff-based patching (M5c.4, ADR-040 §F)", () => {
 
     await waitFor(() => expect(toastSuccessMock).toHaveBeenCalled());
     expect(appDocs[0]!.patch).not.toHaveBeenCalled();
-  });
-
-  it("patches arm_position_id when the LookupPicker emits a new value (M7.5-FU2)", async () => {
-    const { database, appDocs } = makeDatabase({});
-    useDatabaseMock.mockReturnValue(database);
-    render(<EventEditForm user={USER} initialEvent={makeInitialEvent()} />);
-
-    await screen.findByTestId("event-edit-application-row");
-    fireEvent.click(screen.getByTestId("lookup-picker-stub-arm-positions"));
-    fireEvent.click(screen.getByRole("button", { name: /Änderungen speichern/ }));
-
-    await waitFor(() => expect(appDocs[0]!.patch).toHaveBeenCalledTimes(1));
-    const patch = appDocs[0]!.patch.mock.calls[0]![0];
-    expect(patch.arm_position_id).toBe("fake-arm-positions-id");
-    // Other position FKs remain untouched.
-    expect("hand_position_id" in patch).toBe(false);
-    expect("hand_orientation_id" in patch).toBe(false);
   });
 
   it("prefills the legacy_external_ref input from the initial event (M5c-NACH, ADR-050)", async () => {

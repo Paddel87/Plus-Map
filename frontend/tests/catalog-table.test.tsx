@@ -2,16 +2,16 @@
  * Component test for `CatalogTable` (M7.2 + M7.4).
  *
  * Covers loading + empty hint + RestraintType rendering (with
- * brand/model/mechanical_type subtitle) + lookup-row rendering and the
- * reject-reason callout for rejected rows. The action column is opt-in
- * via the `renderRowActions` render-prop introduced in M7.4.
+ * brand/model/mechanical_type subtitle) and the reject-reason callout
+ * for rejected rows. The action column is opt-in via the
+ * `renderRowActions` render-prop introduced in M7.4.
  */
 
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { CatalogTable } from "@/components/catalog/catalog-table";
-import type { LookupCatalogEntry, RestraintTypeEntry } from "@/lib/catalog/types";
+import type { RestraintTypeEntry } from "@/lib/catalog/types";
 
 const RT_APPROVED: RestraintTypeEntry = {
   id: "rt-1",
@@ -31,16 +31,20 @@ const RT_APPROVED: RestraintTypeEntry = {
   updated_at: null,
 };
 
-const ARM_REJECTED: LookupCatalogEntry = {
-  id: "ap-1",
-  name: "Strappado",
-  description: null,
+const RT_REJECTED: RestraintTypeEntry = {
+  id: "rt-2",
+  category: "rope",
+  brand: null,
+  model: null,
+  mechanical_type: null,
+  display_name: "Hanfseil 8mm",
   status: "rejected",
   suggested_by: "u-editor",
   approved_by: null,
   rejected_by: "u-admin",
   rejected_at: "2026-04-28T11:00:00Z",
-  reject_reason: "Duplikat von 'Strappado-A'",
+  reject_reason: "Duplikat von 'Hanfseil-Standard'",
+  note: null,
   created_at: "2026-04-26T08:00:00Z",
   updated_at: "2026-04-28T11:00:00Z",
 };
@@ -55,7 +59,7 @@ describe("CatalogTable", () => {
     render(
       <CatalogTable
         entries={[]}
-        kind="arm-positions"
+        kind="restraint-types"
         isLoading={false}
         emptyHint="Keine Treffer"
       />,
@@ -78,18 +82,18 @@ describe("CatalogTable", () => {
     expect(screen.getByText("Freigegeben")).toBeInTheDocument();
   });
 
-  it("shows reject_reason for rejected lookup rows", () => {
+  it("shows reject_reason for rejected entries", () => {
     render(
       <CatalogTable
-        entries={[ARM_REJECTED]}
-        kind="arm-positions"
+        entries={[RT_REJECTED]}
+        kind="restraint-types"
         isLoading={false}
         emptyHint="leer"
       />,
     );
-    expect(screen.getByText("Strappado")).toBeInTheDocument();
+    expect(screen.getByText("Hanfseil 8mm")).toBeInTheDocument();
     expect(screen.getByText("Abgelehnt")).toBeInTheDocument();
-    expect(screen.getByText("Begründung: Duplikat von 'Strappado-A'")).toBeInTheDocument();
+    expect(screen.getByText("Begründung: Duplikat von 'Hanfseil-Standard'")).toBeInTheDocument();
   });
 
   it("renders renderRowActions output per row when provided", () => {
@@ -123,7 +127,7 @@ describe("CatalogTable", () => {
   it("emits one row per entry with status data-attribute", () => {
     render(
       <CatalogTable
-        entries={[RT_APPROVED, ARM_REJECTED]}
+        entries={[RT_APPROVED, RT_REJECTED]}
         kind="restraint-types"
         isLoading={false}
         emptyHint="leer"
