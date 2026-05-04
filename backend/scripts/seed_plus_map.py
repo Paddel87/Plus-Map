@@ -161,9 +161,9 @@ async def _seed(tester_email: str, tester_password: str, tester_name: str) -> in
                 equipment_objs.append(rt)
 
             # Platzhalter für Position-Tabellen (im UI ausgeblendet, FK-Stub)
-            session.add(ArmPosition(label="–", status=CatalogStatus.APPROVED))
-            session.add(HandPosition(label="–", status=CatalogStatus.APPROVED))
-            session.add(HandOrientation(label="–", status=CatalogStatus.APPROVED))
+            session.add(ArmPosition(label="-", status=CatalogStatus.APPROVED))
+            session.add(HandPosition(label="-", status=CatalogStatus.APPROVED))
+            session.add(HandOrientation(label="-", status=CatalogStatus.APPROVED))
             await session.flush()
 
             # --- Touren + Stopps ---
@@ -193,13 +193,13 @@ async def _seed(tester_email: str, tester_password: str, tester_name: str) -> in
                 session.add(tour)
                 await session.flush()
 
-                # Begleitung pro Tour: 0–2 zufällige
+                # Begleitung pro Tour: 0 bis 2 zufaellige
                 companions_in_tour = rng.sample(companions, k=rng.randint(0, 2))
                 participant_persons = [tester_person, *companions_in_tour]
                 for p in participant_persons:
                     session.add(EventParticipant(event_id=tour.id, person_id=p.id))
 
-                # Stopps: 1–3 pro Tour
+                # Stopps: 1 bis 3 pro Tour
                 stop_count = rng.randint(1, 3)
                 cumulative = started + timedelta(minutes=5)
                 for seq in range(1, stop_count + 1):
