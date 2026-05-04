@@ -1,0 +1,42 @@
+# Caddy reverse-proxy config for HC-Map (M10.5, ADR-051 §B).
+#
+# Copy to docker/Caddyfile (gitignored), then bring the stack up via the
+# Caddy overlay (see docker/compose.caddy.yml). HCMAP_DOMAIN and
+# HCMAP_ACME_EMAIL come in through compose env vars.
+#
+# Auto-TLS: Caddy obtains and renews a Let's Encrypt certificate on first
+# request to {$HCMAP_DOMAIN} on port 80/443. Make sure both ports are
+# reachable from the public internet and that DNS A/AAAA records point at
+# this server.
+
+{
+    email {$HCMAP_ACME_EMAIL}
+    # Comment in for staging certs while testing the renewal pipeline:
+    # acme_ca https://acme-staging-v02.api.letsencrypt.org/directory
+}
+
+{$HCMAP_DOMAIN} {
+    encode gzip zstd
+
+    # API and SQLAdmin land at the FastAPI backend. The ``/admin/*``
+    # namespace belongs to the Next.js frontend (Catalog/Users/Persons
+    # sub-routes); SQLAdmin lives on ``/sqladmin/*`` since ADR-055.
+    handle /api/* {
+        reverse_proxy backend:8000
+    }
+    handle /sqladmin/* {
+        reverse_proxy backend:8000
+    }
+
+    # Everything else is the Next.js frontend (App Router + standalone),
+    # including the ``/admin/`` admin dashboard, ``/admin/catalogs``,
+    # ``/admin/users``, ``/admin/persons``.
+    handle {
+        reverse_proxy frontend:3000
+    }
+
+    log {
+        output stdout
+        format console
+    }
+}

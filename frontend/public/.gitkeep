@@ -1,0 +1,4 @@
+This file keeps the public/ directory in git so the
+docker/frontend.Dockerfile (M10.7) can `COPY --from=builder /app/public`
+without failing on a fresh build. Replace with real static assets
+(favicon, robots.txt, OG images) when needed.

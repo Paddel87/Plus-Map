@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# Cron-side wrapper: load /etc/hc-map/backup.env and exec retention.sh.
+set -euo pipefail
+# shellcheck source=/dev/null
+. /etc/hc-map/backup.env
+exec /usr/local/bin/retention.sh

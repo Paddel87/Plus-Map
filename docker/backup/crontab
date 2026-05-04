@@ -1,0 +1,15 @@
+# HC-Map backup schedule (M10.6, ADR-051 §D). All times UTC.
+# Output is redirected to PID 1 (tini) so `docker logs hc-map-backup-1`
+# shows job stdout/stderr.
+
+SHELL=/bin/bash
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+
+# Daily backup at 03:17 UTC.
+17 3 * * *    root /usr/local/bin/run-backup daily   > /proc/1/fd/1 2>&1
+# Weekly backup on Sunday at 03:33 UTC.
+33 3 * * 0    root /usr/local/bin/run-backup weekly  > /proc/1/fd/1 2>&1
+# Monthly backup on the 1st at 03:47 UTC.
+47 3 1 * *    root /usr/local/bin/run-backup monthly > /proc/1/fd/1 2>&1
+# Retention sweep at 04:00 UTC daily.
+ 0 4 * * *    root /usr/local/bin/run-retention      > /proc/1/fd/1 2>&1

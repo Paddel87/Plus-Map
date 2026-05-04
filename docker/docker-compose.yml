@@ -1,0 +1,56 @@
+# Local development compose file.
+# Run from repo root: docker compose -f docker/docker-compose.yml up --build
+#
+# Production topology lives in docker-compose.prod.yml (added in M10).
+
+name: hc-map
+
+services:
+  db:
+    image: postgis/postgis:16-3.5
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${HCMAP_DB_USER:-hcmap}
+      POSTGRES_PASSWORD: ${HCMAP_DB_PASSWORD:-hcmap}
+      POSTGRES_DB: ${HCMAP_DB_NAME:-hcmap}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${HCMAP_DB_USER:-hcmap} -d ${HCMAP_DB_NAME:-hcmap}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    build:
+      context: ..
+      dockerfile: docker/backend.Dockerfile
+    restart: unless-stopped
+    environment:
+      HCMAP_ENVIRONMENT: ${HCMAP_ENVIRONMENT:-development}
+      HCMAP_LOG_LEVEL: ${HCMAP_LOG_LEVEL:-INFO}
+      HCMAP_DATABASE_URL: postgresql+asyncpg://${HCMAP_DB_USER:-hcmap}:${HCMAP_DB_PASSWORD:-hcmap}@db:5432/${HCMAP_DB_NAME:-hcmap}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8000:8000"
+
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/frontend.Dockerfile
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      # SSR fetch target inside the compose network (ADR-053, M11-HOTFIX-001).
+      BACKEND_INTERNAL_URL: ${BACKEND_INTERNAL_URL:-http://backend:8000}
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:3000:3000"
+
+volumes:
+  db-data:

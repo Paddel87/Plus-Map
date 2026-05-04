@@ -1,0 +1,73 @@
+{
+  "title": "Event",
+  "description": "Event document replicated via /api/sync/events. Wire-format contract shared with backend Pydantic EventDoc (ADR-031).",
+  "version": 3,
+  "primaryKey": "id",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "maxLength": 36
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "maxLength": 32
+    },
+    "ended_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "lat": {
+      "type": "number",
+      "minimum": -90,
+      "maximum": 90
+    },
+    "lon": {
+      "type": "number",
+      "minimum": -180,
+      "maximum": 180
+    },
+    "legacy_external_ref": {
+      "type": ["string", "null"]
+    },
+    "reveal_participants": {
+      "type": "boolean"
+    },
+    "title": {
+      "type": ["string", "null"],
+      "maxLength": 120
+    },
+    "note": {
+      "type": ["string", "null"]
+    },
+    "time_precision": {
+      "type": "string",
+      "enum": ["year", "month", "day", "hour", "minute"],
+      "default": "minute"
+    },
+    "created_by": {
+      "type": ["string", "null"],
+      "format": "uuid"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "maxLength": 32
+    },
+    "deleted_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "_deleted": {
+      "type": "boolean"
+    }
+  },
+  "required": ["id", "started_at", "lat", "lon", "created_at", "updated_at"],
+  "indexes": ["started_at", ["updated_at", "id"]]
+}

@@ -1,0 +1,11 @@
+Hallo,
+
+bitte bestaetige deine HC-Map-E-Mail-Adresse ueber folgenden Link:
+
+  {verify_url}
+
+Der Link ist 1 Stunde lang gueltig. Wurde der Vorgang nicht von dir
+angestossen, ignoriere diese Nachricht.
+
+Viele Gruesse
+HC-Map

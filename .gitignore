@@ -1,0 +1,65 @@
+# --- Secrets / local environment -----------------------------------------
+.env
+.env.*
+!.env.example
+
+# --- Production reverse-proxy configs (M10.5) ----------------------------
+# Operators copy the .example files in docker/ to local working copies
+# that pin their domain + ACME email. Keep examples checked in, ignore
+# the working copies.
+docker/Caddyfile
+docker/traefik/traefik.yml
+docker/traefik/dynamic.yml
+
+# --- Production backup secrets (M10.6) -----------------------------------
+# Operators replace the .example files in docker/secrets/ with their real
+# age recipients and rclone config. Examples stay tracked, working copies
+# stay out of git.
+docker/secrets/age-recipients.txt
+docker/secrets/rclone.conf
+
+# --- M10.9 RC smoke artifacts (local-only) -------------------------------
+# `.smoke/` collects the per-RC-smoke working copies (env file, age
+# private key, mailpit + backup-volume compose override, restore logs).
+# Never check in — keys and credentials live here.
+.smoke/
+
+# --- Python (backend) ----------------------------------------------------
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+.python-version-local
+
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# --- Node / Next.js (frontend) -------------------------------------------
+node_modules/
+.next/
+out/
+.next/cache/
+*.tsbuildinfo
+.pnpm-store/
+
+# Coverage reports (vitest + pytest-cov)
+coverage/
+
+# --- Editors / OS --------------------------------------------------------
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# --- Claude Code (per-developer state) -----------------------------------
+.claude/settings.local.json
+.claude/worktrees/

@@ -1,0 +1,41 @@
+{
+  "title": "EventParticipant",
+  "description": "EventParticipant document replicated via /api/sync/event-participants. Wire-format contract shared with backend Pydantic EventParticipantDoc (ADR-037 §G).",
+  "version": 0,
+  "primaryKey": "id",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid",
+      "maxLength": 36
+    },
+    "event_id": {
+      "type": "string",
+      "format": "uuid",
+      "maxLength": 36
+    },
+    "person_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time",
+      "maxLength": 32
+    },
+    "deleted_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "_deleted": {
+      "type": "boolean"
+    }
+  },
+  "required": ["id", "event_id", "person_id", "created_at", "updated_at"],
+  "indexes": ["event_id", ["updated_at", "id"]]
+}

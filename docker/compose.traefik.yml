@@ -1,0 +1,64 @@
+# Traefik reverse-proxy overlay for HC-Map (M10.5, ADR-051 §B).
+#
+# Usage:
+#   docker compose -f docker/compose.prod.yml -f docker/compose.traefik.yml \
+#     --env-file .env.prod up -d
+#
+# Required env (see .env.example "Production / Reverse-Proxy" block):
+#   HCMAP_DOMAIN         e.g. hc-map.example.org
+#   HCMAP_ACME_EMAIL     contact for Let's Encrypt registration
+#
+# Static + dynamic config live next to this file at
+# docker/traefik/traefik.yml + docker/traefik/dynamic.yml — both are
+# copies of the .example files included in the repo.
+
+services:
+  traefik:
+    image: traefik:v3.1
+    restart: unless-stopped
+    command:
+      - --configFile=/etc/traefik/traefik.yml
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      HCMAP_DOMAIN: ${HCMAP_DOMAIN:?HCMAP_DOMAIN is required for the Traefik overlay}
+      HCMAP_ACME_EMAIL: ${HCMAP_ACME_EMAIL:?HCMAP_ACME_EMAIL is required for Let's Encrypt}
+    volumes:
+      - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
+      - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - traefik-acme:/letsencrypt
+      # Traefik's docker provider (configured in traefik.yml.example) reads
+      # service labels via this socket — read-only, never writable. Without
+      # this mount the provider crashes with "Cannot connect to the Docker
+      # daemon" and labelled routes never become active.
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - internal
+
+  # Routing rules for backend/frontend are attached as labels so the
+  # router config stays close to the service definitions.
+  backend:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.hcmap-backend.loadbalancer.server.port=8000"
+      - "traefik.http.routers.hcmap-backend-api.rule=Host(`${HCMAP_DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/sqladmin`))"
+      - "traefik.http.routers.hcmap-backend-api.entrypoints=websecure"
+      - "traefik.http.routers.hcmap-backend-api.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.hcmap-backend-api.service=hcmap-backend"
+
+  frontend:
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.services.hcmap-frontend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.hcmap-frontend.rule=Host(`${HCMAP_DOMAIN}`)"
+      - "traefik.http.routers.hcmap-frontend.entrypoints=websecure"
+      - "traefik.http.routers.hcmap-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.hcmap-frontend.service=hcmap-frontend"
+      - "traefik.http.routers.hcmap-frontend.priority=1"
+
+volumes:
+  traefik-acme:

@@ -1,0 +1,37 @@
+# Caddy reverse-proxy overlay for HC-Map (M10.5, ADR-051 §B).
+#
+# Usage:
+#   docker compose -f docker/compose.prod.yml -f docker/compose.caddy.yml \
+#     --env-file .env.prod up -d
+#
+# Required env (see .env.example "Production / Reverse-Proxy" block):
+#   HCMAP_DOMAIN         e.g. hc-map.example.org
+#   HCMAP_ACME_EMAIL     contact for Let's Encrypt registration
+#
+# The Caddyfile lives at docker/Caddyfile.example — copy to
+# docker/Caddyfile (gitignored) and edit if you need extra routes.
+
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      HCMAP_DOMAIN: ${HCMAP_DOMAIN:?HCMAP_DOMAIN is required for the Caddy overlay}
+      HCMAP_ACME_EMAIL: ${HCMAP_ACME_EMAIL:?HCMAP_ACME_EMAIL is required for Let's Encrypt}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - backend
+      - frontend
+    networks:
+      - internal
+
+volumes:
+  caddy-data:
+  caddy-config:

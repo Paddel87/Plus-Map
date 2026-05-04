@@ -1,0 +1,58 @@
+# Traefik static configuration for HC-Map (M10.5, ADR-051 §B).
+#
+# Copy to docker/traefik/traefik.yml (gitignored). The Traefik overlay
+# (docker/compose.traefik.yml) mounts this file read-only at
+# /etc/traefik/traefik.yml.
+
+global:
+  checkNewVersion: false
+  sendAnonymousUsage: false
+
+log:
+  level: INFO
+
+# Dashboard is OFF by default — flip api.dashboard to true and add a
+# router rule with auth in dynamic.yml if you want the Traefik UI.
+api:
+  dashboard: false
+
+entryPoints:
+  web:
+    address: ":80"
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+          permanent: true
+  websecure:
+    address: ":443"
+    http:
+      tls:
+        certResolver: letsencrypt
+    # Trust X-Forwarded-* headers from the docker network only. Traefik
+    # itself is the only public hop, so docker-internal IPs cover it.
+    forwardedHeaders:
+      trustedIPs:
+        - "10.0.0.0/8"
+        - "172.16.0.0/12"
+        - "192.168.0.0/16"
+
+certificatesResolvers:
+  letsencrypt:
+    acme:
+      email: "${HCMAP_ACME_EMAIL}"
+      storage: /letsencrypt/acme.json
+      # TLS-ALPN-01 challenge runs over the same :443 entry-point — no
+      # extra DNS provider config needed for HC-Map's single-host setup.
+      tlsChallenge: {}
+      # Uncomment for staging certs while testing the renewal pipeline:
+      # caServer: https://acme-staging-v02.api.letsencrypt.org/directory
+
+providers:
+  docker:
+    exposedByDefault: false
+    network: hc-map_internal
+  file:
+    filename: /etc/traefik/dynamic.yml
+    watch: true

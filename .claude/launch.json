@@ -1,0 +1,26 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "database",
+      "runtimeExecutable": "docker",
+      "runtimeArgs": ["compose", "-f", "docker/docker-compose.yml", "up", "db"],
+      "port": 5432
+    },
+    {
+      "name": "backend",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "HCMAP_DATABASE_URL=postgresql+asyncpg://hcmap:hcmap@localhost:5432/hcmap HCMAP_COOKIE_SECURE=false HCMAP_SECRET_KEY=local-dev-secret-key-32-bytes-minimum-xxx uv --directory backend run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000"
+      ],
+      "port": 8000
+    },
+    {
+      "name": "frontend",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["pnpm", "--dir", "frontend", "dev"],
+      "port": 3000
+    }
+  ]
+}
