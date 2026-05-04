@@ -141,32 +141,9 @@ export function ApplicationStartSheet({
               isAdmin={currentUserRole === "admin"}
             />
           </div>
-          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-            <LookupPicker
-              kind="arm-positions"
-              label="Armhaltung"
-              value={armPositionId}
-              onChange={setArmPositionId}
-              isAdmin={currentUserRole === "admin"}
-              id="application-arm-position"
-            />
-            <LookupPicker
-              kind="hand-positions"
-              label="Handhaltung"
-              value={handPositionId}
-              onChange={setHandPositionId}
-              isAdmin={currentUserRole === "admin"}
-              id="application-hand-position"
-            />
-            <LookupPicker
-              kind="hand-orientations"
-              label="Handausrichtung"
-              value={handOrientationId}
-              onChange={setHandOrientationId}
-              isAdmin={currentUserRole === "admin"}
-              id="application-hand-orientation"
-            />
-          </div>
+          {/* Position-Picker im Plus-Map-UI ausgeblendet — Detail-Felder
+              werden in dieser Variante nicht gepflegt. State-Variablen
+              bleiben, defaulten zu null beim Insert. */}
           <div className="flex flex-col gap-2">
             <Label htmlFor="application-note">Notiz (optional)</Label>
             <textarea

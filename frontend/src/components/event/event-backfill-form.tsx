@@ -566,32 +566,7 @@ export function EventBackfillForm({ user }: EventBackfillFormProps) {
                     id={`app-${row.uiId}-restraints`}
                   />
                 </div>
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                  <LookupPicker
-                    kind="arm-positions"
-                    label="Armhaltung"
-                    value={row.armPositionId}
-                    onChange={(next) => updateApplication(row.uiId, { armPositionId: next })}
-                    isAdmin={user.role === "admin"}
-                    id={`app-${row.uiId}-arm-position`}
-                  />
-                  <LookupPicker
-                    kind="hand-positions"
-                    label="Handhaltung"
-                    value={row.handPositionId}
-                    onChange={(next) => updateApplication(row.uiId, { handPositionId: next })}
-                    isAdmin={user.role === "admin"}
-                    id={`app-${row.uiId}-hand-position`}
-                  />
-                  <LookupPicker
-                    kind="hand-orientations"
-                    label="Handausrichtung"
-                    value={row.handOrientationId}
-                    onChange={(next) => updateApplication(row.uiId, { handOrientationId: next })}
-                    isAdmin={user.role === "admin"}
-                    id={`app-${row.uiId}-hand-orientation`}
-                  />
-                </div>
+                {/* Position-Picker im Plus-Map-UI ausgeblendet. */}
                 <div className="flex flex-col gap-1">
                   <Label htmlFor={`app-${row.uiId}-note`}>Notiz (optional)</Label>
                   <Input

@@ -506,32 +506,7 @@ export function EventEditForm({ user, initialEvent }: EventEditFormProps) {
                     id={`app-edit-${app.id}-restraints`}
                   />
                 </div>
-                <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
-                  <LookupPicker
-                    kind="arm-positions"
-                    label="Armhaltung"
-                    value={app.armPositionId}
-                    onChange={(next) => patchApplication(app.id, { armPositionId: next })}
-                    isAdmin={user.role === "admin"}
-                    id={`app-edit-${app.id}-arm-position`}
-                  />
-                  <LookupPicker
-                    kind="hand-positions"
-                    label="Handhaltung"
-                    value={app.handPositionId}
-                    onChange={(next) => patchApplication(app.id, { handPositionId: next })}
-                    isAdmin={user.role === "admin"}
-                    id={`app-edit-${app.id}-hand-position`}
-                  />
-                  <LookupPicker
-                    kind="hand-orientations"
-                    label="Handausrichtung"
-                    value={app.handOrientationId}
-                    onChange={(next) => patchApplication(app.id, { handOrientationId: next })}
-                    isAdmin={user.role === "admin"}
-                    id={`app-edit-${app.id}-hand-orientation`}
-                  />
-                </div>
+                {/* Position-Picker im Plus-Map-UI ausgeblendet. */}
                 <div className="flex flex-col gap-1">
                   <Label htmlFor={`app-edit-${app.id}-note`}>Notiz</Label>
                   <Input
