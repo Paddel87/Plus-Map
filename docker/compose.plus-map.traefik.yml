@@ -1,0 +1,62 @@
+# Traefik-Overlay für Plus-Map.
+#
+# Setzt voraus, dass auf dem Host bereits ein Traefik-Container läuft, der
+# an einem extern markierten Docker-Netzwerk hängt und Let's Encrypt für
+# die Plus-Map-Subdomain bereitstellt.
+#
+# Aktiviert über docker compose:
+#   docker compose \
+#     -f docker/compose.plus-map.yml \
+#     -f docker/compose.plus-map.traefik.yml \
+#     --env-file .env.plus-map up -d --build
+#
+# Erforderliche Env (in .env.plus-map):
+#   PLUS_MAP_DOMAIN          z. B. plus-map.example.org
+#   TRAEFIK_NETWORK          Name des extern markierten Traefik-Netzwerks
+#                            (oft "traefik", "traefik-public" oder "web")
+#   TRAEFIK_CERTRESOLVER     Name des cert-resolvers in Traefik
+#                            (Default: letsencrypt)
+#   TRAEFIK_ENTRYPOINT       Name des HTTPS-Entrypoints
+#                            (Default: websecure)
+#
+# Hinweise zum bestehenden Traefik:
+#   - Das Netzwerk muss in dessen Compose-Stack als `external: true`
+#     deklariert sein, sonst kann Plus-Map sich nicht andocken.
+#   - Traefik braucht ein Mount auf /var/run/docker.sock (read-only),
+#     damit der Docker-Provider die Plus-Map-Labels einliest.
+
+services:
+  backend:
+    # Loopback-Port-Bindung entfällt im Traefik-Pfad.
+    ports: !reset []
+    networks:
+      - plus-map-internal
+      - traefik-edge
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=${TRAEFIK_NETWORK:?TRAEFIK_NETWORK is required (e.g. traefik)}"
+      - "traefik.http.services.plus-map-backend.loadbalancer.server.port=8000"
+      - "traefik.http.routers.plus-map-backend.rule=Host(`${PLUS_MAP_DOMAIN:?PLUS_MAP_DOMAIN is required}`) && (PathPrefix(`/api`) || PathPrefix(`/sqladmin`))"
+      - "traefik.http.routers.plus-map-backend.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.plus-map-backend.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
+      - "traefik.http.routers.plus-map-backend.service=plus-map-backend"
+
+  frontend:
+    ports: !reset []
+    networks:
+      - plus-map-internal
+      - traefik-edge
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=${TRAEFIK_NETWORK}"
+      - "traefik.http.services.plus-map-frontend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.plus-map-frontend.rule=Host(`${PLUS_MAP_DOMAIN}`)"
+      - "traefik.http.routers.plus-map-frontend.entrypoints=${TRAEFIK_ENTRYPOINT:-websecure}"
+      - "traefik.http.routers.plus-map-frontend.tls.certresolver=${TRAEFIK_CERTRESOLVER:-letsencrypt}"
+      - "traefik.http.routers.plus-map-frontend.service=plus-map-frontend"
+      - "traefik.http.routers.plus-map-frontend.priority=1"
+
+networks:
+  traefik-edge:
+    name: ${TRAEFIK_NETWORK:?TRAEFIK_NETWORK is required (e.g. traefik)}
+    external: true
