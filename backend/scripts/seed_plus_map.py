@@ -29,8 +29,6 @@ import random
 from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
-from sqlalchemy import select
-
 from app.auth.manager import _password_helper
 from app.db import get_engine, get_sessionmaker
 from app.models.application import Application
@@ -45,6 +43,7 @@ from app.models.catalog import (
 from app.models.event import Event, EventParticipant
 from app.models.person import Person, PersonOrigin
 from app.models.user import User, UserRole
+from sqlalchemy import select
 
 # ----------------------------------------------------------------------
 # Demo-Daten
