@@ -1,0 +1,107 @@
+# Plus-Map Stack — eigenständiger Compose-Stack für die Test-Instanz auf Nodica1.
+#
+# Liegt in Co-Existenz neben dem bestehenden HC-Map-Stack auf demselben Host:
+# Stack-Name "plus-map" (statt "hc-map"), eigene Container, eigene Volumes,
+# eigenes Netzwerk, eigene Host-Loopback-Ports (3100/8100 statt 3000/8000).
+#
+# Reverse-Proxy: Frontend und Backend werden auf 127.0.0.1:{3100,8100}
+# gebunden. Der bestehende Caddy/Traefik auf dem Host bekommt einen
+# zusätzlichen Vhost-Eintrag für die Subdomain (z. B. plus-map.<domain>),
+# der dorthin weiterleitet. Kein gemeinsamer Reverse-Proxy-Container.
+#
+# Build: lokal aus diesem Repo. Die Tarn-UI-Strings sind nur in diesem
+# Repo enthalten, also keine vorgebauten GHCR-Images verwenden.
+#
+# Start:
+#   cp .env.example .env.plus-map
+#   # .env.plus-map editieren: HCMAP_DB_PASSWORD, HCMAP_SECRET_KEY,
+#   # HCMAP_BASE_URL=https://plus-map.<deine-domain>, ggf. HCMAP_MAPTILER_API_KEY
+#   docker compose -f docker/compose.plus-map.yml --env-file .env.plus-map up -d --build
+
+name: plus-map
+
+x-restart: &restart
+  restart: unless-stopped
+
+services:
+  db:
+    <<: *restart
+    image: postgis/postgis:16-3.5
+    container_name: plus-map-db
+    environment:
+      POSTGRES_USER: ${HCMAP_DB_USER:?HCMAP_DB_USER is required}
+      POSTGRES_PASSWORD: ${HCMAP_DB_PASSWORD:?HCMAP_DB_PASSWORD is required}
+      POSTGRES_DB: ${HCMAP_DB_NAME:?HCMAP_DB_NAME is required}
+    volumes:
+      - plus-map-db-data:/var/lib/postgresql/data
+    networks:
+      - plus-map-internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${HCMAP_DB_USER} -d ${HCMAP_DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backend:
+    <<: *restart
+    container_name: plus-map-backend
+    build:
+      context: ..
+      dockerfile: docker/backend.Dockerfile
+    environment:
+      HCMAP_ENVIRONMENT: production
+      HCMAP_LOG_LEVEL: ${HCMAP_LOG_LEVEL:-INFO}
+      HCMAP_DATABASE_URL: postgresql+asyncpg://${HCMAP_DB_USER}:${HCMAP_DB_PASSWORD}@db:5432/${HCMAP_DB_NAME}
+      HCMAP_SECRET_KEY: ${HCMAP_SECRET_KEY:?HCMAP_SECRET_KEY is required (>=32 chars)}
+      HCMAP_COOKIE_SECURE: "true"
+      HCMAP_COOKIE_DOMAIN: ${HCMAP_COOKIE_DOMAIN:-}
+      HCMAP_COOKIE_LIFETIME_SECONDS: ${HCMAP_COOKIE_LIFETIME_SECONDS:-604800}
+      HCMAP_BASE_URL: ${HCMAP_BASE_URL:?HCMAP_BASE_URL is required (e.g. https://plus-map.example.org)}
+      HCMAP_SKIP_MIGRATIONS: ${HCMAP_SKIP_MIGRATIONS:-0}
+      HCMAP_MAPTILER_API_KEY: ${HCMAP_MAPTILER_API_KEY:-}
+      HCMAP_MAPTILER_STYLE: ${HCMAP_MAPTILER_STYLE:-basic-v2}
+      HCMAP_GEOCODE_RATE_PER_MINUTE: ${HCMAP_GEOCODE_RATE_PER_MINUTE:-30}
+      HCMAP_SMTP_HOST: ${HCMAP_SMTP_HOST:-}
+      HCMAP_SMTP_PORT: ${HCMAP_SMTP_PORT:-587}
+      HCMAP_SMTP_USER: ${HCMAP_SMTP_USER:-}
+      HCMAP_SMTP_PASSWORD: ${HCMAP_SMTP_PASSWORD:-}
+      HCMAP_SMTP_STARTTLS: ${HCMAP_SMTP_STARTTLS:-true}
+      HCMAP_SMTP_USE_TLS: ${HCMAP_SMTP_USE_TLS:-false}
+      HCMAP_SMTP_FROM: ${HCMAP_SMTP_FROM:-}
+      HCMAP_SMTP_FROM_NAME: ${HCMAP_SMTP_FROM_NAME:-Plus-Map}
+    command: ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000",
+              "--proxy-headers", "--forwarded-allow-ips", "*"]
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "127.0.0.1:8100:8000"
+    networks:
+      - plus-map-internal
+
+  frontend:
+    <<: *restart
+    container_name: plus-map-frontend
+    build:
+      context: ..
+      dockerfile: docker/frontend.Dockerfile
+    environment:
+      NODE_ENV: production
+      BACKEND_INTERNAL_URL: ${BACKEND_INTERNAL_URL:-http://backend:8000}
+      NEXT_PUBLIC_TILE_URL: ${NEXT_PUBLIC_TILE_URL:-/api/tiles/{z}/{x}/{y}}
+      NEXT_PUBLIC_DEFAULT_MAP_CENTER: ${NEXT_PUBLIC_DEFAULT_MAP_CENTER:-49.7913,11.5092}
+    depends_on:
+      - backend
+    ports:
+      - "127.0.0.1:3100:3000"
+    networks:
+      - plus-map-internal
+
+networks:
+  plus-map-internal:
+    driver: bridge
+    name: plus-map-internal
+
+volumes:
+  plus-map-db-data:
+    name: plus-map-db-data
