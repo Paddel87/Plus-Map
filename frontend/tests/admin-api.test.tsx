@@ -90,9 +90,7 @@ describe("useAdminStats", () => {
       jsonResponse({
         events_total: 7,
         events_per_month_last_12: [],
-        top_restraints: [],
-        top_arm_positions: [],
-        top_hand_positions: [],
+        top_equipment: [],
         users_by_role: { admin: 1, editor: 2, viewer: 0 },
         persons_total: 3,
         persons_on_the_fly_unlinked: 0,

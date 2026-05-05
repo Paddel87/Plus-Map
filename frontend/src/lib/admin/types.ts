@@ -49,24 +49,16 @@ export interface MonthlyEventCount {
   count: number;
 }
 
-export interface RestraintCount {
+export interface EquipmentCount {
   id: string;
   display_name: string;
-  count: number;
-}
-
-export interface PositionCount {
-  id: string;
-  name: string;
   count: number;
 }
 
 export interface AdminStats {
   events_total: number;
   events_per_month_last_12: MonthlyEventCount[];
-  top_restraints: RestraintCount[];
-  top_arm_positions: PositionCount[];
-  top_hand_positions: PositionCount[];
+  top_equipment: EquipmentCount[];
   users_by_role: Record<UserRole, number>;
   persons_total: number;
   persons_on_the_fly_unlinked: number;

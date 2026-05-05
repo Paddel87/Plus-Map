@@ -122,29 +122,13 @@ export default function AdminPage() {
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4">
             <TopList
               title="Top Ausrüstung"
-              items={data.top_restraints.map((r) => ({
+              items={data.top_equipment.map((r) => ({
                 id: r.id,
                 label: r.display_name,
                 count: r.count,
-              }))}
-            />
-            <TopList
-              title="Top Trage-Modi"
-              items={data.top_arm_positions.map((p) => ({
-                id: p.id,
-                label: p.name,
-                count: p.count,
-              }))}
-            />
-            <TopList
-              title="Top Halte-Positionen"
-              items={data.top_hand_positions.map((p) => ({
-                id: p.id,
-                label: p.name,
-                count: p.count,
               }))}
             />
           </div>
