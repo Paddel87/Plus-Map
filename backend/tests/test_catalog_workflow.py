@@ -205,7 +205,9 @@ async def test_editor_cannot_withdraw_own_rejected(
 ) -> None:
     _, email, password = await make_user(async_session_factory, role=UserRole.EDITOR)
     csrf_editor = await login(client, email, password)
-    entry_id = await _propose_restraint_type(client, csrf_editor, display_name="M7-Withdraw-Rejected")
+    entry_id = await _propose_restraint_type(
+        client, csrf_editor, display_name="M7-Withdraw-Rejected"
+    )
     await client.post("/api/auth/logout")
     _, csrf_admin = await login_as(client, async_session_factory, role=UserRole.ADMIN)
     rej = await post_with_csrf(
@@ -227,7 +229,9 @@ async def test_admin_can_withdraw_any_pending(
     async_session_factory: async_sessionmaker[AsyncSession],
 ) -> None:
     _, csrf_editor = await login_as(client, async_session_factory, role=UserRole.EDITOR)
-    entry_id = await _propose_restraint_type(client, csrf_editor, display_name="M7-Withdraw-AdminAny")
+    entry_id = await _propose_restraint_type(
+        client, csrf_editor, display_name="M7-Withdraw-AdminAny"
+    )
     await client.post("/api/auth/logout")
     _, csrf_admin = await login_as(client, async_session_factory, role=UserRole.ADMIN)
     resp = await delete_with_csrf(client, csrf_admin, f"/api/restraint-types/{entry_id}")
@@ -239,7 +243,9 @@ async def test_admin_cannot_withdraw_approved(
     async_session_factory: async_sessionmaker[AsyncSession],
 ) -> None:
     _, csrf_editor = await login_as(client, async_session_factory, role=UserRole.EDITOR)
-    entry_id = await _propose_restraint_type(client, csrf_editor, display_name="M7-Withdraw-Approved")
+    entry_id = await _propose_restraint_type(
+        client, csrf_editor, display_name="M7-Withdraw-Approved"
+    )
     await client.post("/api/auth/logout")
     _, csrf_admin = await login_as(client, async_session_factory, role=UserRole.ADMIN)
     appr = await post_with_csrf(client, csrf_admin, f"/api/restraint-types/{entry_id}/approve")
@@ -331,9 +337,15 @@ async def test_listing_status_filter(
     async_session_factory: async_sessionmaker[AsyncSession],
 ) -> None:
     _, csrf_editor = await login_as(client, async_session_factory, role=UserRole.EDITOR)
-    pending_id = await _propose_restraint_type(client, csrf_editor, display_name="M7-Filter-Pending")
-    approved_id = await _propose_restraint_type(client, csrf_editor, display_name="M7-Filter-Approved")
-    rejected_id = await _propose_restraint_type(client, csrf_editor, display_name="M7-Filter-Rejected")
+    pending_id = await _propose_restraint_type(
+        client, csrf_editor, display_name="M7-Filter-Pending"
+    )
+    approved_id = await _propose_restraint_type(
+        client, csrf_editor, display_name="M7-Filter-Approved"
+    )
+    rejected_id = await _propose_restraint_type(
+        client, csrf_editor, display_name="M7-Filter-Rejected"
+    )
     await client.post("/api/auth/logout")
 
     _, csrf_admin = await login_as(client, async_session_factory, role=UserRole.ADMIN)
