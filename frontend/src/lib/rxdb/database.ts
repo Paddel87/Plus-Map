@@ -96,11 +96,11 @@ async function buildDatabase(): Promise<HCMapDatabase> {
     applications: {
       schema: applicationSchema,
       // Schema v0 → v1 (M7.5, ADR-046): add the optional
-      // `restraint_type_ids` array. Existing local docs default to an
+      // `equipment_item_ids` array. Existing local docs default to an
       // empty set so the next push doesn't accidentally drop server
       // restraints (LWW would replace them with []).
       migrationStrategies: {
-        1: (doc: Record<string, unknown>) => ({ ...doc, restraint_type_ids: [] }),
+        1: (doc: Record<string, unknown>) => ({ ...doc, equipment_item_ids: [] }),
       },
     },
     event_participants: { schema: eventParticipantSchema },

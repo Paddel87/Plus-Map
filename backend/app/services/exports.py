@@ -14,8 +14,8 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.application import Application, ApplicationRestraint
-from app.models.catalog import RestraintType
+from app.models.application import Application, ApplicationEquipment
+from app.models.catalog import EquipmentItem
 from app.models.event import Event, EventParticipant
 
 
@@ -41,15 +41,15 @@ async def build_json_export(session: AsyncSession) -> dict[str, Any]:
         .scalars()
         .all()
     )
-    ars = (await session.execute(select(ApplicationRestraint))).scalars().all()
+    aes = (await session.execute(select(ApplicationEquipment))).scalars().all()
 
-    referenced_rt_ids = {ar.restraint_type_id for ar in ars}
-    rts: list[RestraintType] = []
-    if referenced_rt_ids:
-        rts = list(
+    referenced_ei_ids = {ae.equipment_item_id for ae in aes}
+    eis: list[EquipmentItem] = []
+    if referenced_ei_ids:
+        eis = list(
             (
                 await session.execute(
-                    select(RestraintType).where(RestraintType.id.in_(referenced_rt_ids))
+                    select(EquipmentItem).where(EquipmentItem.id.in_(referenced_ei_ids))
                 )
             )
             .scalars()
@@ -61,8 +61,8 @@ async def build_json_export(session: AsyncSession) -> dict[str, Any]:
         "events": [_event_to_dict(e) for e in events],
         "applications": [_app_to_dict(a) for a in apps],
         "event_participants": [_ep_to_dict(ep) for ep in eps],
-        "application_restraints": [_ar_to_dict(ar) for ar in ars],
-        "restraint_types": [_rt_to_dict(rt) for rt in rts],
+        "application_equipment": [_ae_to_dict(ae) for ae in aes],
+        "equipment_items": [_ei_to_dict(ei) for ei in eis],
     }
 
 
@@ -175,21 +175,20 @@ def _ep_to_dict(ep: EventParticipant) -> dict[str, Any]:
     }
 
 
-def _ar_to_dict(ar: ApplicationRestraint) -> dict[str, Any]:
+def _ae_to_dict(ae: ApplicationEquipment) -> dict[str, Any]:
     return {
-        "application_id": str(ar.application_id),
-        "restraint_type_id": str(ar.restraint_type_id),
-        "created_at": ar.created_at.isoformat(),
+        "application_id": str(ae.application_id),
+        "equipment_item_id": str(ae.equipment_item_id),
+        "created_at": ae.created_at.isoformat(),
     }
 
 
-def _rt_to_dict(rt: RestraintType) -> dict[str, Any]:
+def _ei_to_dict(ei: EquipmentItem) -> dict[str, Any]:
     return {
-        "id": str(rt.id),
-        "category": rt.category.value,
-        "brand": rt.brand,
-        "model": rt.model,
-        "mechanical_type": rt.mechanical_type.value if rt.mechanical_type else None,
-        "display_name": rt.display_name,
-        "status": rt.status.value,
+        "id": str(ei.id),
+        "category": ei.category.value,
+        "brand": ei.brand,
+        "model": ei.model,
+        "display_name": ei.display_name,
+        "status": ei.status.value,
     }

@@ -32,7 +32,7 @@ async def _clean(async_session_factory: async_sessionmaker[AsyncSession]):
     yield
     async with async_session_factory() as session, session.begin():
         await session.execute(text("DELETE FROM event_participant"))
-        await session.execute(text("DELETE FROM application_restraint"))
+        await session.execute(text("DELETE FROM application_equipment"))
         await session.execute(text("DELETE FROM application"))
         await session.execute(text("DELETE FROM event"))
 

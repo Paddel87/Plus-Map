@@ -25,8 +25,8 @@ async def get_application(
     application = await application_svc.get_application(session, application_id)
     if application is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    rt_ids = await application_svc.restraint_ids_for(session, application_id)
-    return ApplicationRead.model_validate({**application.__dict__, "restraint_type_ids": rt_ids})
+    ei_ids = await application_svc.equipment_ids_for(session, application_id)
+    return ApplicationRead.model_validate({**application.__dict__, "equipment_item_ids": ei_ids})
 
 
 @router.patch("/{application_id}", response_model=ApplicationRead)
@@ -39,8 +39,8 @@ async def patch_application(
     if application is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     await application_svc.update_application(session, application, payload)
-    rt_ids = await application_svc.restraint_ids_for(session, application_id)
-    return ApplicationRead.model_validate({**application.__dict__, "restraint_type_ids": rt_ids})
+    ei_ids = await application_svc.equipment_ids_for(session, application_id)
+    return ApplicationRead.model_validate({**application.__dict__, "equipment_item_ids": ei_ids})
 
 
 @router.delete(
@@ -72,5 +72,5 @@ async def end_application(
     if application is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     await application_svc.end_application(session, application)
-    rt_ids = await application_svc.restraint_ids_for(session, application_id)
-    return ApplicationRead.model_validate({**application.__dict__, "restraint_type_ids": rt_ids})
+    ei_ids = await application_svc.equipment_ids_for(session, application_id)
+    return ApplicationRead.model_validate({**application.__dict__, "equipment_item_ids": ei_ids})

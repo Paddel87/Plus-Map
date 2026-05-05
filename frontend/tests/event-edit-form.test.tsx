@@ -78,8 +78,8 @@ vi.mock("@/components/person/recipient-picker", () => ({
   ),
 }));
 
-vi.mock("@/components/catalog/restraint-picker", () => ({
-  RestraintPicker: ({
+vi.mock("@/components/catalog/equipment-picker", () => ({
+  EquipmentPicker: ({
     value,
     onChange,
   }: {
@@ -88,7 +88,7 @@ vi.mock("@/components/catalog/restraint-picker", () => ({
   }) => (
     <button
       type="button"
-      data-testid="restraint-picker-stub"
+      data-testid="equipment-picker-stub"
       data-restraints={value.join(",")}
       onClick={() => onChange(["00000000-0000-0000-0000-0000000000ff"])}
     >
@@ -290,32 +290,32 @@ describe("EventEditForm — diff-based patching (M5c.4, ADR-040 §F)", () => {
     expect(eventDoc.patch).not.toHaveBeenCalled();
   });
 
-  it("patches restraint_type_ids when the picker reports a new selection (M7.5-FU1)", async () => {
+  it("patches equipment_item_ids when the picker reports a new selection (M7.5-FU1)", async () => {
     const { database, eventDoc, appDocs } = makeDatabase({});
     useDatabaseMock.mockReturnValue(database);
     render(<EventEditForm user={USER} initialEvent={makeInitialEvent()} />);
 
     await screen.findByTestId("event-edit-application-row");
-    fireEvent.click(screen.getByTestId("restraint-picker-stub"));
+    fireEvent.click(screen.getByTestId("equipment-picker-stub"));
     fireEvent.click(screen.getByRole("button", { name: /Änderungen speichern/ }));
 
     await waitFor(() => expect(appDocs[0]!.patch).toHaveBeenCalledTimes(1));
-    expect(appDocs[0]!.patch.mock.calls[0]![0].restraint_type_ids).toEqual([
+    expect(appDocs[0]!.patch.mock.calls[0]![0].equipment_item_ids).toEqual([
       "00000000-0000-0000-0000-0000000000ff",
     ]);
     expect(eventDoc.patch).not.toHaveBeenCalled();
   });
 
-  it("does not patch restraint_type_ids when the set is unchanged (M7.5-FU1)", async () => {
+  it("does not patch equipment_item_ids when the set is unchanged (M7.5-FU1)", async () => {
     const initialIds = ["00000000-0000-0000-0000-000000000aaa"];
     const { database, appDocs } = makeDatabase({
-      applications: [makeApplication({ restraint_type_ids: initialIds })],
+      applications: [makeApplication({ equipment_item_ids: initialIds })],
     });
     useDatabaseMock.mockReturnValue(database);
     render(<EventEditForm user={USER} initialEvent={makeInitialEvent()} />);
 
     await screen.findByTestId("event-edit-application-row");
-    // Toggle nothing — RestraintPicker stub does not auto-fire.
+    // Toggle nothing — EquipmentPicker stub does not auto-fire.
     fireEvent.click(screen.getByRole("button", { name: /Änderungen speichern/ }));
 
     await waitFor(() => expect(toastSuccessMock).toHaveBeenCalled());

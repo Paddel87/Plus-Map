@@ -1,4 +1,4 @@
-"""Pydantic schemas for the RestraintType (equipment) catalog."""
+"""Pydantic schemas for the EquipmentItem (outdoor-equipment) catalog."""
 
 from __future__ import annotations
 
@@ -7,50 +7,43 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from app.models.catalog import (
-    CatalogStatus,
-    RestraintCategory,
-    RestraintMechanicalType,
-)
+from app.models.catalog import CatalogStatus, EquipmentCategory
 
 
 class CatalogReject(BaseModel):
-    """Request body for ``POST /restraint-types/{id}/reject`` (admin-only)."""
+    """Request body for ``POST /equipment-items/{id}/reject`` (admin-only)."""
 
     reason: str = Field(min_length=1, max_length=2000)
 
 
-class RestraintTypeCreate(BaseModel):
-    category: RestraintCategory
+class EquipmentItemCreate(BaseModel):
+    category: EquipmentCategory
     brand: str | None = Field(default=None, max_length=120)
     model: str | None = Field(default=None, max_length=200)
-    mechanical_type: RestraintMechanicalType | None = None
     display_name: str = Field(min_length=1, max_length=300)
     note: str | None = None
 
 
-class RestraintTypeUpdate(BaseModel):
-    """Admin-only PATCH body for RestraintType.
+class EquipmentItemUpdate(BaseModel):
+    """Admin-only PATCH body for EquipmentItem.
 
-    Identity fields (category, brand, model, mechanical_type) are
-    editable by admin to allow correction of typos / categorisation
-    mistakes after approval (ADR-043 §B). UNIQUE conflicts return 409.
+    Identity fields (category, brand, model) are editable by admin to
+    allow correction of typos / categorisation mistakes after approval
+    (ADR-043 §B). UNIQUE conflicts return 409.
     """
 
-    category: RestraintCategory | None = None
+    category: EquipmentCategory | None = None
     brand: str | None = Field(default=None, max_length=120)
     model: str | None = Field(default=None, max_length=200)
-    mechanical_type: RestraintMechanicalType | None = None
     display_name: str | None = Field(default=None, min_length=1, max_length=300)
     note: str | None = None
 
 
-class RestraintTypeRead(BaseModel):
+class EquipmentItemRead(BaseModel):
     id: uuid.UUID
-    category: RestraintCategory
+    category: EquipmentCategory
     brand: str | None = None
     model: str | None = None
-    mechanical_type: RestraintMechanicalType | None = None
     display_name: str
     status: CatalogStatus
     suggested_by: uuid.UUID | None = None

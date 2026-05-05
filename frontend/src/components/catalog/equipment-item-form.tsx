@@ -11,43 +11,38 @@ import { Label } from "@/components/ui/label";
 import {
   useCreateCatalogEntry,
   useUpdateCatalogEntry,
-  type RestraintTypeCreatePayload,
+  type EquipmentItemCreatePayload,
 } from "@/lib/catalog/api";
 import {
-  MECHANICAL_TYPE_LABELS,
-  RESTRAINT_CATEGORY_LABELS,
-  type RestraintCategory,
-  type RestraintMechanicalType,
-  type RestraintTypeEntry,
+  EQUIPMENT_CATEGORY_LABELS,
+  type EquipmentCategory,
+  type EquipmentItemEntry,
 } from "@/lib/catalog/types";
 
 const SELECT_CLASS =
   "flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:focus-visible:ring-slate-300";
 
-export type RestraintTypeFormMode =
+export type EquipmentItemFormMode =
   | { type: "create" }
-  | { type: "edit"; entry: RestraintTypeEntry };
+  | { type: "edit"; entry: EquipmentItemEntry };
 
-export function RestraintTypeForm({
+export function EquipmentItemForm({
   mode,
   isAdmin,
 }: {
-  mode: RestraintTypeFormMode;
+  mode: EquipmentItemFormMode;
   isAdmin: boolean;
 }) {
   const router = useRouter();
   const initial = mode.type === "edit" ? mode.entry : null;
-  const [category, setCategory] = useState<RestraintCategory>(initial?.category ?? "rope");
+  const [category, setCategory] = useState<EquipmentCategory>(initial?.category ?? "tools");
   const [brand, setBrand] = useState(initial?.brand ?? "");
   const [model, setModel] = useState(initial?.model ?? "");
-  const [mechanicalType, setMechanicalType] = useState<RestraintMechanicalType | "">(
-    initial?.mechanical_type ?? "",
-  );
   const [displayName, setDisplayName] = useState(initial?.display_name ?? "");
   const [note, setNote] = useState(initial?.note ?? "");
 
-  const create = useCreateCatalogEntry("restraint-types");
-  const update = useUpdateCatalogEntry("restraint-types");
+  const create = useCreateCatalogEntry("equipment-items");
+  const update = useUpdateCatalogEntry("equipment-items");
   const pending = create.isPending || update.isPending;
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
@@ -57,11 +52,10 @@ export function RestraintTypeForm({
       toast.error("Display-Name darf nicht leer sein");
       return;
     }
-    const body: RestraintTypeCreatePayload = {
+    const body: EquipmentItemCreatePayload = {
       category,
       brand: brand.trim() === "" ? null : brand.trim(),
       model: model.trim() === "" ? null : model.trim(),
-      mechanical_type: mechanicalType === "" ? null : mechanicalType,
       display_name: trimmedDisplayName,
       note: note.trim() === "" ? null : note.trim(),
     };
@@ -73,7 +67,7 @@ export function RestraintTypeForm({
         await update.mutateAsync({ id: mode.entry.id, body });
         toast.success("Eintrag aktualisiert");
       }
-      router.push(`/admin/catalogs/restraint-types`);
+      router.push(`/admin/catalogs/equipment-items`);
       router.refresh();
     } catch (err) {
       describeMutationError(err);
@@ -100,27 +94,10 @@ export function RestraintTypeForm({
             id="rt-category"
             name="category"
             value={category}
-            onChange={(e) => setCategory(e.target.value as RestraintCategory)}
+            onChange={(e) => setCategory(e.target.value as EquipmentCategory)}
             className={SELECT_CLASS}
           >
-            {Object.entries(RESTRAINT_CATEGORY_LABELS).map(([key, label]) => (
-              <option key={key} value={key}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div className="flex flex-col gap-1.5">
-          <Label htmlFor="rt-mechanical">Bauart</Label>
-          <select
-            id="rt-mechanical"
-            name="mechanical_type"
-            value={mechanicalType}
-            onChange={(e) => setMechanicalType(e.target.value as RestraintMechanicalType | "")}
-            className={SELECT_CLASS}
-          >
-            <option value="">— keine —</option>
-            {Object.entries(MECHANICAL_TYPE_LABELS).map(([key, label]) => (
+            {Object.entries(EQUIPMENT_CATEGORY_LABELS).map(([key, label]) => (
               <option key={key} value={key}>
                 {label}
               </option>
@@ -172,7 +149,7 @@ export function RestraintTypeForm({
         <Button
           type="button"
           variant="ghost"
-          onClick={() => router.push(`/admin/catalogs/restraint-types`)}
+          onClick={() => router.push(`/admin/catalogs/equipment-items`)}
         >
           Abbrechen
         </Button>

@@ -1,6 +1,6 @@
 """Catalog models with proposal workflow.
 
-RestraintType carries the ``status`` and ``suggested_by`` /
+EquipmentItem carries the ``status`` and ``suggested_by`` /
 ``approved_by`` proposal flow described in fahrplan.md M7. Visibility
 rules (admin sees all, editors see approved + own pending, viewers see
 approved) are enforced via RLS policies set up in M2.
@@ -35,27 +35,22 @@ class CatalogStatus(enum.StrEnum):
     REJECTED = "rejected"
 
 
-class RestraintCategory(enum.StrEnum):
-    """High-level grouping for the restraint catalog."""
+class EquipmentCategory(enum.StrEnum):
+    """High-level grouping for the outdoor-equipment catalog."""
 
-    HANDCUFFS = "handcuffs"
-    THUMBCUFFS = "thumbcuffs"
-    LEGCUFFS = "legcuffs"
-    CUFFS_LEATHER = "cuffs_leather"
-    ROPE = "rope"
-    TAPE = "tape"
-    CABLE_TIE = "cable_tie"
-    CLOTH = "cloth"
-    STRAP = "strap"
+    NAVIGATION = "navigation"
+    LIGHTING = "lighting"
+    HYDRATION = "hydration"
+    NUTRITION = "nutrition"
+    SAFETY = "safety"
+    TOOLS = "tools"
+    DOCUMENTATION = "documentation"
+    COMFORT = "comfort"
+    MOBILITY = "mobility"
+    CARRYING = "carrying"
+    CLOTHING = "clothing"
+    SHELTER = "shelter"
     OTHER = "other"
-
-
-class RestraintMechanicalType(enum.StrEnum):
-    """Mechanical type for cuff-style restraints."""
-
-    CHAIN = "chain"
-    HINGED = "hinged"
-    RIGID = "rigid"
 
 
 def _enum(enum_cls: type[enum.Enum], pg_name: str) -> Enum:
@@ -67,10 +62,10 @@ def _enum(enum_cls: type[enum.Enum], pg_name: str) -> Enum:
     )
 
 
-# Shared Postgres enum: catalog_status is reused across four tables. Without
-# inherit_schema=True / create_type=False elsewhere, SQLAlchemy would try to
-# CREATE TYPE multiple times. We define it once here on the metadata and
-# reference the same instance in every column.
+# Shared Postgres enum: catalog_status is reused across multiple columns.
+# Without inherit_schema=True / create_type=False elsewhere, SQLAlchemy
+# would try to CREATE TYPE multiple times. Define once on the metadata
+# and reference the same instance in every column.
 _CATALOG_STATUS = Enum(
     CatalogStatus,
     name="catalog_status",
@@ -80,33 +75,28 @@ _CATALOG_STATUS = Enum(
 )
 
 
-class RestraintType(Base, TimestampMixin):
-    __tablename__ = "restraint_type"
+class EquipmentItem(Base, TimestampMixin):
+    __tablename__ = "equipment_item"
     __table_args__ = (
         UniqueConstraint(
             "category",
             "brand",
             "model",
-            "mechanical_type",
-            name="uq_restraint_type_identity",
+            name="uq_equipment_item_identity",
             postgresql_nulls_not_distinct=True,
         ),
-        Index("ix_restraint_type_status", "status"),
-        Index("ix_restraint_type_category", "category"),
-        Index("ix_restraint_type_brand", "brand"),
+        Index("ix_equipment_item_status", "status"),
+        Index("ix_equipment_item_category", "category"),
+        Index("ix_equipment_item_brand", "brand"),
     )
 
     id: Mapped[uuid.UUID] = pk_column()
-    category: Mapped[RestraintCategory] = mapped_column(
-        _enum(RestraintCategory, "restraint_category"),
+    category: Mapped[EquipmentCategory] = mapped_column(
+        _enum(EquipmentCategory, "equipment_category"),
         nullable=False,
     )
     brand: Mapped[str | None] = mapped_column(String(120), nullable=True)
     model: Mapped[str | None] = mapped_column(String(200), nullable=True)
-    mechanical_type: Mapped[RestraintMechanicalType | None] = mapped_column(
-        _enum(RestraintMechanicalType, "restraint_mechanical_type"),
-        nullable=True,
-    )
     display_name: Mapped[str] = mapped_column(String(300), nullable=False)
     status: Mapped[CatalogStatus] = mapped_column(
         _CATALOG_STATUS,
@@ -135,5 +125,3 @@ class RestraintType(Base, TimestampMixin):
     )
     reject_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     note: Mapped[str | None] = mapped_column(Text, nullable=True)
-
-

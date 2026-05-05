@@ -15,11 +15,11 @@ from tests.api_helpers import login_as, post_with_csrf
 async def _clean(async_session_factory: async_sessionmaker[AsyncSession]):
     yield
     async with async_session_factory() as session, session.begin():
-        await session.execute(text("DELETE FROM application_restraint"))
-        await session.execute(text("DELETE FROM restraint_type WHERE display_name LIKE 'Test-%'"))
+        await session.execute(text("DELETE FROM application_equipment"))
+        await session.execute(text("DELETE FROM equipment_item WHERE display_name LIKE 'Test-%'"))
 
 
-async def test_editor_proposes_restraint_type_pending(
+async def test_editor_proposes_equipment_item_pending(
     client: AsyncClient,
     async_session_factory: async_sessionmaker[AsyncSession],
 ) -> None:
@@ -27,9 +27,9 @@ async def test_editor_proposes_restraint_type_pending(
     resp = await post_with_csrf(
         client,
         csrf,
-        "/api/restraint-types",
+        "/api/equipment-items",
         json={
-            "category": "rope",
+            "category": "tools",
             "display_name": "Test-Hanfseil",
         },
     )
@@ -37,7 +37,7 @@ async def test_editor_proposes_restraint_type_pending(
     assert resp.json()["status"] == "pending"
 
 
-async def test_admin_approves_restraint_type(
+async def test_admin_approves_equipment_item(
     client: AsyncClient,
     async_session_factory: async_sessionmaker[AsyncSession],
 ) -> None:
@@ -45,9 +45,9 @@ async def test_admin_approves_restraint_type(
     create = await post_with_csrf(
         client,
         csrf_editor,
-        "/api/restraint-types",
+        "/api/equipment-items",
         json={
-            "category": "tape",
+            "category": "safety",
             "display_name": "Test-Bondage-Tape",
         },
     )
@@ -55,8 +55,6 @@ async def test_admin_approves_restraint_type(
 
     await client.post("/api/auth/logout")
     _, csrf_admin = await login_as(client, async_session_factory, role=UserRole.ADMIN)
-    approve = await post_with_csrf(client, csrf_admin, f"/api/restraint-types/{rt_id}/approve")
+    approve = await post_with_csrf(client, csrf_admin, f"/api/equipment-items/{rt_id}/approve")
     assert approve.status_code == 200, approve.text
     assert approve.json()["status"] == "approved"
-
-

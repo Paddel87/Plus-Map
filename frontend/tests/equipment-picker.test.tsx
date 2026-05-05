@@ -1,5 +1,5 @@
 /**
- * Component coverage for the M7.5 RestraintPicker (ADR-046 §G).
+ * Component coverage for the M7.5 EquipmentPicker (ADR-046 §G).
  *
  * Covers the three behaviours called out in ADR-043 §H:
  *   1. typeahead filter (display_name + brand + model + category match)
@@ -17,8 +17,8 @@ import { fireEvent, render, screen, waitFor, within } from "@testing-library/rea
 import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { RestraintPicker } from "@/components/catalog/restraint-picker";
-import type { RestraintTypeEntry } from "@/lib/catalog/types";
+import { EquipmentPicker } from "@/components/catalog/equipment-picker";
+import type { EquipmentItemEntry } from "@/lib/catalog/types";
 
 const toastSuccessMock = vi.fn();
 const toastErrorMock = vi.fn();
@@ -30,15 +30,14 @@ vi.mock("sonner", () => ({
 }));
 
 function makeRestraint(
-  overrides: Partial<RestraintTypeEntry> & Pick<RestraintTypeEntry, "id" | "display_name">,
-): RestraintTypeEntry {
+  overrides: Partial<EquipmentItemEntry> & Pick<EquipmentItemEntry, "id" | "display_name">,
+): EquipmentItemEntry {
   return {
     id: overrides.id,
     display_name: overrides.display_name,
-    category: overrides.category ?? "rope",
+    category: overrides.category ?? "tools",
     brand: overrides.brand ?? null,
     model: overrides.model ?? null,
-    mechanical_type: overrides.mechanical_type ?? null,
     note: overrides.note ?? null,
     status: overrides.status ?? "approved",
     suggested_by: overrides.suggested_by ?? null,
@@ -51,31 +50,29 @@ function makeRestraint(
   };
 }
 
-const SEED: RestraintTypeEntry[] = [
+const SEED: EquipmentItemEntry[] = [
   makeRestraint({
     id: "11111111-1111-1111-1111-111111111111",
     display_name: "ASP Chain",
-    category: "handcuffs",
+    category: "navigation",
     brand: "ASP",
-    mechanical_type: "chain",
   }),
   makeRestraint({
     id: "22222222-2222-2222-2222-222222222222",
     display_name: "Clejuso Model 13",
-    category: "handcuffs",
+    category: "navigation",
     brand: "Clejuso",
     model: "Model 13",
-    mechanical_type: "rigid",
   }),
   makeRestraint({
     id: "33333333-3333-3333-3333-333333333333",
     display_name: "Hanfseil",
-    category: "rope",
+    category: "tools",
   }),
   makeRestraint({
     id: "44444444-4444-4444-4444-444444444444",
     display_name: "Pending Proposal",
-    category: "rope",
+    category: "tools",
     status: "pending",
   }),
 ];
@@ -89,7 +86,7 @@ function withQuery() {
   );
 }
 
-function mockListResponse(items: RestraintTypeEntry[]): void {
+function mockListResponse(items: EquipmentItemEntry[]): void {
   (globalThis.fetch as ReturnType<typeof vi.fn>).mockImplementation(async () => {
     return new Response(JSON.stringify({ items, total: items.length, limit: 50, offset: 0 }), {
       status: 200,
@@ -112,26 +109,26 @@ afterEach(() => {
   vi.unstubAllGlobals();
 });
 
-describe("RestraintPicker — typeahead", () => {
+describe("EquipmentPicker — typeahead", () => {
   it("filters by display_name substring", async () => {
     mockListResponse(SEED);
     const Wrapper = withQuery();
     const onChange = vi.fn();
     render(
       <Wrapper>
-        <RestraintPicker value={[]} onChange={onChange} isAdmin={false} />
+        <EquipmentPicker value={[]} onChange={onChange} isAdmin={false} />
       </Wrapper>,
     );
     await waitFor(() =>
-      expect(screen.getAllByTestId("restraint-picker-option").length).toBeGreaterThan(0),
+      expect(screen.getAllByTestId("equipment-picker-option").length).toBeGreaterThan(0),
     );
     // All three approved entries visible by default.
-    expect(screen.getAllByTestId("restraint-picker-option")).toHaveLength(3);
+    expect(screen.getAllByTestId("equipment-picker-option")).toHaveLength(3);
 
     fireEvent.change(screen.getByLabelText("Ausrüstung suchen"), {
       target: { value: "Clejuso" },
     });
-    expect(screen.getAllByTestId("restraint-picker-option")).toHaveLength(1);
+    expect(screen.getAllByTestId("equipment-picker-option")).toHaveLength(1);
     expect(screen.getByText("Clejuso Model 13")).toBeInTheDocument();
   });
 
@@ -140,17 +137,17 @@ describe("RestraintPicker — typeahead", () => {
     const Wrapper = withQuery();
     render(
       <Wrapper>
-        <RestraintPicker value={[]} onChange={vi.fn()} isAdmin={false} />
+        <EquipmentPicker value={[]} onChange={vi.fn()} isAdmin={false} />
       </Wrapper>,
     );
     await waitFor(() =>
-      expect(screen.getAllByTestId("restraint-picker-option").length).toBeGreaterThan(0),
+      expect(screen.getAllByTestId("equipment-picker-option").length).toBeGreaterThan(0),
     );
-    // "Handschellen" is the German label for the `handcuffs` category.
+    // "Navigation" is the German label for the `navigation` category.
     fireEvent.change(screen.getByLabelText("Ausrüstung suchen"), {
-      target: { value: "Handschellen" },
+      target: { value: "Navigation" },
     });
-    expect(screen.getAllByTestId("restraint-picker-option")).toHaveLength(2);
+    expect(screen.getAllByTestId("equipment-picker-option")).toHaveLength(2);
   });
 
   it("hides pending entries even when the API returns them", async () => {
@@ -160,29 +157,29 @@ describe("RestraintPicker — typeahead", () => {
     const Wrapper = withQuery();
     render(
       <Wrapper>
-        <RestraintPicker value={[]} onChange={vi.fn()} isAdmin={false} />
+        <EquipmentPicker value={[]} onChange={vi.fn()} isAdmin={false} />
       </Wrapper>,
     );
     await waitFor(() =>
-      expect(screen.getAllByTestId("restraint-picker-option").length).toBeGreaterThan(0),
+      expect(screen.getAllByTestId("equipment-picker-option").length).toBeGreaterThan(0),
     );
     expect(screen.queryByText("Pending Proposal")).toBeNull();
-    expect(screen.getAllByTestId("restraint-picker-option")).toHaveLength(3);
+    expect(screen.getAllByTestId("equipment-picker-option")).toHaveLength(3);
   });
 });
 
-describe("RestraintPicker — multi-select", () => {
+describe("EquipmentPicker — multi-select", () => {
   it("calls onChange with the toggled set", async () => {
     mockListResponse(SEED);
     const Wrapper = withQuery();
     const onChange = vi.fn();
     render(
       <Wrapper>
-        <RestraintPicker value={[]} onChange={onChange} isAdmin={false} />
+        <EquipmentPicker value={[]} onChange={onChange} isAdmin={false} />
       </Wrapper>,
     );
     await waitFor(() =>
-      expect(screen.getAllByTestId("restraint-picker-option").length).toBeGreaterThan(0),
+      expect(screen.getAllByTestId("equipment-picker-option").length).toBeGreaterThan(0),
     );
     fireEvent.click(screen.getByText("ASP Chain"));
     expect(onChange).toHaveBeenLastCalledWith(["11111111-1111-1111-1111-111111111111"]);
@@ -194,7 +191,7 @@ describe("RestraintPicker — multi-select", () => {
     const onChange = vi.fn();
     render(
       <Wrapper>
-        <RestraintPicker
+        <EquipmentPicker
           value={["11111111-1111-1111-1111-111111111111"]}
           onChange={onChange}
           isAdmin={false}
@@ -202,13 +199,13 @@ describe("RestraintPicker — multi-select", () => {
       </Wrapper>,
     );
     await waitFor(() =>
-      expect(screen.getAllByTestId("restraint-picker-option").length).toBeGreaterThan(0),
+      expect(screen.getAllByTestId("equipment-picker-option").length).toBeGreaterThan(0),
     );
-    const selectedList = screen.getByTestId("restraint-picker-selected");
+    const selectedList = screen.getByTestId("equipment-picker-selected");
     expect(within(selectedList).getByText("ASP Chain")).toBeInTheDocument();
 
     const selectedOptions = screen
-      .getAllByTestId("restraint-picker-option")
+      .getAllByTestId("equipment-picker-option")
       .filter((el) => el.dataset.selected === "true");
     expect(selectedOptions).toHaveLength(1);
 
@@ -217,22 +214,22 @@ describe("RestraintPicker — multi-select", () => {
   });
 });
 
-describe("RestraintPicker — quick-propose", () => {
+describe("EquipmentPicker — quick-propose", () => {
   it("blocks submit when display_name is empty", async () => {
     mockListResponse(SEED);
     const Wrapper = withQuery();
     render(
       <Wrapper>
-        <RestraintPicker value={[]} onChange={vi.fn()} isAdmin={false} />
+        <EquipmentPicker value={[]} onChange={vi.fn()} isAdmin={false} />
       </Wrapper>,
     );
     await waitFor(() =>
-      expect(screen.getAllByTestId("restraint-picker-option").length).toBeGreaterThan(0),
+      expect(screen.getAllByTestId("equipment-picker-option").length).toBeGreaterThan(0),
     );
-    fireEvent.click(screen.getByTestId("restraint-picker-propose-toggle"));
-    fireEvent.click(screen.getByTestId("restraint-picker-propose-submit"));
+    fireEvent.click(screen.getByTestId("equipment-picker-propose-toggle"));
+    fireEvent.click(screen.getByTestId("equipment-picker-propose-submit"));
     // Inline error appears, no POST issued.
-    const form = screen.getByTestId("restraint-picker-propose-form");
+    const form = screen.getByTestId("equipment-picker-propose-form");
     expect(within(form).getByRole("alert")).toHaveTextContent(/leer/);
     expect(globalThis.fetch).toHaveBeenCalledTimes(1); // only the initial list GET
   });
@@ -263,18 +260,18 @@ describe("RestraintPicker — quick-propose", () => {
     const onChange = vi.fn();
     render(
       <Wrapper>
-        <RestraintPicker value={[]} onChange={onChange} isAdmin={false} />
+        <EquipmentPicker value={[]} onChange={onChange} isAdmin={false} />
       </Wrapper>,
     );
     await waitFor(() =>
-      expect(screen.getAllByTestId("restraint-picker-option").length).toBeGreaterThan(0),
+      expect(screen.getAllByTestId("equipment-picker-option").length).toBeGreaterThan(0),
     );
-    fireEvent.click(screen.getByTestId("restraint-picker-propose-toggle"));
-    const form = screen.getByTestId("restraint-picker-propose-form");
+    fireEvent.click(screen.getByTestId("equipment-picker-propose-toggle"));
+    const form = screen.getByTestId("equipment-picker-propose-form");
     fireEvent.change(within(form).getByLabelText(/Display-Name/), {
       target: { value: "New Editor Suggestion" },
     });
-    fireEvent.click(screen.getByTestId("restraint-picker-propose-submit"));
+    fireEvent.click(screen.getByTestId("equipment-picker-propose-submit"));
 
     await waitFor(() => expect(toastSuccessMock).toHaveBeenCalled());
     expect(postBody).not.toBeNull();
@@ -309,7 +306,7 @@ describe("RestraintPicker — quick-propose", () => {
     const onChange = vi.fn();
     render(
       <Wrapper>
-        <RestraintPicker
+        <EquipmentPicker
           value={["11111111-1111-1111-1111-111111111111"]}
           onChange={onChange}
           isAdmin
@@ -317,14 +314,14 @@ describe("RestraintPicker — quick-propose", () => {
       </Wrapper>,
     );
     await waitFor(() =>
-      expect(screen.getAllByTestId("restraint-picker-option").length).toBeGreaterThan(0),
+      expect(screen.getAllByTestId("equipment-picker-option").length).toBeGreaterThan(0),
     );
-    fireEvent.click(screen.getByTestId("restraint-picker-propose-toggle"));
-    const form = screen.getByTestId("restraint-picker-propose-form");
+    fireEvent.click(screen.getByTestId("equipment-picker-propose-toggle"));
+    const form = screen.getByTestId("equipment-picker-propose-form");
     fireEvent.change(within(form).getByLabelText(/Display-Name/), {
       target: { value: "Admin Direct" },
     });
-    fireEvent.click(screen.getByTestId("restraint-picker-propose-submit"));
+    fireEvent.click(screen.getByTestId("equipment-picker-propose-submit"));
 
     await waitFor(() => expect(toastSuccessMock).toHaveBeenCalled());
     // Existing selection preserved + new id appended.

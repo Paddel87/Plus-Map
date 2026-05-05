@@ -115,7 +115,7 @@ function makeApplication(
     updated_at: startedAt,
     deleted_at: null,
     _deleted: false,
-    restraint_type_ids: [],
+    equipment_item_ids: [],
     ...overrides,
   };
 }

@@ -342,10 +342,10 @@ function ApplicationsTimeline({
   isLive: boolean;
   onStop?: (applicationId: string) => Promise<void> | void;
 }) {
-  // M7.5: resolve restraint_type_ids → display names via the M7.x
+  // M7.5: resolve equipment_item_ids → display names via the M7.x
   // catalog cache. Same query key the picker uses, so this view shares
   // a single fetch with the picker on the same page.
-  const restraints = useCatalogList("restraint-types", { status: "approved", limit: 200 });
+  const restraints = useCatalogList("equipment-items", { status: "approved", limit: 200 });
   const restraintNames = useMemo(() => {
     const map = new Map<string, string>();
     const items = restraints.data?.items ?? [];
@@ -428,12 +428,12 @@ function ApplicationsTimeline({
                 />
                 <span className="text-sm">{isActive ? "läuft" : "beendet"}</span>
               </div>
-              {application.restraint_type_ids.length > 0 ? (
+              {application.equipment_item_ids.length > 0 ? (
                 <ul
                   className="flex flex-wrap gap-1 pt-1"
                   data-testid="applications-timeline-app-restraints"
                 >
-                  {application.restraint_type_ids.map((rtId) => (
+                  {application.equipment_item_ids.map((rtId) => (
                     <li key={rtId}>
                       <span className="inline-flex items-center rounded-md bg-slate-100 px-1.5 py-0.5 text-[10px] font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
                         {restraintNames.get(rtId) ?? `Unbekannt (${rtId.slice(0, 8)})`}

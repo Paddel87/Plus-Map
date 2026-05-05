@@ -43,8 +43,8 @@ from sqlalchemy import and_, delete, func, or_, select
 from sqlalchemy.exc import IntegrityError, ProgrammingError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.application import Application, ApplicationRestraint
-from app.models.catalog import CatalogStatus, RestraintType
+from app.models.application import Application, ApplicationEquipment
+from app.models.catalog import CatalogStatus, EquipmentItem
 from app.models.event import Event, EventParticipant
 from app.models.user import User, UserRole
 from app.sync.schemas import (
@@ -117,8 +117,8 @@ async def pull_applications(
     rows = list((await session.execute(stmt)).scalars().all())
     # Bulk-load the n:m set in one query so /pull stays O(N+1) bounded
     # rather than firing one query per application (ADR-046 §B).
-    restraint_sets = await _load_restraint_sets(session, [r.id for r in rows])
-    docs = [_application_to_doc(r, restraint_sets.get(r.id, [])) for r in rows]
+    equipment_sets = await _load_equipment_sets(session, [r.id for r in rows])
+    docs = [_application_to_doc(r, equipment_sets.get(r.id, [])) for r in rows]
     new_cp: SyncCheckpoint | None
     if rows:
         last = rows[-1]
@@ -324,18 +324,18 @@ async def push_applications(
             continue
 
         if existing is None:
-            # Editor must only link approved restraints; a pending or
+            # Editor must only link approved equipment items; a pending or
             # unknown id is a hard conflict (ADR-046 §C). Catalog FK
             # validation runs before the row insert so we don't have to
             # roll back partial state.
-            if not await _restraints_allowed(session, new_doc.restraint_type_ids, user):
+            if not await _equipment_allowed(session, new_doc.equipment_item_ids, user):
                 conflicts.append(_synthetic_application_tombstone(new_doc.id, new_doc.event_id))
                 continue
             inserted = await _insert_application_or_conflict(session, new_doc, user)
             if inserted is None:
                 conflicts.append(_synthetic_application_tombstone(new_doc.id, new_doc.event_id))
                 continue
-            await _sync_application_restraints(session, inserted.id, new_doc.restraint_type_ids)
+            await _sync_application_equipment(session, inserted.id, new_doc.equipment_item_ids)
             continue
 
         # Update path.
@@ -343,7 +343,7 @@ async def push_applications(
         if conflict is not None:
             conflicts.append(await _application_conflict_doc(session, existing))
             continue
-        if not await _restraints_allowed(session, new_doc.restraint_type_ids, user):
+        if not await _equipment_allowed(session, new_doc.equipment_item_ids, user):
             conflicts.append(await _application_conflict_doc(session, existing))
             continue
         _apply_application_update(existing, new_doc)
@@ -354,7 +354,7 @@ async def push_applications(
             await session.refresh(existing)
             conflicts.append(await _application_conflict_doc(session, existing))
             continue
-        await _sync_application_restraints(session, existing.id, new_doc.restraint_type_ids)
+        await _sync_application_equipment(session, existing.id, new_doc.equipment_item_ids)
 
     return conflicts
 
@@ -511,7 +511,7 @@ def _event_participant_to_doc(row: EventParticipant) -> EventParticipantDoc:
 
 def _application_to_doc(
     row: Application,
-    restraint_type_ids: list[uuid.UUID] | None = None,
+    equipment_item_ids: list[uuid.UUID] | None = None,
 ) -> ApplicationDoc:
     return ApplicationDoc(
         id=row.id,
@@ -527,7 +527,7 @@ def _application_to_doc(
         updated_at=row.updated_at,
         deleted_at=row.deleted_at,
         deleted=row.is_deleted,
-        restraint_type_ids=list(restraint_type_ids or []),
+        equipment_item_ids=list(equipment_item_ids or []),
     )
 
 
@@ -535,56 +535,56 @@ async def _application_conflict_doc(
     session: AsyncSession,
     row: Application,
 ) -> ApplicationDoc:
-    """Build a master-doc reply for a push conflict, including the live restraint set.
+    """Build a master-doc reply for a push conflict, including the live equipment set.
 
     ADR-046 §D: a Konflikt-Antwort must teach the client the server's
-    truth for restraints too, otherwise the client would silently drop
-    or reapply the local set on the next push.
+    truth for equipment items too, otherwise the client would silently
+    drop or reapply the local set on the next push.
     """
-    sets = await _load_restraint_sets(session, [row.id])
+    sets = await _load_equipment_sets(session, [row.id])
     return _application_to_doc(row, sets.get(row.id, []))
 
 
-async def _load_restraint_sets(
+async def _load_equipment_sets(
     session: AsyncSession,
     application_ids: Sequence[uuid.UUID],
 ) -> dict[uuid.UUID, list[uuid.UUID]]:
-    """Bulk-load `application_restraint` rows for the given application ids.
+    """Bulk-load `application_equipment` rows for the given application ids.
 
-    Returns ``{application_id: [restraint_type_id, ...]}``. Missing keys
+    Returns ``{application_id: [equipment_item_id, ...]}``. Missing keys
     map to an empty set semantically — the caller materialises ``[]``.
-    Sorted by ``restraint_type_id`` to keep the wire format
+    Sorted by ``equipment_item_id`` to keep the wire format
     deterministic across pulls (helps roundtrip tests stay stable).
     """
     if not application_ids:
         return {}
     stmt = select(
-        ApplicationRestraint.application_id,
-        ApplicationRestraint.restraint_type_id,
-    ).where(ApplicationRestraint.application_id.in_(list(application_ids)))
+        ApplicationEquipment.application_id,
+        ApplicationEquipment.equipment_item_id,
+    ).where(ApplicationEquipment.application_id.in_(list(application_ids)))
     rows = list((await session.execute(stmt)).all())
     result: dict[uuid.UUID, list[uuid.UUID]] = {}
-    for app_id, rt_id in rows:
-        result.setdefault(app_id, []).append(rt_id)
+    for app_id, ei_id in rows:
+        result.setdefault(app_id, []).append(ei_id)
     for app_id in result:
         result[app_id].sort()
     return result
 
 
-async def _restraints_allowed(
+async def _equipment_allowed(
     session: AsyncSession,
-    restraint_type_ids: Sequence[uuid.UUID],
+    equipment_item_ids: Sequence[uuid.UUID],
     user: User,
 ) -> bool:
-    """Editor may only link approved RestraintTypes (ADR-046 §C).
+    """Editor may only link approved EquipmentItems (ADR-046 §C).
 
     Admin pushes bypass the approved-check (mirrors the catalog-FK
     behaviour in :func:`_insert_application_or_conflict`). Unknown ids
     fail too — they would otherwise FK-violate later in
-    ``_sync_application_restraints`` and surface as an opaque
+    ``_sync_application_equipment`` and surface as an opaque
     IntegrityError.
     """
-    if not restraint_type_ids:
+    if not equipment_item_ids:
         return True
     if user.role == UserRole.ADMIN:
         # Admin still needs the rows to exist so the FK insert succeeds;
@@ -592,28 +592,28 @@ async def _restraints_allowed(
         existing_rows = list(
             (
                 await session.execute(
-                    select(RestraintType.id).where(RestraintType.id.in_(list(restraint_type_ids)))
+                    select(EquipmentItem.id).where(EquipmentItem.id.in_(list(equipment_item_ids)))
                 )
             )
             .scalars()
             .all()
         )
-        return len(existing_rows) == len(set(restraint_type_ids))
+        return len(existing_rows) == len(set(equipment_item_ids))
     rows = list(
         (
             await session.execute(
-                select(RestraintType.id, RestraintType.status).where(
-                    RestraintType.id.in_(list(restraint_type_ids))
+                select(EquipmentItem.id, EquipmentItem.status).where(
+                    EquipmentItem.id.in_(list(equipment_item_ids))
                 )
             )
         ).all()
     )
-    if len(rows) != len(set(restraint_type_ids)):
+    if len(rows) != len(set(equipment_item_ids)):
         return False
     return all(status == CatalogStatus.APPROVED for _, status in rows)
 
 
-async def _sync_application_restraints(
+async def _sync_application_equipment(
     session: AsyncSession,
     application_id: uuid.UUID,
     target_ids: Sequence[uuid.UUID],
@@ -623,15 +623,15 @@ async def _sync_application_restraints(
     Diffs the current rows against ``target_ids`` and issues a single
     DELETE for the removed elements plus an ``INSERT … ON CONFLICT DO
     NOTHING`` for the added ones. RLS already filters writes to
-    applications the caller may modify (`application_restraint_editor_modify`
+    applications the caller may modify (`application_equipment_editor_modify`
     from M2).
     """
     target = set(target_ids)
     current = set(
         (
             await session.execute(
-                select(ApplicationRestraint.restraint_type_id).where(
-                    ApplicationRestraint.application_id == application_id
+                select(ApplicationEquipment.equipment_item_id).where(
+                    ApplicationEquipment.application_id == application_id
                 )
             )
         )
@@ -642,18 +642,18 @@ async def _sync_application_restraints(
     to_add = target - current
     if to_delete:
         await session.execute(
-            delete(ApplicationRestraint).where(
-                ApplicationRestraint.application_id == application_id,
-                ApplicationRestraint.restraint_type_id.in_(list(to_delete)),
+            delete(ApplicationEquipment).where(
+                ApplicationEquipment.application_id == application_id,
+                ApplicationEquipment.equipment_item_id.in_(list(to_delete)),
             )
         )
-    for rt_id in to_add:
+    for ei_id in to_add:
         try:
             async with session.begin_nested():
                 session.add(
-                    ApplicationRestraint(
+                    ApplicationEquipment(
                         application_id=application_id,
-                        restraint_type_id=rt_id,
+                        equipment_item_id=ei_id,
                     )
                 )
                 await session.flush()

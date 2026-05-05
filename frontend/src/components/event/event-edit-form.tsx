@@ -26,7 +26,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { RestraintPicker } from "@/components/catalog/restraint-picker";
+import { EquipmentPicker } from "@/components/catalog/equipment-picker";
 import { RecipientPicker } from "@/components/person/recipient-picker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -147,7 +147,7 @@ export function EventEditForm({ user, initialEvent }: EventEditFormProps) {
       const editableApps: EditableApplication[] = applicationDocs.map((doc) => {
         const json = doc.toJSON() as ApplicationDocType;
         const matchingPerson = initialEvent.participants.find((p) => p.id === json.recipient_id);
-        const restraintIds = [...(json.restraint_type_ids ?? [])];
+        const restraintIds = [...(json.equipment_item_ids ?? [])];
         return {
           id: json.id,
           startedAt: isoToLocal(json.started_at),
@@ -263,7 +263,7 @@ export function EventEditForm({ user, initialEvent }: EventEditFormProps) {
           patch.ended_at = localToIso(app.endedAt);
         }
         if (!setEquals(app.restraintTypeIds, app.initial.restraintTypeIds)) {
-          patch.restraint_type_ids = [...app.restraintTypeIds];
+          patch.equipment_item_ids = [...app.restraintTypeIds];
         }
         if (Object.keys(patch).length > 0) {
           patch.updated_at = new Date().toISOString();
@@ -477,7 +477,7 @@ export function EventEditForm({ user, initialEvent }: EventEditFormProps) {
                 </div>
                 <div className="flex flex-col gap-1">
                   <Label>Ausrüstung (optional)</Label>
-                  <RestraintPicker
+                  <EquipmentPicker
                     value={app.restraintTypeIds}
                     onChange={(next) => patchApplication(app.id, { restraintTypeIds: next })}
                     isAdmin={user.role === "admin"}

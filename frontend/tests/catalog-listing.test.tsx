@@ -41,7 +41,7 @@ beforeEach(() => {
   vi.stubGlobal("fetch", vi.fn());
   Object.defineProperty(window, "location", {
     configurable: true,
-    value: { href: "http://localhost/admin/catalogs/restraint-types", origin: "http://localhost" },
+    value: { href: "http://localhost/admin/catalogs/equipment-items", origin: "http://localhost" },
   });
 });
 
@@ -81,11 +81,11 @@ describe("CatalogListing (M7.2)", () => {
     const Wrapper = withQuery();
     render(
       <Wrapper>
-        <CatalogListing kind="restraint-types" currentUser={ADMIN} />
+        <CatalogListing kind="equipment-items" currentUser={ADMIN} />
       </Wrapper>,
     );
     await waitFor(() => expect(calledUrl).not.toBeNull());
-    expect(calledUrl).toBe("/api/restraint-types");
+    expect(calledUrl).toBe("/api/equipment-items");
   });
 
   it("forwards URL ?status=pending to the API", async () => {
@@ -109,10 +109,9 @@ describe("CatalogListing (M7.2)", () => {
       [
         {
           id: "r-1",
-          category: "rope",
+          category: "tools",
           brand: null,
           model: null,
-          mechanical_type: null,
           display_name: "Hanfseil",
           status: "approved",
           suggested_by: null,
@@ -130,7 +129,7 @@ describe("CatalogListing (M7.2)", () => {
     const Wrapper = withQuery();
     render(
       <Wrapper>
-        <CatalogListing kind="restraint-types" currentUser={ADMIN} />
+        <CatalogListing kind="equipment-items" currentUser={ADMIN} />
       </Wrapper>,
     );
     expect(await screen.findByText("Hanfseil")).toBeInTheDocument();
@@ -142,12 +141,12 @@ describe("CatalogListing (M7.2)", () => {
     const Wrapper = withQuery();
     render(
       <Wrapper>
-        <CatalogListing kind="restraint-types" currentUser={ADMIN} />
+        <CatalogListing kind="equipment-items" currentUser={ADMIN} />
       </Wrapper>,
     );
     fireEvent.click(screen.getByRole("radio", { name: "Vorgeschlagen" }));
     expect(replaceMock).toHaveBeenCalledTimes(1);
-    expect(replaceMock).toHaveBeenCalledWith("/admin/catalogs/restraint-types?status=pending", {
+    expect(replaceMock).toHaveBeenCalledWith("/admin/catalogs/equipment-items?status=pending", {
       scroll: false,
     });
   });
@@ -157,7 +156,7 @@ describe("CatalogListing (M7.2)", () => {
     Object.defineProperty(window, "location", {
       configurable: true,
       value: {
-        href: "http://localhost/admin/catalogs/restraint-types?status=approved",
+        href: "http://localhost/admin/catalogs/equipment-items?status=approved",
         origin: "http://localhost",
       },
     });
@@ -165,11 +164,11 @@ describe("CatalogListing (M7.2)", () => {
     const Wrapper = withQuery();
     render(
       <Wrapper>
-        <CatalogListing kind="restraint-types" currentUser={ADMIN} />
+        <CatalogListing kind="equipment-items" currentUser={ADMIN} />
       </Wrapper>,
     );
     fireEvent.click(screen.getByRole("radio", { name: "Alle" }));
-    expect(replaceMock).toHaveBeenCalledWith("/admin/catalogs/restraint-types", { scroll: false });
+    expect(replaceMock).toHaveBeenCalledWith("/admin/catalogs/equipment-items", { scroll: false });
   });
 
   it("renders 'Neuer Eintrag' for admins, 'Neuen Vorschlag einreichen' for editors", async () => {
@@ -177,20 +176,20 @@ describe("CatalogListing (M7.2)", () => {
     const Wrapper = withQuery();
     const { rerender } = render(
       <Wrapper>
-        <CatalogListing kind="restraint-types" currentUser={ADMIN} />
+        <CatalogListing kind="equipment-items" currentUser={ADMIN} />
       </Wrapper>,
     );
     const adminLink = await screen.findByRole("link", { name: "Neuer Eintrag" });
-    expect(adminLink).toHaveAttribute("href", "/admin/catalogs/restraint-types/new");
+    expect(adminLink).toHaveAttribute("href", "/admin/catalogs/equipment-items/new");
     rerender(
       <Wrapper>
-        <CatalogListing kind="restraint-types" currentUser={EDITOR} />
+        <CatalogListing kind="equipment-items" currentUser={EDITOR} />
       </Wrapper>,
     );
     const editorLink = await screen.findByRole("link", {
       name: "Neuen Vorschlag einreichen",
     });
-    expect(editorLink).toHaveAttribute("href", "/admin/catalogs/restraint-types/new");
+    expect(editorLink).toHaveAttribute("href", "/admin/catalogs/equipment-items/new");
   });
 
   it("shows an error alert when the API rejects", async () => {
@@ -200,7 +199,7 @@ describe("CatalogListing (M7.2)", () => {
     const Wrapper = withQuery();
     render(
       <Wrapper>
-        <CatalogListing kind="restraint-types" currentUser={ADMIN} />
+        <CatalogListing kind="equipment-items" currentUser={ADMIN} />
       </Wrapper>,
     );
     expect(await screen.findByRole("alert")).toHaveTextContent(/nicht laden/i);

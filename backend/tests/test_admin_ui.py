@@ -32,7 +32,7 @@ _MODEL_PATHS = [
     "/sqladmin/person/list",
     "/sqladmin/event/list",
     "/sqladmin/application/list",
-    "/sqladmin/restraint-type/list",
+    "/sqladmin/equipment-item/list",
 ]
 
 

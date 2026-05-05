@@ -70,7 +70,7 @@ export interface ApplicationDocType {
    * Wire-format default is ``[]``; the backend stores rows separately
    * and replaces the set on push (LWW).
    */
-  restraint_type_ids: string[];
+  equipment_item_ids: string[];
 }
 
 /** Cursor for the pull endpoint — `(updated_at, id)` per ADR-030. */

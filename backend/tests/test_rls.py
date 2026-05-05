@@ -228,14 +228,14 @@ def test_viewer_sees_only_approved_catalog(db_engine: Engine, role_session) -> N
     _, world = role_session
     pending_id = uuid7()
     approved_id = uuid7()
-    # As superuser, seed one approved + one pending RestraintType
+    # As superuser, seed one approved + one pending EquipmentItem
     with db_engine.begin() as conn:
         conn.execute(
             text(
-                "INSERT INTO restraint_type (id, category, brand, model, "
-                "mechanical_type, display_name, status, suggested_by) "
-                "VALUES (:id1, 'rope', null, :m1, null, :n1, 'approved', null), "
-                "(:id2, 'rope', null, :m2, null, :n2, 'pending', :sb)"
+                "INSERT INTO equipment_item (id, category, brand, model, "
+                "display_name, status, suggested_by) "
+                "VALUES (:id1, 'tools', null, :m1, :n1, 'approved', null), "
+                "(:id2, 'tools', null, :m2, :n2, 'pending', :sb)"
             ),
             {
                 "id1": approved_id,
@@ -256,7 +256,7 @@ def test_viewer_sees_only_approved_catalog(db_engine: Engine, role_session) -> N
                 {"v": str(world["user_bob"])},
             )
             rows = conn.execute(
-                text("SELECT id FROM restraint_type WHERE id IN (:a, :p)"),
+                text("SELECT id FROM equipment_item WHERE id IN (:a, :p)"),
                 {"a": approved_id, "p": pending_id},
             ).all()
             visible = {r[0] for r in rows}
@@ -264,7 +264,7 @@ def test_viewer_sees_only_approved_catalog(db_engine: Engine, role_session) -> N
     finally:
         with db_engine.begin() as conn:
             conn.execute(
-                text("DELETE FROM restraint_type WHERE id IN (:a, :p)"),
+                text("DELETE FROM equipment_item WHERE id IN (:a, :p)"),
                 {"a": approved_id, "p": pending_id},
             )
 
@@ -276,10 +276,10 @@ def test_editor_sees_own_pending_catalog(db_engine: Engine, role_session) -> Non
     with db_engine.begin() as conn:
         conn.execute(
             text(
-                "INSERT INTO restraint_type (id, category, brand, model, "
-                "mechanical_type, display_name, status, suggested_by) "
-                "VALUES (:id1, 'rope', null, :m1, null, :n1, 'pending', :sb1), "
-                "(:id2, 'rope', null, :m2, null, :n2, 'pending', :sb2)"
+                "INSERT INTO equipment_item (id, category, brand, model, "
+                "display_name, status, suggested_by) "
+                "VALUES (:id1, 'tools', null, :m1, :n1, 'pending', :sb1), "
+                "(:id2, 'tools', null, :m2, :n2, 'pending', :sb2)"
             ),
             {
                 "id1": own_pending,
@@ -301,7 +301,7 @@ def test_editor_sees_own_pending_catalog(db_engine: Engine, role_session) -> Non
                 {"v": str(world["user_alice"])},
             )
             rows = conn.execute(
-                text("SELECT id FROM restraint_type WHERE id IN (:a, :b)"),
+                text("SELECT id FROM equipment_item WHERE id IN (:a, :b)"),
                 {"a": own_pending, "b": other_pending},
             ).all()
             visible = {r[0] for r in rows}
@@ -309,7 +309,7 @@ def test_editor_sees_own_pending_catalog(db_engine: Engine, role_session) -> Non
     finally:
         with db_engine.begin() as conn:
             conn.execute(
-                text("DELETE FROM restraint_type WHERE id IN (:a, :b)"),
+                text("DELETE FROM equipment_item WHERE id IN (:a, :b)"),
                 {"a": own_pending, "b": other_pending},
             )
 
@@ -322,12 +322,12 @@ def test_editor_sees_own_rejected_catalog(db_engine: Engine, role_session) -> No
     with db_engine.begin() as conn:
         conn.execute(
             text(
-                "INSERT INTO restraint_type (id, category, brand, model, "
-                "mechanical_type, display_name, status, suggested_by, "
+                "INSERT INTO equipment_item (id, category, brand, model, "
+                "display_name, status, suggested_by, "
                 "rejected_by, reject_reason) "
                 "VALUES "
-                "(:id1, 'rope', null, :m1, null, :n1, 'rejected', :sb1, :rb, :rr1), "
-                "(:id2, 'rope', null, :m2, null, :n2, 'rejected', :sb2, :rb, :rr2)"
+                "(:id1, 'tools', null, :m1, :n1, 'rejected', :sb1, :rb, :rr1), "
+                "(:id2, 'tools', null, :m2, :n2, 'rejected', :sb2, :rb, :rr2)"
             ),
             {
                 "id1": own_rejected,
@@ -353,7 +353,7 @@ def test_editor_sees_own_rejected_catalog(db_engine: Engine, role_session) -> No
                 {"v": str(world["user_alice"])},
             )
             rows = conn.execute(
-                text("SELECT id FROM restraint_type WHERE id IN (:a, :b)"),
+                text("SELECT id FROM equipment_item WHERE id IN (:a, :b)"),
                 {"a": own_rejected, "b": other_rejected},
             ).all()
             visible = {r[0] for r in rows}
@@ -361,7 +361,7 @@ def test_editor_sees_own_rejected_catalog(db_engine: Engine, role_session) -> No
     finally:
         with db_engine.begin() as conn:
             conn.execute(
-                text("DELETE FROM restraint_type WHERE id IN (:a, :b)"),
+                text("DELETE FROM equipment_item WHERE id IN (:a, :b)"),
                 {"a": own_rejected, "b": other_rejected},
             )
 
@@ -373,10 +373,10 @@ def test_viewer_does_not_see_rejected(db_engine: Engine, role_session) -> None:
     with db_engine.begin() as conn:
         conn.execute(
             text(
-                "INSERT INTO restraint_type (id, category, brand, model, "
-                "mechanical_type, display_name, status, suggested_by, "
+                "INSERT INTO equipment_item (id, category, brand, model, "
+                "display_name, status, suggested_by, "
                 "rejected_by, reject_reason) "
-                "VALUES (:id, 'rope', null, :m, null, :n, 'rejected', :sb, :rb, :rr)"
+                "VALUES (:id, 'tools', null, :m, :n, 'rejected', :sb, :rb, :rr)"
             ),
             {
                 "id": rid,
@@ -396,13 +396,13 @@ def test_viewer_does_not_see_rejected(db_engine: Engine, role_session) -> None:
                 {"v": str(world["user_bob"])},
             )
             rows = conn.execute(
-                text("SELECT id FROM restraint_type WHERE id = :id"),
+                text("SELECT id FROM equipment_item WHERE id = :id"),
                 {"id": rid},
             ).all()
         assert rows == []
     finally:
         with db_engine.begin() as conn:
-            conn.execute(text("DELETE FROM restraint_type WHERE id = :id"), {"id": rid})
+            conn.execute(text("DELETE FROM equipment_item WHERE id = :id"), {"id": rid})
 
 
 def test_editor_can_delete_own_pending_via_rls(db_engine: Engine, role_session) -> None:
@@ -412,9 +412,9 @@ def test_editor_can_delete_own_pending_via_rls(db_engine: Engine, role_session) 
     with db_engine.begin() as conn:
         conn.execute(
             text(
-                "INSERT INTO restraint_type (id, category, brand, model, "
-                "mechanical_type, display_name, status, suggested_by) "
-                "VALUES (:id, 'rope', null, :m, null, :n, 'pending', :sb)"
+                "INSERT INTO equipment_item (id, category, brand, model, "
+                "display_name, status, suggested_by) "
+                "VALUES (:id, 'tools', null, :m, :n, 'pending', :sb)"
             ),
             {
                 "id": own_pending,
@@ -432,13 +432,13 @@ def test_editor_can_delete_own_pending_via_rls(db_engine: Engine, role_session) 
                 {"v": str(world["user_alice"])},
             )
             result = conn.execute(
-                text("DELETE FROM restraint_type WHERE id = :id"),
+                text("DELETE FROM equipment_item WHERE id = :id"),
                 {"id": own_pending},
             )
             assert result.rowcount == 1
     finally:
         with db_engine.begin() as conn:
-            conn.execute(text("DELETE FROM restraint_type WHERE id = :id"), {"id": own_pending})
+            conn.execute(text("DELETE FROM equipment_item WHERE id = :id"), {"id": own_pending})
 
 
 def test_editor_cannot_delete_foreign_pending_via_rls(db_engine: Engine, role_session) -> None:
@@ -448,9 +448,9 @@ def test_editor_cannot_delete_foreign_pending_via_rls(db_engine: Engine, role_se
     with db_engine.begin() as conn:
         conn.execute(
             text(
-                "INSERT INTO restraint_type (id, category, brand, model, "
-                "mechanical_type, display_name, status, suggested_by) "
-                "VALUES (:id, 'rope', null, :m, null, :n, 'pending', :sb)"
+                "INSERT INTO equipment_item (id, category, brand, model, "
+                "display_name, status, suggested_by) "
+                "VALUES (:id, 'tools', null, :m, :n, 'pending', :sb)"
             ),
             {
                 "id": other_pending,
@@ -468,7 +468,7 @@ def test_editor_cannot_delete_foreign_pending_via_rls(db_engine: Engine, role_se
                 {"v": str(world["user_alice"])},
             )
             result = conn.execute(
-                text("DELETE FROM restraint_type WHERE id = :id"),
+                text("DELETE FROM equipment_item WHERE id = :id"),
                 {"id": other_pending},
             )
             # RLS hides the foreign pending from editor A entirely, so
@@ -478,7 +478,7 @@ def test_editor_cannot_delete_foreign_pending_via_rls(db_engine: Engine, role_se
     finally:
         with db_engine.begin() as conn:
             conn.execute(
-                text("DELETE FROM restraint_type WHERE id = :id"),
+                text("DELETE FROM equipment_item WHERE id = :id"),
                 {"id": other_pending},
             )
 
@@ -490,10 +490,10 @@ def test_editor_cannot_delete_own_rejected_via_rls(db_engine: Engine, role_sessi
     with db_engine.begin() as conn:
         conn.execute(
             text(
-                "INSERT INTO restraint_type (id, category, brand, model, "
-                "mechanical_type, display_name, status, suggested_by, "
+                "INSERT INTO equipment_item (id, category, brand, model, "
+                "display_name, status, suggested_by, "
                 "rejected_by, reject_reason) "
-                "VALUES (:id, 'rope', null, :m, null, :n, 'rejected', :sb, :rb, :rr)"
+                "VALUES (:id, 'tools', null, :m, :n, 'rejected', :sb, :rb, :rr)"
             ),
             {
                 "id": own_rejected,
@@ -513,7 +513,7 @@ def test_editor_cannot_delete_own_rejected_via_rls(db_engine: Engine, role_sessi
                 {"v": str(world["user_alice"])},
             )
             result = conn.execute(
-                text("DELETE FROM restraint_type WHERE id = :id"),
+                text("DELETE FROM equipment_item WHERE id = :id"),
                 {"id": own_rejected},
             )
             # Editor is allowed to SELECT (status = 'rejected' AND own)
@@ -522,4 +522,4 @@ def test_editor_cannot_delete_own_rejected_via_rls(db_engine: Engine, role_sessi
             assert result.rowcount == 0
     finally:
         with db_engine.begin() as conn:
-            conn.execute(text("DELETE FROM restraint_type WHERE id = :id"), {"id": own_rejected})
+            conn.execute(text("DELETE FROM equipment_item WHERE id = :id"), {"id": own_rejected})

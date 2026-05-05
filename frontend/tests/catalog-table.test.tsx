@@ -1,24 +1,23 @@
 /**
  * Component test for `CatalogTable` (M7.2 + M7.4).
  *
- * Covers loading + empty hint + RestraintType rendering (with
- * brand/model/mechanical_type subtitle) and the reject-reason callout
- * for rejected rows. The action column is opt-in via the
- * `renderRowActions` render-prop introduced in M7.4.
+ * Covers loading + empty hint + EquipmentItem rendering (with
+ * brand/model subtitle) and the reject-reason callout for rejected
+ * rows. The action column is opt-in via the `renderRowActions`
+ * render-prop introduced in M7.4.
  */
 
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { CatalogTable } from "@/components/catalog/catalog-table";
-import type { RestraintTypeEntry } from "@/lib/catalog/types";
+import type { EquipmentItemEntry } from "@/lib/catalog/types";
 
-const RT_APPROVED: RestraintTypeEntry = {
+const RT_APPROVED: EquipmentItemEntry = {
   id: "rt-1",
-  category: "handcuffs",
+  category: "navigation",
   brand: "ASP",
   model: "Chain",
-  mechanical_type: "chain",
   display_name: "ASP Chain Cuffs",
   status: "approved",
   suggested_by: null,
@@ -31,12 +30,11 @@ const RT_APPROVED: RestraintTypeEntry = {
   updated_at: null,
 };
 
-const RT_REJECTED: RestraintTypeEntry = {
+const RT_REJECTED: EquipmentItemEntry = {
   id: "rt-2",
-  category: "rope",
+  category: "tools",
   brand: null,
   model: null,
-  mechanical_type: null,
   display_name: "Hanfseil 8mm",
   status: "rejected",
   suggested_by: "u-editor",
@@ -51,7 +49,7 @@ const RT_REJECTED: RestraintTypeEntry = {
 
 describe("CatalogTable", () => {
   it("renders a loading state while isLoading", () => {
-    render(<CatalogTable entries={[]} kind="restraint-types" isLoading emptyHint="leer" />);
+    render(<CatalogTable entries={[]} kind="equipment-items" isLoading emptyHint="leer" />);
     expect(screen.getByRole("status")).toBeInTheDocument();
   });
 
@@ -59,7 +57,7 @@ describe("CatalogTable", () => {
     render(
       <CatalogTable
         entries={[]}
-        kind="restraint-types"
+        kind="equipment-items"
         isLoading={false}
         emptyHint="Keine Treffer"
       />,
@@ -68,17 +66,17 @@ describe("CatalogTable", () => {
     expect(screen.queryByRole("table")).not.toBeInTheDocument();
   });
 
-  it("renders a RestraintType with subtitle assembled from category/brand/model/mechanical_type", () => {
+  it("renders an EquipmentItem with subtitle assembled from category/brand/model", () => {
     render(
       <CatalogTable
         entries={[RT_APPROVED]}
-        kind="restraint-types"
+        kind="equipment-items"
         isLoading={false}
         emptyHint="leer"
       />,
     );
     expect(screen.getByText("ASP Chain Cuffs")).toBeInTheDocument();
-    expect(screen.getByText("Handschellen · ASP · Chain · Chain")).toBeInTheDocument();
+    expect(screen.getByText("Navigation · ASP · Chain")).toBeInTheDocument();
     expect(screen.getByText("Freigegeben")).toBeInTheDocument();
   });
 
@@ -86,7 +84,7 @@ describe("CatalogTable", () => {
     render(
       <CatalogTable
         entries={[RT_REJECTED]}
-        kind="restraint-types"
+        kind="equipment-items"
         isLoading={false}
         emptyHint="leer"
       />,
@@ -100,23 +98,23 @@ describe("CatalogTable", () => {
     render(
       <CatalogTable
         entries={[RT_APPROVED]}
-        kind="restraint-types"
+        kind="equipment-items"
         isLoading={false}
         emptyHint="leer"
         renderRowActions={(entry) => (
-          <a href={`/admin/catalogs/restraint-types/${entry.id}/edit`}>Bearbeiten</a>
+          <a href={`/admin/catalogs/equipment-items/${entry.id}/edit`}>Bearbeiten</a>
         )}
       />,
     );
     const link = screen.getByRole("link", { name: "Bearbeiten" });
-    expect(link).toHaveAttribute("href", "/admin/catalogs/restraint-types/rt-1/edit");
+    expect(link).toHaveAttribute("href", "/admin/catalogs/equipment-items/rt-1/edit");
   });
 
   it("hides the action column when renderRowActions is omitted", () => {
     render(
       <CatalogTable
         entries={[RT_APPROVED]}
-        kind="restraint-types"
+        kind="equipment-items"
         isLoading={false}
         emptyHint="leer"
       />,
@@ -128,7 +126,7 @@ describe("CatalogTable", () => {
     render(
       <CatalogTable
         entries={[RT_APPROVED, RT_REJECTED]}
-        kind="restraint-types"
+        kind="equipment-items"
         isLoading={false}
         emptyHint="leer"
       />,

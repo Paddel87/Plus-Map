@@ -1,4 +1,4 @@
-"""Application and ApplicationRestraint models.
+"""Application and ApplicationEquipment models.
 
 An Application is a single restraint action inside an Event with a Performer
 and Recipient. Multiple applications are sequenced via ``sequence_no``.
@@ -79,15 +79,15 @@ class Application(Base, TimestampMixin, CreatedByMixin, SoftDeleteMixin):
     )
 
 
-class ApplicationRestraint(Base):
-    """n:m link between applications and restraint types."""
+class ApplicationEquipment(Base):
+    """n:m link between applications and equipment items."""
 
-    __tablename__ = "application_restraint"
+    __tablename__ = "application_equipment"
     __table_args__ = (
         PrimaryKeyConstraint(
-            "application_id", "restraint_type_id", name="pk_application_restraint"
+            "application_id", "equipment_item_id", name="pk_application_equipment"
         ),
-        Index("ix_application_restraint_restraint_type_id", "restraint_type_id"),
+        Index("ix_application_equipment_equipment_item_id", "equipment_item_id"),
     )
 
     application_id: Mapped[uuid.UUID] = mapped_column(
@@ -95,9 +95,9 @@ class ApplicationRestraint(Base):
         ForeignKey("application.id", ondelete="CASCADE"),
         nullable=False,
     )
-    restraint_type_id: Mapped[uuid.UUID] = mapped_column(
+    equipment_item_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
-        ForeignKey("restraint_type.id", ondelete="RESTRICT"),
+        ForeignKey("equipment_item.id", ondelete="RESTRICT"),
         nullable=False,
     )
     created_at: Mapped[datetime] = mapped_column(

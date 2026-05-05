@@ -200,9 +200,9 @@ async def list_applications_for_event(
     rows = await application_svc.list_applications_for_event(session, event_id)
     result: list[ApplicationRead] = []
     for application in rows:
-        rt_ids = await application_svc.restraint_ids_for(session, application.id)
+        ei_ids = await application_svc.equipment_ids_for(session, application.id)
         result.append(
-            ApplicationRead.model_validate({**application.__dict__, "restraint_type_ids": rt_ids})
+            ApplicationRead.model_validate({**application.__dict__, "equipment_item_ids": ei_ids})
         )
     return result
 
@@ -227,8 +227,8 @@ async def create_application_for_event(
         role=user.role,
         strict=strict,
     )
-    rt_ids = await application_svc.restraint_ids_for(session, application.id)
-    return ApplicationRead.model_validate({**application.__dict__, "restraint_type_ids": rt_ids})
+    ei_ids = await application_svc.equipment_ids_for(session, application.id)
+    return ApplicationRead.model_validate({**application.__dict__, "equipment_item_ids": ei_ids})
 
 
 @router.post(
@@ -251,8 +251,8 @@ async def start_application_for_event(
         requester_person_id=user.person_id,
         role=user.role,
     )
-    rt_ids = await application_svc.restraint_ids_for(session, application.id)
-    return ApplicationRead.model_validate({**application.__dict__, "restraint_type_ids": rt_ids})
+    ei_ids = await application_svc.equipment_ids_for(session, application.id)
+    return ApplicationRead.model_validate({**application.__dict__, "equipment_item_ids": ei_ids})
 
 
 # --- helpers ----------------------------------------------------------

@@ -4,7 +4,7 @@ Owns three special behaviours described in ADR-020:
 - Auto-Participant: performer + recipient are inserted as
   ``EventParticipant`` if not already present (ADR-012).
 - ``sequence_no`` is assigned server-side as next free integer per event.
-- Catalog refs (restraint types) must be ``status='approved'`` unless the
+- Catalog refs (equipment items) must be ``status='approved'`` unless the
   user is admin.
 """
 
@@ -18,8 +18,8 @@ from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.application import Application, ApplicationRestraint
-from app.models.catalog import CatalogStatus, RestraintType
+from app.models.application import Application, ApplicationEquipment
+from app.models.catalog import CatalogStatus, EquipmentItem
 from app.models.event import EventParticipant
 from app.models.user import UserRole
 from app.schemas.application import (
@@ -33,7 +33,7 @@ async def _ensure_approved_catalog(
     session: AsyncSession,
     *,
     role: UserRole,
-    restraint_type_ids: list[uuid.UUID],
+    equipment_item_ids: list[uuid.UUID],
 ) -> None:
     """Reject the request if any catalog reference is not 'approved'.
 
@@ -41,12 +41,12 @@ async def _ensure_approved_catalog(
     """
     if role == UserRole.ADMIN:
         return
-    for rt_id in restraint_type_ids:
-        row = await session.get(RestraintType, rt_id)
+    for ei_id in equipment_item_ids:
+        row = await session.get(EquipmentItem, ei_id)
         if row is None or row.status != CatalogStatus.APPROVED:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Catalog reference restraint_type={rt_id} is not approved",
+                detail=f"Catalog reference equipment_item={ei_id} is not approved",
             )
 
 
@@ -93,7 +93,7 @@ async def create_application(
     await _ensure_approved_catalog(
         session,
         role=role,
-        restraint_type_ids=payload.restraint_type_ids,
+        equipment_item_ids=payload.equipment_item_ids,
     )
     seq = await _next_sequence_no(session, event_id)
     application = Application(
@@ -114,8 +114,8 @@ async def create_application(
     if payload.recipient_id != payload.performer_id:
         await _ensure_participant(session, event_id, payload.recipient_id)
 
-    for rt_id in payload.restraint_type_ids:
-        session.add(ApplicationRestraint(application_id=application.id, restraint_type_id=rt_id))
+    for ei_id in payload.equipment_item_ids:
+        session.add(ApplicationEquipment(application_id=application.id, equipment_item_id=ei_id))
     await session.flush()
     await session.refresh(application)
     return application
@@ -134,8 +134,8 @@ async def start_application(
 
     ``started_at`` is set to ``now()``. ``performer_id`` defaults to the
     requester's person (Regel-002); ``recipient_id`` defaults to the
-    same person (self-bondage) if not supplied — UI is expected to pass
-    the chosen recipient explicitly.
+    same person if not supplied — UI is expected to pass the chosen
+    recipient explicitly.
     """
     performer_id = payload.performer_id or requester_person_id
     recipient_id = payload.recipient_id or requester_person_id
@@ -143,7 +143,7 @@ async def start_application(
     await _ensure_approved_catalog(
         session,
         role=role,
-        restraint_type_ids=payload.restraint_type_ids,
+        equipment_item_ids=payload.equipment_item_ids,
     )
     seq = await _next_sequence_no(session, event_id)
     application = Application(
@@ -164,8 +164,8 @@ async def start_application(
     if recipient_id != performer_id:
         await _ensure_participant(session, event_id, recipient_id)
 
-    for rt_id in payload.restraint_type_ids:
-        session.add(ApplicationRestraint(application_id=application.id, restraint_type_id=rt_id))
+    for ei_id in payload.equipment_item_ids:
+        session.add(ApplicationEquipment(application_id=application.id, equipment_item_id=ei_id))
     await session.flush()
     await session.refresh(application)
     return application
@@ -209,12 +209,12 @@ async def list_applications_for_event(
     return rows
 
 
-async def restraint_ids_for(session: AsyncSession, application_id: uuid.UUID) -> list[uuid.UUID]:
+async def equipment_ids_for(session: AsyncSession, application_id: uuid.UUID) -> list[uuid.UUID]:
     rows = (
         (
             await session.execute(
-                select(ApplicationRestraint.restraint_type_id).where(
-                    ApplicationRestraint.application_id == application_id
+                select(ApplicationEquipment.equipment_item_id).where(
+                    ApplicationEquipment.application_id == application_id
                 )
             )
         )
