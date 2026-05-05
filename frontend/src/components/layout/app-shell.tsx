@@ -30,7 +30,7 @@ export function AppShell({ user, children }: { user: AuthUser; children: ReactNo
               </SheetTrigger>
               <SheetContent side="left" className="w-72">
                 <SheetHeader>
-                  <SheetTitle>HC-Map</SheetTitle>
+                  <SheetTitle>Plus-Map</SheetTitle>
                 </SheetHeader>
                 <nav className="mt-6 flex flex-col gap-1">
                   {items.map((item) => {
@@ -50,7 +50,7 @@ export function AppShell({ user, children }: { user: AuthUser; children: ReactNo
               </SheetContent>
             </Sheet>
             <Link href="/" className="font-semibold tracking-tight">
-              HC-Map
+              Plus-Map
             </Link>
             <div className="flex items-center gap-2">
               <SyncStatusIndicator />

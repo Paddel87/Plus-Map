@@ -17,7 +17,6 @@ async def _clean(async_session_factory: async_sessionmaker[AsyncSession]):
     async with async_session_factory() as session, session.begin():
         await session.execute(text("DELETE FROM application_restraint"))
         await session.execute(text("DELETE FROM restraint_type WHERE display_name LIKE 'Test-%'"))
-        await session.execute(text("DELETE FROM arm_position WHERE name LIKE 'Test-%'"))
 
 
 async def test_editor_proposes_restraint_type_pending(
@@ -61,16 +60,3 @@ async def test_admin_approves_restraint_type(
     assert approve.json()["status"] == "approved"
 
 
-async def test_propose_arm_position(
-    client: AsyncClient,
-    async_session_factory: async_sessionmaker[AsyncSession],
-) -> None:
-    _, csrf = await login_as(client, async_session_factory, role=UserRole.EDITOR)
-    resp = await post_with_csrf(
-        client,
-        csrf,
-        "/api/arm-positions",
-        json={"name": "Test-Position-Z"},
-    )
-    assert resp.status_code == 201
-    assert resp.json()["status"] == "pending"

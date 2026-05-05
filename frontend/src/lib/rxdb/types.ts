@@ -56,9 +56,6 @@ export interface ApplicationDocType {
   event_id: string;
   performer_id: string;
   recipient_id: string;
-  arm_position_id: string | null;
-  hand_position_id: string | null;
-  hand_orientation_id: string | null;
   sequence_no: number;
   started_at: string | null;
   ended_at: string | null;

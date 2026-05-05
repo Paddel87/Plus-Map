@@ -179,9 +179,6 @@ async def test_push_application_assigns_server_sequence_no(
         "event_id": event_doc["id"],
         "performer_id": str(user.person_id),
         "recipient_id": str(user.person_id),
-        "arm_position_id": None,
-        "hand_position_id": None,
-        "hand_orientation_id": None,
         "sequence_no": 99,  # ignored by server
         "started_at": "2026-04-26T12:01:00+00:00",
         "ended_at": None,

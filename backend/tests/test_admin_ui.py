@@ -33,9 +33,6 @@ _MODEL_PATHS = [
     "/sqladmin/event/list",
     "/sqladmin/application/list",
     "/sqladmin/restraint-type/list",
-    "/sqladmin/arm-position/list",
-    "/sqladmin/hand-position/list",
-    "/sqladmin/hand-orientation/list",
 ]
 
 

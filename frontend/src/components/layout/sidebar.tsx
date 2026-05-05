@@ -17,7 +17,7 @@ export function Sidebar({ user }: { user: AuthUser }) {
     <aside className="hidden h-screen w-60 shrink-0 flex-col border-r border-slate-200 bg-white px-4 py-6 dark:border-slate-800 dark:bg-slate-950 md:flex">
       <div className="px-2 pb-4">
         <Link href="/" className="text-lg font-semibold tracking-tight">
-          HC-Map
+          Plus-Map
         </Link>
       </div>
       <div className="px-1 pb-4">

@@ -1,9 +1,9 @@
 """Catalog service: list, propose, approve, reject, withdraw, update.
 
-Covers all four catalog tables (RestraintType + 3 lookup tables) per
-ADR-043. Status transitions are exposed as named functions so the audit
-columns (approved_by/rejected_by/rejected_at/reject_reason) can only be
-set in one place.
+Covers the RestraintType (equipment) catalog per ADR-043. Status
+transitions are exposed as named functions so the audit columns
+(approved_by/rejected_by/rejected_at/reject_reason) can only be set in
+one place.
 """
 
 from __future__ import annotations
@@ -17,13 +17,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.catalog import (
-    ArmPosition,
-    CatalogStatus,
-    HandOrientation,
-    HandPosition,
-    RestraintType,
-)
+from app.models.catalog import CatalogStatus, RestraintType
 
 
 class CatalogConflictError(Exception):
@@ -34,14 +28,14 @@ class CatalogStateError(Exception):
     """Raised when a status transition is attempted from an invalid state."""
 
 
-async def list_lookup[CatalogModel: (ArmPosition, HandPosition, HandOrientation, RestraintType)](
+async def list_lookup(
     session: AsyncSession,
-    model: type[CatalogModel],
+    model: type[RestraintType],
     *,
     limit: int,
     offset: int,
     status_filter: CatalogStatus | None = None,
-) -> tuple[Sequence[CatalogModel], int]:
+) -> tuple[Sequence[RestraintType], int]:
     """List entries the current request may see (RLS handles visibility).
 
     ``status_filter`` further constrains the result; if absent, every
@@ -63,44 +57,6 @@ async def list_lookup[CatalogModel: (ArmPosition, HandPosition, HandOrientation,
         .all()
     )
     return rows, int(total or 0)
-
-
-async def propose_lookup[LookupModel: (ArmPosition, HandPosition, HandOrientation)](
-    session: AsyncSession,
-    model: type[LookupModel],
-    *,
-    name: str,
-    description: str | None,
-    suggested_by: uuid.UUID,
-    auto_approve: bool = False,
-) -> LookupModel:
-    """Insert a new lookup-table entry.
-
-    Editors create pending suggestions; the route layer passes
-    ``auto_approve=True`` for admins so a fresh admin-created entry
-    is immediately usable in pickers (ADR-042 §F).
-    """
-    if auto_approve:
-        entry = model(
-            name=name,
-            description=description,
-            status=CatalogStatus.APPROVED,
-            approved_by=suggested_by,
-        )
-    else:
-        entry = model(
-            name=name,
-            description=description,
-            status=CatalogStatus.PENDING,
-            suggested_by=suggested_by,
-        )
-    session.add(entry)
-    try:
-        await session.flush()
-    except IntegrityError as exc:
-        raise CatalogConflictError(str(exc.orig)) from exc
-    await session.refresh(entry)
-    return entry
 
 
 async def propose_restraint_type(
@@ -141,30 +97,6 @@ async def propose_restraint_type(
     return entry
 
 
-async def update_lookup[LookupModel: (ArmPosition, HandPosition, HandOrientation)](
-    session: AsyncSession,
-    entry: LookupModel,
-    *,
-    payload: dict[str, Any],
-) -> LookupModel:
-    """Apply admin PATCH to a lookup-table entry.
-
-    Only fields present in ``payload`` are written; status is never
-    touched here (ADR-043 §B).
-    """
-    if "name" in payload and payload["name"] is not None:
-        entry.name = payload["name"]
-    if "description" in payload:
-        entry.description = payload["description"]
-    entry.updated_at = datetime.now(tz=UTC)
-    try:
-        await session.flush()
-    except IntegrityError as exc:
-        raise CatalogConflictError(str(exc.orig)) from exc
-    await session.refresh(entry)
-    return entry
-
-
 async def update_restraint_type(
     session: AsyncSession,
     entry: RestraintType,
@@ -184,12 +116,12 @@ async def update_restraint_type(
     return entry
 
 
-async def approve_entry[CatalogModel: (ArmPosition, HandPosition, HandOrientation, RestraintType)](
+async def approve_entry(
     session: AsyncSession,
-    entry: CatalogModel,
+    entry: RestraintType,
     *,
     approved_by: uuid.UUID,
-) -> CatalogModel:
+) -> RestraintType:
     """Set status to approved. Allowed from pending; idempotent on
     already-approved (no-op). Rejects rejected → approved transitions
     (must go through reset-to-pending workflow not in M7 scope).
@@ -207,13 +139,13 @@ async def approve_entry[CatalogModel: (ArmPosition, HandPosition, HandOrientatio
     return entry
 
 
-async def reject_entry[CatalogModel: (ArmPosition, HandPosition, HandOrientation, RestraintType)](
+async def reject_entry(
     session: AsyncSession,
-    entry: CatalogModel,
+    entry: RestraintType,
     *,
     rejected_by: uuid.UUID,
     reason: str,
-) -> CatalogModel:
+) -> RestraintType:
     """Set status to rejected with audit fields. Allowed from pending."""
     if entry.status != CatalogStatus.PENDING:
         raise CatalogStateError(
@@ -229,16 +161,16 @@ async def reject_entry[CatalogModel: (ArmPosition, HandPosition, HandOrientation
     return entry
 
 
-async def withdraw_entry[CatalogModel: (ArmPosition, HandPosition, HandOrientation, RestraintType)](
+async def withdraw_entry(
     session: AsyncSession,
-    entry: CatalogModel,
+    entry: RestraintType,
 ) -> None:
     """Hard-delete a pending entry (admin: any pending; editor: own only).
 
     RLS enforces the editor-only-own-pending rule via
-    ``<table>_owner_withdraw`` policy. Admin uses
-    ``<table>_admin_modify``. Status validation is the service's job
-    so we return a clean 4xx instead of a silent RLS no-op.
+    ``restraint_type_owner_withdraw`` policy. Admin uses
+    ``restraint_type_admin_modify``. Status validation is the service's
+    job so we return a clean 4xx instead of a silent RLS no-op.
     """
     if entry.status != CatalogStatus.PENDING:
         raise CatalogStateError(

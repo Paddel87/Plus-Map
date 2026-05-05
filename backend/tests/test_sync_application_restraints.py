@@ -30,7 +30,6 @@ async def _clean(async_session_factory: async_sessionmaker[AsyncSession]):
         await session.execute(text("DELETE FROM application"))
         await session.execute(text("DELETE FROM event"))
         await session.execute(text("DELETE FROM restraint_type WHERE display_name LIKE 'M7.5 %'"))
-        await session.execute(text("DELETE FROM arm_position WHERE name LIKE 'M7.5 %'"))
 
 
 def _new_event_doc() -> dict:
@@ -64,9 +63,6 @@ def _new_app_doc(
         "event_id": event_id,
         "performer_id": performer_id,
         "recipient_id": recipient_id,
-        "arm_position_id": None,
-        "hand_position_id": None,
-        "hand_orientation_id": None,
         "sequence_no": 1,
         "started_at": "2026-04-29T12:01:00+00:00",
         "ended_at": None,
@@ -330,47 +326,6 @@ async def test_editor_update_with_pending_restraint_type_keeps_server_set(
 
 
 # --- Conflict-response payload --------------------------------------------
-
-
-async def test_editor_update_with_pending_arm_position_returns_conflict(
-    client: AsyncClient,
-    async_session_factory: async_sessionmaker[AsyncSession],
-) -> None:
-    """M7.5-FU2: editor update path now also checks position-FK approved status.
-
-    Before the followup, the update path applied position FKs without
-    a status check — an editor could promote a pending ArmPosition into
-    a live application by editing it (RLS lets the editor see their own
-    pending). The new ``_position_fks_allowed`` helper closes that hole.
-    """
-    user, csrf = await login_as(client, async_session_factory, role=UserRole.EDITOR)
-    eid = await _seed_event(client, csrf)
-    doc = _new_app_doc(eid, str(user.person_id), str(user.person_id))
-    await _push_app(client, csrf, doc)
-    master = (await _pull_apps(client))[0]
-
-    # Seed a pending ArmPosition owned by the editor (RLS-visible, but
-    # not approved → not allowed as an Application FK).
-    pending_arm = uuid.uuid4()
-    async with async_session_factory() as session, session.begin():
-        await session.execute(
-            text(
-                "INSERT INTO arm_position (id, name, status, suggested_by) "
-                "VALUES (:id, :n, 'pending', :sb)"
-            ),
-            {
-                "id": pending_arm,
-                "n": f"M7.5 Pending arm {secrets.token_hex(2)}",
-                "sb": user.id,
-            },
-        )
-
-    new_state = dict(master)
-    new_state["arm_position_id"] = str(pending_arm)
-    conflicts = await _push_app(client, csrf, new_state, master=master)
-    assert len(conflicts) == 1
-    # Conflict carries the server master, which still has arm_position_id = None.
-    assert conflicts[0]["arm_position_id"] is None
 
 
 async def test_conflict_response_carries_current_restraint_set(

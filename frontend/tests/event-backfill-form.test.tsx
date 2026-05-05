@@ -133,30 +133,6 @@ vi.mock("@/components/catalog/restraint-picker", () => ({
   ),
 }));
 
-vi.mock("@/components/catalog/lookup-picker", () => ({
-  LookupPicker: ({
-    kind,
-    value,
-    onChange,
-    label,
-  }: {
-    kind: string;
-    value: string | null;
-    onChange: (id: string | null) => void;
-    label: string;
-  }) => (
-    <button
-      type="button"
-      data-testid={`lookup-picker-stub-${kind}`}
-      data-value={value ?? ""}
-      aria-label={label}
-      onClick={() => onChange(`fake-${kind}-id`)}
-    >
-      pick-{kind}
-    </button>
-  ),
-}));
-
 const USER: AuthUser = {
   id: "00000000-0000-0000-0000-000000000099",
   email: "self@example.com",
@@ -207,7 +183,7 @@ function addApplication(): void {
 }
 
 function submit(): void {
-  fireEvent.click(screen.getByRole("button", { name: /Event speichern/ }));
+  fireEvent.click(screen.getByRole("button", { name: /Tour speichern/ }));
 }
 
 describe("EventBackfillForm — submit guards (M5c.3, ADR-039 §E)", () => {
@@ -238,7 +214,7 @@ describe("EventBackfillForm — submit guards (M5c.3, ADR-039 §E)", () => {
     submit();
     expect(toastErrorMock).toHaveBeenCalled();
     const row = screen.getByTestId("event-backfill-application-row");
-    expect(row.textContent).toMatch(/Recipient ist Pflicht/);
+    expect(row.textContent).toMatch(/Begleitung ist Pflicht/);
     expect(eventInsertMock).not.toHaveBeenCalled();
   });
 });

@@ -81,7 +81,7 @@ export default function AdminPersonsPage() {
             <Link href="/admin">← Dashboard</Link>
           </Button>
           <Button asChild>
-            <a href={adminExportUrl()} download="hc-map-export.json">
+            <a href={adminExportUrl()} download="plus-map-export.json">
               Export herunterladen
             </a>
           </Button>

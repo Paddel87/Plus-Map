@@ -106,9 +106,6 @@ function makeApplication(
     event_id: EVENT_ID,
     performer_id: PERSON_SELF,
     recipient_id: PERSON_ALICE,
-    arm_position_id: null,
-    hand_position_id: null,
-    hand_orientation_id: null,
     sequence_no: seq,
     started_at: startedAt,
     ended_at: null,
@@ -153,8 +150,8 @@ describe("EventDetailView — render decision tree (M5c.2, ADR-038)", () => {
   it("shows live-action buttons while the event is running", () => {
     useDatabaseMock.mockReturnValue(makeDatabase([]));
     renderWithProviders(<EventDetailView user={USER} initialEvent={makeEvent()} />);
-    expect(screen.getByRole("button", { name: /Neue Application/ })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Event beenden/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Neuer Stopp/ })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /Tour beenden/ })).toBeInTheDocument();
   });
 
   it("hides live-action buttons once the event has ended", () => {
@@ -165,10 +162,10 @@ describe("EventDetailView — render decision tree (M5c.2, ADR-038)", () => {
         initialEvent={makeEvent({ ended_at: "2026-04-27T13:30:00Z" })}
       />,
     );
-    expect(screen.queryByRole("button", { name: /Neue Application/ })).toBeNull();
-    expect(screen.queryByRole("button", { name: /Event beenden/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Neuer Stopp/ })).toBeNull();
+    expect(screen.queryByRole("button", { name: /Tour beenden/ })).toBeNull();
     // Status header switches.
-    expect(screen.getByText("Event beendet")).toBeInTheDocument();
+    expect(screen.getByText("Tour beendet")).toBeInTheDocument();
   });
 
   it("renders an explicit pause row between two completed applications", () => {

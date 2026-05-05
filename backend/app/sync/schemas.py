@@ -86,9 +86,6 @@ class ApplicationDoc(BaseModel):
     event_id: uuid.UUID
     performer_id: uuid.UUID
     recipient_id: uuid.UUID
-    arm_position_id: uuid.UUID | None = None
-    hand_position_id: uuid.UUID | None = None
-    hand_orientation_id: uuid.UUID | None = None
     sequence_no: int = Field(ge=1)
     started_at: datetime | None = None
     ended_at: datetime | None = None

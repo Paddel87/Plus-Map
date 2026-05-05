@@ -64,7 +64,7 @@ export function ForgotPasswordForm() {
       <CardHeader>
         <CardTitle>Passwort vergessen?</CardTitle>
         <CardDescription>
-          Trage die E-Mail-Adresse deines HC-Map-Kontos ein. Wir senden dir einen Link zum
+          Trage die E-Mail-Adresse deines Plus-Map-Kontos ein. Wir senden dir einen Link zum
           Zurücksetzen.
         </CardDescription>
       </CardHeader>

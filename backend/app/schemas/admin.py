@@ -76,18 +76,10 @@ class RestraintCount(BaseModel):
     count: int
 
 
-class PositionCount(BaseModel):
-    id: uuid.UUID
-    name: str
-    count: int
-
-
 class AdminStats(BaseModel):
     events_total: int
     events_per_month_last_12: list[MonthlyEventCount]
     top_restraints: list[RestraintCount]
-    top_arm_positions: list[PositionCount]
-    top_hand_positions: list[PositionCount]
     users_by_role: dict[UserRole, int]
     persons_total: int
     persons_on_the_fly_unlinked: int
@@ -106,6 +98,3 @@ class AdminExport(BaseModel):
     event_participants: list[dict[str, object]]
     application_restraints: list[dict[str, object]]
     restraint_types: list[dict[str, object]]
-    arm_positions: list[dict[str, object]]
-    hand_positions: list[dict[str, object]]
-    hand_orientations: list[dict[str, object]]

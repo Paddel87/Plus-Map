@@ -6,8 +6,8 @@ import { Providers } from "@/components/providers";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "HC-Map",
-  description: "Self-hosted, geo-referenced event log.",
+  title: "Plus-Map",
+  description: "Self-hosted, geo-referenced outdoor-tour log.",
 };
 
 export const viewport: Viewport = {

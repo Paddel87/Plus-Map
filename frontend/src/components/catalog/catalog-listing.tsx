@@ -6,7 +6,7 @@ import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { toast } from "sonner";
 
 import { CatalogTable } from "@/components/catalog/catalog-table";
-import { describeMutationError } from "@/components/catalog/lookup-form";
+import { describeMutationError } from "@/components/catalog/mutation-error";
 import { RejectReasonDialog } from "@/components/catalog/reject-reason-dialog";
 import { StatusFilter, type StatusFilterValue } from "@/components/catalog/status-filter";
 import { Button } from "@/components/ui/button";

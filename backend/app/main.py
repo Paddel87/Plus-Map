@@ -23,12 +23,7 @@ from app.logging_middleware import request_logger
 from app.migrations_runner import run_migrations_with_advisory_lock
 from app.routes.admin import router as admin_router
 from app.routes.applications import router as applications_router
-from app.routes.catalog import (
-    arm_positions_router,
-    hand_orientations_router,
-    hand_positions_router,
-    restraint_types_router,
-)
+from app.routes.catalog import restraint_types_router
 from app.routes.events import router as events_router
 from app.routes.exports import router as exports_router
 from app.routes.geocode import router as geocode_router
@@ -136,9 +131,6 @@ def create_app() -> FastAPI:
     app.include_router(applications_router, prefix="/api")
     app.include_router(persons_router, prefix="/api")
     app.include_router(restraint_types_router, prefix="/api")
-    app.include_router(arm_positions_router, prefix="/api")
-    app.include_router(hand_positions_router, prefix="/api")
-    app.include_router(hand_orientations_router, prefix="/api")
     app.include_router(search_router, prefix="/api")
     app.include_router(exports_router, prefix="/api")
     app.include_router(tiles_router, prefix="/api")

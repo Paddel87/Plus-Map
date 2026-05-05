@@ -30,7 +30,6 @@ import { useNow } from "@/hooks/use-now";
 import { useWakeLock } from "@/hooks/use-wake-lock";
 import type { AuthUser } from "@/lib/auth";
 import { useCatalogList } from "@/lib/catalog/api";
-import { isRestraintTypeEntry } from "@/lib/catalog/types";
 import { diffSeconds, formatDuration } from "@/lib/duration";
 import { isMasked, maskParticipants } from "@/lib/masking";
 import { formatEventTime } from "@/lib/event-time";
@@ -351,7 +350,7 @@ function ApplicationsTimeline({
     const map = new Map<string, string>();
     const items = restraints.data?.items ?? [];
     for (const item of items) {
-      if (isRestraintTypeEntry(item)) map.set(item.id, item.display_name);
+      map.set(item.id, item.display_name);
     }
     return map;
   }, [restraints.data]);

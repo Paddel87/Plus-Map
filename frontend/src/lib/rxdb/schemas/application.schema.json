@@ -23,18 +23,6 @@
       "type": "string",
       "format": "uuid"
     },
-    "arm_position_id": {
-      "type": ["string", "null"],
-      "format": "uuid"
-    },
-    "hand_position_id": {
-      "type": ["string", "null"],
-      "format": "uuid"
-    },
-    "hand_orientation_id": {
-      "type": ["string", "null"],
-      "format": "uuid"
-    },
     "sequence_no": {
       "type": "integer",
       "minimum": 1,

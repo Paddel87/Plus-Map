@@ -9,11 +9,8 @@ EXPECTED_TABLES = {
     "alembic_version",
     "application",
     "application_restraint",
-    "arm_position",
     "event",
     "event_participant",
-    "hand_orientation",
-    "hand_position",
     "person",
     "restraint_type",
     "spatial_ref_sys",  # PostGIS-managed

@@ -34,8 +34,8 @@ describe("SearchResults", () => {
     expect(links).toHaveLength(2);
     expect(links[0]).toHaveAttribute("href", "/events/00000000-0000-0000-0000-000000000001");
     expect(links[1]).toHaveAttribute("href", "/events/00000000-0000-0000-0000-000000000003");
-    expect(within(links[0]!).getByText("Event")).toBeInTheDocument();
-    expect(within(links[1]!).getByText("Application")).toBeInTheDocument();
+    expect(within(links[0]!).getByText("Tour")).toBeInTheDocument();
+    expect(within(links[1]!).getByText("Stopp")).toBeInTheDocument();
   });
 });
 

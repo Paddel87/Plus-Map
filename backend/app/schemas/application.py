@@ -11,9 +11,6 @@ from pydantic import BaseModel, ConfigDict, Field
 class ApplicationBase(BaseModel):
     performer_id: uuid.UUID
     recipient_id: uuid.UUID
-    arm_position_id: uuid.UUID | None = None
-    hand_position_id: uuid.UUID | None = None
-    hand_orientation_id: uuid.UUID | None = None
     started_at: datetime | None = None
     ended_at: datetime | None = None
     note: str | None = None
@@ -41,9 +38,6 @@ class ApplicationLiveStart(BaseModel):
 
     performer_id: uuid.UUID | None = None
     recipient_id: uuid.UUID | None = None
-    arm_position_id: uuid.UUID | None = None
-    hand_position_id: uuid.UUID | None = None
-    hand_orientation_id: uuid.UUID | None = None
     note: str | None = None
     restraint_type_ids: list[uuid.UUID] = Field(default_factory=list)
 
@@ -51,9 +45,6 @@ class ApplicationLiveStart(BaseModel):
 class ApplicationUpdate(BaseModel):
     performer_id: uuid.UUID | None = None
     recipient_id: uuid.UUID | None = None
-    arm_position_id: uuid.UUID | None = None
-    hand_position_id: uuid.UUID | None = None
-    hand_orientation_id: uuid.UUID | None = None
     started_at: datetime | None = None
     ended_at: datetime | None = None
     note: str | None = None

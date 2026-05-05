@@ -69,7 +69,7 @@ export function LoginForm() {
     <Card className="w-full max-w-sm">
       <CardHeader>
         <CardTitle>Anmelden</CardTitle>
-        <CardDescription>HC-Map — Pfad A, geschlossener Nutzerkreis.</CardDescription>
+        <CardDescription>Plus-Map — geschlossener Nutzerkreis.</CardDescription>
         {error === "pin" ? (
           <p className="pt-2 text-sm text-amber-700 dark:text-amber-400" role="alert">
             Sitzung wurde nach 5 falschen PIN-Eingaben beendet. Bitte erneut anmelden.

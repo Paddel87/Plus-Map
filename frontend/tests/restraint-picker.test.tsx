@@ -128,7 +128,7 @@ describe("RestraintPicker — typeahead", () => {
     // All three approved entries visible by default.
     expect(screen.getAllByTestId("restraint-picker-option")).toHaveLength(3);
 
-    fireEvent.change(screen.getByLabelText("Restraint suchen"), {
+    fireEvent.change(screen.getByLabelText("Ausrüstung suchen"), {
       target: { value: "Clejuso" },
     });
     expect(screen.getAllByTestId("restraint-picker-option")).toHaveLength(1);
@@ -147,7 +147,7 @@ describe("RestraintPicker — typeahead", () => {
       expect(screen.getAllByTestId("restraint-picker-option").length).toBeGreaterThan(0),
     );
     // "Handschellen" is the German label for the `handcuffs` category.
-    fireEvent.change(screen.getByLabelText("Restraint suchen"), {
+    fireEvent.change(screen.getByLabelText("Ausrüstung suchen"), {
       target: { value: "Handschellen" },
     });
     expect(screen.getAllByTestId("restraint-picker-option")).toHaveLength(2);

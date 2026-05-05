@@ -1,8 +1,8 @@
 {
-  "name": "hc-map-frontend",
+  "name": "plus-map-frontend",
   "version": "0.0.0",
   "private": true,
-  "description": "HC-Map frontend (Next.js App Router, TypeScript strict).",
+  "description": "Plus-Map frontend (Next.js App Router, TypeScript strict).",
   "license": "AGPL-3.0-only",
   "scripts": {
     "dev": "next dev -p 3000",

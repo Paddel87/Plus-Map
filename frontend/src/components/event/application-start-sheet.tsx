@@ -50,9 +50,6 @@ export function ApplicationStartSheet({
   const [recipient, setRecipient] = useState<PersonRead | null>(defaultRecipient);
   const [note, setNote] = useState("");
   const [restraintTypeIds, setRestraintTypeIds] = useState<string[]>([]);
-  const [armPositionId, setArmPositionId] = useState<string | null>(null);
-  const [handPositionId, setHandPositionId] = useState<string | null>(null);
-  const [handOrientationId, setHandOrientationId] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
@@ -60,9 +57,6 @@ export function ApplicationStartSheet({
       setRecipient(defaultRecipient);
       setNote("");
       setRestraintTypeIds([]);
-      setArmPositionId(null);
-      setHandPositionId(null);
-      setHandOrientationId(null);
     }
   }, [open, defaultRecipient]);
 
@@ -86,9 +80,6 @@ export function ApplicationStartSheet({
         event_id: eventId,
         performer_id: performerPersonId,
         recipient_id: recipientId,
-        arm_position_id: armPositionId,
-        hand_position_id: handPositionId,
-        hand_orientation_id: handOrientationId,
         sequence_no: localSeq,
         started_at: now,
         ended_at: null,
@@ -140,9 +131,6 @@ export function ApplicationStartSheet({
               isAdmin={currentUserRole === "admin"}
             />
           </div>
-          {/* Position-Picker im Plus-Map-UI ausgeblendet — Detail-Felder
-              werden in dieser Variante nicht gepflegt. State-Variablen
-              bleiben, defaulten zu null beim Insert. */}
           <div className="flex flex-col gap-2">
             <Label htmlFor="application-note">Notiz (optional)</Label>
             <textarea

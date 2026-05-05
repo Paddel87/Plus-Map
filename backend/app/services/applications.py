@@ -4,8 +4,8 @@ Owns three special behaviours described in ADR-020:
 - Auto-Participant: performer + recipient are inserted as
   ``EventParticipant`` if not already present (ADR-012).
 - ``sequence_no`` is assigned server-side as next free integer per event.
-- Catalog refs (restraint types, positions) must be ``status='approved'``
-  unless the user is admin.
+- Catalog refs (restraint types) must be ``status='approved'`` unless the
+  user is admin.
 """
 
 from __future__ import annotations
@@ -13,20 +13,13 @@ from __future__ import annotations
 import uuid
 from collections.abc import Sequence
 from datetime import UTC, datetime
-from typing import Any
 
 from fastapi import HTTPException, status
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.application import Application, ApplicationRestraint
-from app.models.catalog import (
-    ArmPosition,
-    CatalogStatus,
-    HandOrientation,
-    HandPosition,
-    RestraintType,
-)
+from app.models.catalog import CatalogStatus, RestraintType
 from app.models.event import EventParticipant
 from app.models.user import UserRole
 from app.schemas.application import (
@@ -40,9 +33,6 @@ async def _ensure_approved_catalog(
     session: AsyncSession,
     *,
     role: UserRole,
-    arm_position_id: uuid.UUID | None,
-    hand_position_id: uuid.UUID | None,
-    hand_orientation_id: uuid.UUID | None,
     restraint_type_ids: list[uuid.UUID],
 ) -> None:
     """Reject the request if any catalog reference is not 'approved'.
@@ -51,23 +41,12 @@ async def _ensure_approved_catalog(
     """
     if role == UserRole.ADMIN:
         return
-    pairs: list[tuple[Any, uuid.UUID]] = []
-    if arm_position_id:
-        pairs.append((ArmPosition, arm_position_id))
-    if hand_position_id:
-        pairs.append((HandPosition, hand_position_id))
-    if hand_orientation_id:
-        pairs.append((HandOrientation, hand_orientation_id))
     for rt_id in restraint_type_ids:
-        pairs.append((RestraintType, rt_id))
-
-    for model_cls, ref_id in pairs:
-        row = await session.get(model_cls, ref_id)
+        row = await session.get(RestraintType, rt_id)
         if row is None or row.status != CatalogStatus.APPROVED:
-            table = model_cls.__tablename__
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Catalog reference {table}={ref_id} is not approved",
+                detail=f"Catalog reference restraint_type={rt_id} is not approved",
             )
 
 
@@ -114,9 +93,6 @@ async def create_application(
     await _ensure_approved_catalog(
         session,
         role=role,
-        arm_position_id=payload.arm_position_id,
-        hand_position_id=payload.hand_position_id,
-        hand_orientation_id=payload.hand_orientation_id,
         restraint_type_ids=payload.restraint_type_ids,
     )
     seq = await _next_sequence_no(session, event_id)
@@ -124,9 +100,6 @@ async def create_application(
         event_id=event_id,
         performer_id=payload.performer_id,
         recipient_id=payload.recipient_id,
-        arm_position_id=payload.arm_position_id,
-        hand_position_id=payload.hand_position_id,
-        hand_orientation_id=payload.hand_orientation_id,
         sequence_no=seq,
         started_at=payload.started_at,
         ended_at=payload.ended_at,
@@ -170,9 +143,6 @@ async def start_application(
     await _ensure_approved_catalog(
         session,
         role=role,
-        arm_position_id=payload.arm_position_id,
-        hand_position_id=payload.hand_position_id,
-        hand_orientation_id=payload.hand_orientation_id,
         restraint_type_ids=payload.restraint_type_ids,
     )
     seq = await _next_sequence_no(session, event_id)
@@ -180,9 +150,6 @@ async def start_application(
         event_id=event_id,
         performer_id=performer_id,
         recipient_id=recipient_id,
-        arm_position_id=payload.arm_position_id,
-        hand_position_id=payload.hand_position_id,
-        hand_orientation_id=payload.hand_orientation_id,
         sequence_no=seq,
         started_at=datetime.now(tz=UTC),
         ended_at=None,
