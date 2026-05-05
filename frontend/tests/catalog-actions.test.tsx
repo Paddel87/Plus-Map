@@ -16,7 +16,7 @@ import type { ReactNode } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { CatalogListing } from "@/components/catalog/catalog-listing";
-import type { LookupCatalogEntry, RestraintTypeEntry } from "@/lib/catalog/types";
+import type { LookupCatalogEntry, EquipmentItemEntry } from "@/lib/catalog/types";
 import type { RbacUser } from "@/lib/rbac";
 
 const replaceMock = vi.fn();
@@ -39,12 +39,11 @@ const ADMIN: RbacUser = { id: "u-admin", role: "admin" };
 const EDITOR_A: RbacUser = { id: "u-editor-a", role: "editor" };
 const EDITOR_B: RbacUser = { id: "u-editor-b", role: "editor" };
 
-const PENDING_BY_EDITOR_A: RestraintTypeEntry = {
+const PENDING_BY_EDITOR_A: EquipmentItemEntry = {
   id: "rt-pending",
-  category: "rope",
+  category: "tools",
   brand: null,
   model: null,
-  mechanical_type: null,
   display_name: "Hanfseil",
   status: "pending",
   suggested_by: "u-editor-a",
@@ -119,7 +118,7 @@ beforeEach(() => {
   Object.defineProperty(window, "location", {
     configurable: true,
     value: {
-      href: "http://localhost/admin/catalogs/restraint-types?status=pending",
+      href: "http://localhost/admin/catalogs/equipment-items?status=pending",
       origin: "http://localhost",
     },
   });
@@ -135,7 +134,7 @@ describe("CatalogListing — admin actions on pending row", () => {
     const Wrapper = withQuery();
     render(
       <Wrapper>
-        <CatalogListing kind="restraint-types" currentUser={ADMIN} />
+        <CatalogListing kind="equipment-items" currentUser={ADMIN} />
       </Wrapper>,
     );
     expect(await screen.findByText("Hanfseil")).toBeInTheDocument();
@@ -148,7 +147,7 @@ describe("CatalogListing — admin actions on pending row", () => {
     const Wrapper = withQuery();
     render(
       <Wrapper>
-        <CatalogListing kind="restraint-types" currentUser={ADMIN} />
+        <CatalogListing kind="equipment-items" currentUser={ADMIN} />
       </Wrapper>,
     );
     await screen.findByText("Hanfseil");
@@ -156,7 +155,7 @@ describe("CatalogListing — admin actions on pending row", () => {
     await waitFor(() =>
       expect(
         calls.some(
-          (c) => c.method === "POST" && c.url === "/api/restraint-types/rt-pending/approve",
+          (c) => c.method === "POST" && c.url === "/api/equipment-items/rt-pending/approve",
         ),
       ).toBe(true),
     );
@@ -171,7 +170,7 @@ describe("CatalogListing — admin actions on pending row", () => {
     const Wrapper = withQuery();
     render(
       <Wrapper>
-        <CatalogListing kind="restraint-types" currentUser={ADMIN} />
+        <CatalogListing kind="equipment-items" currentUser={ADMIN} />
       </Wrapper>,
     );
     await screen.findByText("Hanfseil");
@@ -189,7 +188,7 @@ describe("CatalogListing — admin actions on pending row", () => {
 
     await waitFor(() => {
       const rejectCall = calls.find(
-        (c) => c.method === "POST" && c.url === "/api/restraint-types/rt-pending/reject",
+        (c) => c.method === "POST" && c.url === "/api/equipment-items/rt-pending/reject",
       );
       expect(rejectCall).toBeDefined();
       expect(rejectCall!.body).toEqual({
@@ -206,7 +205,7 @@ describe("CatalogListing — editor variant", () => {
     const Wrapper = withQuery();
     render(
       <Wrapper>
-        <CatalogListing kind="restraint-types" currentUser={EDITOR_A} />
+        <CatalogListing kind="equipment-items" currentUser={EDITOR_A} />
       </Wrapper>,
     );
     await screen.findByText("Hanfseil");
@@ -220,7 +219,7 @@ describe("CatalogListing — editor variant", () => {
     const Wrapper = withQuery();
     render(
       <Wrapper>
-        <CatalogListing kind="restraint-types" currentUser={EDITOR_B} />
+        <CatalogListing kind="equipment-items" currentUser={EDITOR_B} />
       </Wrapper>,
     );
     await screen.findByText("Hanfseil");
@@ -235,14 +234,14 @@ describe("CatalogListing — editor variant", () => {
     const Wrapper = withQuery();
     render(
       <Wrapper>
-        <CatalogListing kind="restraint-types" currentUser={EDITOR_A} />
+        <CatalogListing kind="equipment-items" currentUser={EDITOR_A} />
       </Wrapper>,
     );
     await screen.findByText("Hanfseil");
     fireEvent.click(screen.getByRole("button", { name: "Zurückziehen" }));
     await waitFor(() =>
       expect(
-        calls.some((c) => c.method === "DELETE" && c.url === "/api/restraint-types/rt-pending"),
+        calls.some((c) => c.method === "DELETE" && c.url === "/api/equipment-items/rt-pending"),
       ).toBe(true),
     );
     await waitFor(() => expect(toastSuccessMock).toHaveBeenCalled());

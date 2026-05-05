@@ -114,8 +114,8 @@ vi.mock("@/components/person/recipient-picker", () => ({
   ),
 }));
 
-vi.mock("@/components/catalog/restraint-picker", () => ({
-  RestraintPicker: ({
+vi.mock("@/components/catalog/equipment-picker", () => ({
+  EquipmentPicker: ({
     value,
     onChange,
   }: {
@@ -124,7 +124,7 @@ vi.mock("@/components/catalog/restraint-picker", () => ({
   }) => (
     <button
       type="button"
-      data-testid="restraint-picker-stub"
+      data-testid="equipment-picker-stub"
       data-restraints={value.join(",")}
       onClick={() => onChange(["00000000-0000-0000-0000-0000000000ff"])}
     >
