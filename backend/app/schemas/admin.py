@@ -70,7 +70,7 @@ class MonthlyEventCount(BaseModel):
     count: int
 
 
-class RestraintCount(BaseModel):
+class EquipmentCount(BaseModel):
     id: uuid.UUID
     display_name: str
     count: int
@@ -79,7 +79,7 @@ class RestraintCount(BaseModel):
 class AdminStats(BaseModel):
     events_total: int
     events_per_month_last_12: list[MonthlyEventCount]
-    top_restraints: list[RestraintCount]
+    top_equipment: list[EquipmentCount]
     users_by_role: dict[UserRole, int]
     persons_total: int
     persons_on_the_fly_unlinked: int
@@ -96,5 +96,5 @@ class AdminExport(BaseModel):
     events: list[dict[str, object]]
     applications: list[dict[str, object]]
     event_participants: list[dict[str, object]]
-    application_restraints: list[dict[str, object]]
-    restraint_types: list[dict[str, object]]
+    application_equipment: list[dict[str, object]]
+    equipment_items: list[dict[str, object]]

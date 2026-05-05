@@ -1,7 +1,7 @@
 """Seed-Skript für die Plus-Map Test-Instanz.
 
 Legt an:
-  - Equipment-Katalog (RestraintType, Status `approved`) mit ~10 Outdoor-Items.
+  - Equipment-Katalog (EquipmentItem, Status `approved`) mit ~10 Outdoor-Items.
   - 5 Personen (Erfasser + 4 Begleiter).
   - 1 Editor-User, verknüpft mit der ersten Person.
   - 8 Touren über die letzten 90 Tage gestreut.
@@ -31,8 +31,8 @@ from app.db import get_engine, get_sessionmaker
 from app.models.application import Application
 from app.models.catalog import (
     CatalogStatus,
-    RestraintCategory,
-    RestraintType,
+    EquipmentCategory,
+    EquipmentItem,
 )
 from app.models.event import Event, EventParticipant
 from app.models.person import Person, PersonOrigin
@@ -43,19 +43,23 @@ from sqlalchemy import select
 # Demo-Daten
 # ----------------------------------------------------------------------
 
-EQUIPMENT: list[tuple[str, str | None, str | None, str]] = [
-    # (display_name, brand, model, mechanical_type or "")
-    # mechanical_type ist nullable; wir setzen es nur, wo plausibel.
-    ("Wanderstöcke (Leki Makalu Lite)", "Leki", "Makalu Lite", "hinged"),
-    ("Stirnlampe (Petzl Tikka)", "Petzl", "Tikka", "rigid"),
-    ("Kompass (Suunto M-3 Global)", "Suunto", "M-3 Global", "rigid"),
-    ("Topografische Karte (DAV BY 09)", "DAV", "BY 09 Allgäu", "chain"),
-    ("Trinkflasche (Nalgene Wide Mouth 1l)", "Nalgene", "Wide Mouth 1l", "rigid"),
-    ("Rucksack (Deuter Speed Lite 21)", "Deuter", "Speed Lite 21", "chain"),
-    ("Erste-Hilfe-Set (Tatonka Mini)", "Tatonka", "First Aid Mini", "chain"),
-    ("Multitool (Leatherman Wave+)", "Leatherman", "Wave+", "hinged"),
-    ("Kamera (Sony RX100 VII)", "Sony", "RX100 VII", "rigid"),
-    ("Sitzkissen (Therm-a-Rest Z Seat)", "Therm-a-Rest", "Z Seat", "hinged"),
+EQUIPMENT: list[tuple[str, str | None, str | None, EquipmentCategory]] = [
+    # (display_name, brand, model, category)
+    ("Wanderstöcke (Leki Makalu Lite)", "Leki", "Makalu Lite", EquipmentCategory.MOBILITY),
+    ("Stirnlampe (Petzl Tikka)", "Petzl", "Tikka", EquipmentCategory.LIGHTING),
+    ("Kompass (Suunto M-3 Global)", "Suunto", "M-3 Global", EquipmentCategory.NAVIGATION),
+    ("Topografische Karte (DAV BY 09)", "DAV", "BY 09 Allgäu", EquipmentCategory.NAVIGATION),
+    (
+        "Trinkflasche (Nalgene Wide Mouth 1l)",
+        "Nalgene",
+        "Wide Mouth 1l",
+        EquipmentCategory.HYDRATION,
+    ),
+    ("Rucksack (Deuter Speed Lite 21)", "Deuter", "Speed Lite 21", EquipmentCategory.CARRYING),
+    ("Erste-Hilfe-Set (Tatonka Mini)", "Tatonka", "First Aid Mini", EquipmentCategory.SAFETY),
+    ("Multitool (Leatherman Wave+)", "Leatherman", "Wave+", EquipmentCategory.TOOLS),
+    ("Kamera (Sony RX100 VII)", "Sony", "RX100 VII", EquipmentCategory.DOCUMENTATION),
+    ("Sitzkissen (Therm-a-Rest Z Seat)", "Therm-a-Rest", "Z Seat", EquipmentCategory.COMFORT),
 ]
 
 PERSONS = [
@@ -139,19 +143,18 @@ async def _seed(tester_email: str, tester_password: str, tester_name: str) -> in
             await session.flush()
 
             # --- Equipment-Katalog ---
-            equipment_objs: list[RestraintType] = []
-            for display_name, brand, model, mech in EQUIPMENT:
-                rt = RestraintType(
-                    category=RestraintCategory.OTHER,
+            equipment_objs: list[EquipmentItem] = []
+            for display_name, brand, model, category in EQUIPMENT:
+                ei = EquipmentItem(
+                    category=category,
                     brand=brand,
                     model=model,
-                    mechanical_type=mech if mech else None,
                     display_name=display_name,
                     status=CatalogStatus.APPROVED,
                     approved_by=tester_user.id,
                 )
-                session.add(rt)
-                equipment_objs.append(rt)
+                session.add(ei)
+                equipment_objs.append(ei)
 
             await session.flush()
 

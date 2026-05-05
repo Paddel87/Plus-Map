@@ -10,8 +10,8 @@ from __future__ import annotations
 
 from sqladmin import ModelView
 
-from app.models.application import Application, ApplicationRestraint
-from app.models.catalog import RestraintType
+from app.models.application import Application, ApplicationEquipment
+from app.models.catalog import EquipmentItem
 from app.models.event import Event, EventParticipant
 from app.models.person import Person
 from app.models.user import User
@@ -54,25 +54,24 @@ class PersonAdmin(ModelView, model=Person):
     form_excluded_columns = [Person.deleted_at, Person.created_at, Person.updated_at]
 
 
-class RestraintTypeAdmin(ModelView, model=RestraintType):
-    name = "Restraint type"
-    name_plural = "Restraint types"
-    icon = "fa-solid fa-link"
+class EquipmentItemAdmin(ModelView, model=EquipmentItem):
+    name = "Equipment item"
+    name_plural = "Equipment items"
+    icon = "fa-solid fa-toolbox"
     column_list = [
-        RestraintType.display_name,
-        RestraintType.brand,
-        RestraintType.model,
-        RestraintType.category,
-        RestraintType.mechanical_type,
-        RestraintType.status,
+        EquipmentItem.display_name,
+        EquipmentItem.brand,
+        EquipmentItem.model,
+        EquipmentItem.category,
+        EquipmentItem.status,
     ]
-    column_searchable_list = [RestraintType.display_name, RestraintType.brand]
+    column_searchable_list = [EquipmentItem.display_name, EquipmentItem.brand]
     column_sortable_list = [
-        RestraintType.display_name,
-        RestraintType.status,
-        RestraintType.created_at,
+        EquipmentItem.display_name,
+        EquipmentItem.status,
+        EquipmentItem.created_at,
     ]
-    form_excluded_columns = [RestraintType.created_at, RestraintType.updated_at]
+    form_excluded_columns = [EquipmentItem.created_at, EquipmentItem.updated_at]
 
 
 class EventAdmin(ModelView, model=Event):
@@ -133,7 +132,7 @@ class ApplicationAdmin(ModelView, model=Application):
     ]
 
 
-# ApplicationRestraint and EventParticipant are intentionally not
+# ApplicationEquipment and EventParticipant are intentionally not
 # exposed: they are internal join tables driven by the sync pipeline
 # (ADR-012, ADR-046). Inspecting them in SQLAdmin would tempt manual
 # edits that violate the join invariants.
@@ -143,7 +142,7 @@ ALL_MODEL_VIEWS: list[type[ModelView]] = [
     PersonAdmin,
     EventAdmin,
     ApplicationAdmin,
-    RestraintTypeAdmin,
+    EquipmentItemAdmin,
 ]
 
 # Re-export the join models so future ADR amendments can opt to surface
@@ -151,10 +150,10 @@ ALL_MODEL_VIEWS: list[type[ModelView]] = [
 __all__ = [
     "ALL_MODEL_VIEWS",
     "ApplicationAdmin",
-    "ApplicationRestraint",
+    "ApplicationEquipment",
+    "EquipmentItemAdmin",
     "EventAdmin",
     "EventParticipant",
     "PersonAdmin",
-    "RestraintTypeAdmin",
     "UserAdmin",
 ]

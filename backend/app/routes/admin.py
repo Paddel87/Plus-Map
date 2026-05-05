@@ -30,8 +30,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.auth.manager import _password_helper
 from app.deps import get_rls_session, require_role
-from app.models.application import Application, ApplicationRestraint
-from app.models.catalog import CatalogStatus, RestraintType
+from app.models.application import Application, ApplicationEquipment
+from app.models.catalog import CatalogStatus, EquipmentItem
 from app.models.event import Event, EventParticipant
 from app.models.person import Person, PersonOrigin
 from app.models.user import User, UserRole
@@ -41,10 +41,10 @@ from app.schemas.admin import (
     AdminUserCreate,
     AdminUserRead,
     AdminUserUpdate,
+    EquipmentCount,
     MonthlyEventCount,
     PersonMergeRequest,
     PersonMergeResponse,
-    RestraintCount,
 )
 from app.schemas.common import Page
 from app.services import person_merge as merge_svc
@@ -262,25 +262,25 @@ async def get_stats(
         MonthlyEventCount(year=int(r.y), month=int(r.m), count=int(r.c)) for r in monthly_rows
     ]
 
-    top_restraints_q = (
+    top_equipment_q = (
         select(
-            RestraintType.id,
-            RestraintType.display_name,
+            EquipmentItem.id,
+            EquipmentItem.display_name,
             func.count().label("c"),
         )
         .join(
-            ApplicationRestraint,
-            ApplicationRestraint.restraint_type_id == RestraintType.id,
+            ApplicationEquipment,
+            ApplicationEquipment.equipment_item_id == EquipmentItem.id,
         )
-        .join(Application, Application.id == ApplicationRestraint.application_id)
+        .join(Application, Application.id == ApplicationEquipment.application_id)
         .where(Application.is_deleted.is_(False))
-        .group_by(RestraintType.id, RestraintType.display_name)
+        .group_by(EquipmentItem.id, EquipmentItem.display_name)
         .order_by(func.count().desc())
         .limit(10)
     )
-    top_restraints = [
-        RestraintCount(id=r.id, display_name=r.display_name, count=int(r.c))
-        for r in (await session.execute(top_restraints_q)).all()
+    top_equipment = [
+        EquipmentCount(id=r.id, display_name=r.display_name, count=int(r.c))
+        for r in (await session.execute(top_equipment_q)).all()
     ]
 
     users_by_role_q = select(User.role, func.count()).group_by(User.role)
@@ -302,8 +302,8 @@ async def get_stats(
     pending_proposals = int(
         await session.scalar(
             select(func.count())
-            .select_from(RestraintType)
-            .where(RestraintType.status == CatalogStatus.PENDING)
+            .select_from(EquipmentItem)
+            .where(EquipmentItem.status == CatalogStatus.PENDING)
         )
         or 0
     )
@@ -311,7 +311,7 @@ async def get_stats(
     return AdminStats(
         events_total=int(events_total or 0),
         events_per_month_last_12=monthly,
-        top_restraints=top_restraints,
+        top_equipment=top_equipment,
         users_by_role=users_by_role,
         persons_total=int(persons_total or 0),
         persons_on_the_fly_unlinked=int(on_the_fly_unlinked or 0),
@@ -340,8 +340,8 @@ async def export_all(
         events=await _dump(session, Event),
         applications=await _dump(session, Application),
         event_participants=await _dump(session, EventParticipant),
-        application_restraints=await _dump(session, ApplicationRestraint),
-        restraint_types=await _dump(session, RestraintType),
+        application_equipment=await _dump(session, ApplicationEquipment),
+        equipment_items=await _dump(session, EquipmentItem),
     )
 
 

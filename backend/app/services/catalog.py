@@ -1,7 +1,7 @@
 """Catalog service: list, propose, approve, reject, withdraw, update.
 
-Covers the RestraintType (equipment) catalog per ADR-043. Status
-transitions are exposed as named functions so the audit columns
+Covers the EquipmentItem (outdoor-equipment) catalog per ADR-043.
+Status transitions are exposed as named functions so the audit columns
 (approved_by/rejected_by/rejected_at/reject_reason) can only be set in
 one place.
 """
@@ -17,7 +17,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.models.catalog import CatalogStatus, RestraintType
+from app.models.catalog import CatalogStatus, EquipmentItem
 
 
 class CatalogConflictError(Exception):
@@ -30,12 +30,12 @@ class CatalogStateError(Exception):
 
 async def list_lookup(
     session: AsyncSession,
-    model: type[RestraintType],
+    model: type[EquipmentItem],
     *,
     limit: int,
     offset: int,
     status_filter: CatalogStatus | None = None,
-) -> tuple[Sequence[RestraintType], int]:
+) -> tuple[Sequence[EquipmentItem], int]:
     """List entries the current request may see (RLS handles visibility).
 
     ``status_filter`` further constrains the result; if absent, every
@@ -59,31 +59,30 @@ async def list_lookup(
     return rows, int(total or 0)
 
 
-async def propose_restraint_type(
+async def propose_equipment_item(
     session: AsyncSession,
     *,
     payload: dict[str, Any],
     suggested_by: uuid.UUID,
     auto_approve: bool = False,
-) -> RestraintType:
-    """Insert a new RestraintType. ``auto_approve`` short-circuits the
+) -> EquipmentItem:
+    """Insert a new EquipmentItem. ``auto_approve`` short-circuits the
     propose-then-approve dance for admin-created entries (ADR-042 §F)."""
     common = dict(
         category=payload["category"],
         brand=payload.get("brand"),
         model=payload.get("model"),
-        mechanical_type=payload.get("mechanical_type"),
         display_name=payload["display_name"],
         note=payload.get("note"),
     )
     if auto_approve:
-        entry = RestraintType(
+        entry = EquipmentItem(
             **common,
             status=CatalogStatus.APPROVED,
             approved_by=suggested_by,
         )
     else:
-        entry = RestraintType(
+        entry = EquipmentItem(
             **common,
             status=CatalogStatus.PENDING,
             suggested_by=suggested_by,
@@ -97,14 +96,14 @@ async def propose_restraint_type(
     return entry
 
 
-async def update_restraint_type(
+async def update_equipment_item(
     session: AsyncSession,
-    entry: RestraintType,
+    entry: EquipmentItem,
     *,
     payload: dict[str, Any],
-) -> RestraintType:
-    """Apply admin PATCH to a RestraintType entry."""
-    for field in ("category", "brand", "model", "mechanical_type", "display_name", "note"):
+) -> EquipmentItem:
+    """Apply admin PATCH to an EquipmentItem entry."""
+    for field in ("category", "brand", "model", "display_name", "note"):
         if field in payload:
             setattr(entry, field, payload[field])
     entry.updated_at = datetime.now(tz=UTC)
@@ -118,10 +117,10 @@ async def update_restraint_type(
 
 async def approve_entry(
     session: AsyncSession,
-    entry: RestraintType,
+    entry: EquipmentItem,
     *,
     approved_by: uuid.UUID,
-) -> RestraintType:
+) -> EquipmentItem:
     """Set status to approved. Allowed from pending; idempotent on
     already-approved (no-op). Rejects rejected → approved transitions
     (must go through reset-to-pending workflow not in M7 scope).
@@ -141,11 +140,11 @@ async def approve_entry(
 
 async def reject_entry(
     session: AsyncSession,
-    entry: RestraintType,
+    entry: EquipmentItem,
     *,
     rejected_by: uuid.UUID,
     reason: str,
-) -> RestraintType:
+) -> EquipmentItem:
     """Set status to rejected with audit fields. Allowed from pending."""
     if entry.status != CatalogStatus.PENDING:
         raise CatalogStateError(
@@ -163,13 +162,13 @@ async def reject_entry(
 
 async def withdraw_entry(
     session: AsyncSession,
-    entry: RestraintType,
+    entry: EquipmentItem,
 ) -> None:
     """Hard-delete a pending entry (admin: any pending; editor: own only).
 
     RLS enforces the editor-only-own-pending rule via
-    ``restraint_type_owner_withdraw`` policy. Admin uses
-    ``restraint_type_admin_modify``. Status validation is the service's
+    ``equipment_item_owner_withdraw`` policy. Admin uses
+    ``equipment_item_admin_modify``. Status validation is the service's
     job so we return a clean 4xx instead of a silent RLS no-op.
     """
     if entry.status != CatalogStatus.PENDING:
