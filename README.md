@@ -110,7 +110,7 @@ Tunnel-URL pro Session frisch teilen, danach beenden. Cloudflare stellt das Zert
 
 ```bash
 docker compose -f docker/compose.plus-map.yml exec backend \
-    uv run python -m scripts.seed_plus_map \
+    python -m scripts.seed_plus_map \
     --tester-email testerin@plus-map.example \
     --tester-password '<min-12-zeichen>' \
     --tester-name 'Testerin'
