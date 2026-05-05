@@ -8,11 +8,11 @@ from sqlalchemy.engine import Engine
 EXPECTED_TABLES = {
     "alembic_version",
     "application",
-    "application_restraint",
+    "application_equipment",
     "event",
     "event_participant",
     "person",
-    "restraint_type",
+    "equipment_item",
     "spatial_ref_sys",  # PostGIS-managed
     "user",
 }
@@ -46,4 +46,4 @@ def test_rls_enabled_on_data_tables(db_engine: Engine) -> None:
             )
         ).all()
     rls_tables = {r[0] for r in rows}
-    assert {"event", "event_participant", "application", "application_restraint"} <= rls_tables
+    assert {"event", "event_participant", "application", "application_equipment"} <= rls_tables
