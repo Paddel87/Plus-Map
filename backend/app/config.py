@@ -14,16 +14,16 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 class Settings(BaseSettings):
     """Runtime settings sourced from environment variables.
 
-    Variable names follow the pattern HCMAP_<NAME>. Defaults are intentionally
+    Variable names follow the pattern PLUSMAP_<NAME>. Defaults are intentionally
     chosen to fail loudly in production (no implicit secrets, no implicit DB).
     """
 
     model_config = SettingsConfigDict(
-        env_prefix="HCMAP_",
+        env_prefix="PLUSMAP_",
         env_file=None,
         case_sensitive=False,
         extra="ignore",
-        # Compose passes optional vars as ${HCMAP_X:-} (empty string when unset).
+        # Compose passes optional vars as ${PLUSMAP_X:-} (empty string when unset).
         # Treat empty values as missing so Field defaults apply — required for
         # smtp_from: EmailStr | None to accept the unset case.
         env_ignore_empty=True,
@@ -33,7 +33,7 @@ class Settings(BaseSettings):
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
 
     database_url: str = Field(
-        default="postgresql+asyncpg://hcmap:hcmap@db:5432/hcmap",
+        default="postgresql+asyncpg://plusmap:plusmap@db:5432/plusmap",
         description="SQLAlchemy async DSN for Postgres+PostGIS.",
     )
 
@@ -123,7 +123,7 @@ class Settings(BaseSettings):
         ),
     )
     smtp_from_name: str = Field(
-        default="HC-Map",
+        default="Plus-Map",
         description="Display name for the From-header.",
     )
 

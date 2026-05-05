@@ -150,4 +150,4 @@ async def _login_as(
         data={"username": user.email, "password": "TestPassword-12chars"},
     )
     assert resp.status_code == 204
-    return resp.cookies["hcmap_csrf"]
+    return resp.cookies["plusmap_csrf"]

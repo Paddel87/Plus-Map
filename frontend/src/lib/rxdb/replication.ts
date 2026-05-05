@@ -17,7 +17,7 @@ import type {
   ApplicationCollection,
   EventCollection,
   EventParticipantCollection,
-  HCMapDatabase,
+  PlusMapDatabase,
 } from "./database";
 import type {
   ApplicationDocType,
@@ -28,7 +28,7 @@ import type {
 
 const DEFAULT_PULL_BATCH = 100;
 const DEFAULT_PUSH_BATCH = 50;
-const REPLICATION_IDENTIFIER = "hcmap-fastapi-sync-v1";
+const REPLICATION_IDENTIFIER = "plusmap-fastapi-sync-v1";
 
 interface PullResult<T> {
   documents: T[];
@@ -53,7 +53,7 @@ async function fetchJson<T>(input: string, init?: RequestInit): Promise<T> {
 
 function readCsrfCookie(): string | null {
   if (typeof document === "undefined") return null;
-  const match = document.cookie.match(/(?:^|;\s*)hcmap_csrf=([^;]+)/);
+  const match = document.cookie.match(/(?:^|;\s*)plusmap_csrf=([^;]+)/);
   return match ? decodeURIComponent(match[1] ?? "") : null;
 }
 
@@ -147,7 +147,7 @@ export interface ReplicationHandles {
   stop: () => Promise<void>;
 }
 
-export function startReplication(database: HCMapDatabase): ReplicationHandles {
+export function startReplication(database: PlusMapDatabase): ReplicationHandles {
   const eventsRep = makeReplication<EventDocType>(database.events, {
     collectionPath: "events",
   });

@@ -1,7 +1,7 @@
 """Double-submit-token CSRF protection (ADR-019, decision C1).
 
 After a successful login the auth router sets a non-HttpOnly cookie
-``hcmap_csrf`` carrying a random token. Every state-changing request
+``plusmap_csrf`` carrying a random token. Every state-changing request
 (POST/PUT/PATCH/DELETE) must echo the same value in the
 ``X-CSRF-Token`` header. Mismatch -> 403.
 
@@ -20,7 +20,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
-CSRF_COOKIE = "hcmap_csrf"
+CSRF_COOKIE = "plusmap_csrf"
 CSRF_HEADER = "X-CSRF-Token"
 
 _SAFE_METHODS = frozenset({"GET", "HEAD", "OPTIONS"})

@@ -23,7 +23,7 @@ describe("proxy", () => {
   });
 
   test("does not redirect when session cookie is present", () => {
-    const response = proxy(buildRequest("/profile", "hcmap_session=abc"));
+    const response = proxy(buildRequest("/profile", "plusmap_session=abc"));
     expect(response.headers.get("location")).toBeNull();
   });
 

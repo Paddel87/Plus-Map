@@ -1,6 +1,6 @@
 import { NextResponse, type NextRequest } from "next/server";
 
-const SESSION_COOKIE = "hcmap_session";
+const SESSION_COOKIE = "plusmap_session";
 const PUBLIC_PATHS = ["/login", "/forgot-password", "/reset-password"];
 
 function isPublic(pathname: string): boolean {

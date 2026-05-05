@@ -18,7 +18,7 @@ import { hashPin, verifyPin as verifyPinHash, PIN_FAIL_LIMIT, type PinRecord } f
 import { clearPinRecord, loadPinRecord, savePinRecord, updateFailCount } from "@/lib/pin-storage";
 
 export const DEFAULT_INACTIVITY_MS = 60_000;
-const TIMEOUT_STORAGE_KEY = "hcmap.pinLock.inactivityMs";
+const TIMEOUT_STORAGE_KEY = "plusmap.pinLock.inactivityMs";
 const ACTIVITY_EVENTS: ReadonlyArray<keyof DocumentEventMap> = [
   "pointerdown",
   "keydown",

@@ -7,7 +7,7 @@ import { cn } from "@/lib/cn";
 const EXPORT_LINKS = [
   {
     href: "/api/export/me",
-    download: "hcmap-export.json",
+    download: "plusmap-export.json",
     label: "Alle Daten als JSON",
   },
   {
@@ -39,7 +39,7 @@ export function ExportButtons({ role }: { role: UserRole }) {
       {role === "admin" ? (
         <a
           href="/api/admin/export/all"
-          download="hcmap-admin-export.json"
+          download="plusmap-admin-export.json"
           rel="nofollow"
           className={cn(buttonVariants({ variant: "outline" }))}
         >

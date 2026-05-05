@@ -24,7 +24,7 @@ const LocationPickerMap = dynamic(
   },
 );
 
-const RECIPIENT_DRAFT_PREFIX = "hcmap:event-recipient:";
+const RECIPIENT_DRAFT_PREFIX = "plusmap:event-recipient:";
 
 export interface EventCreateFormProps {
   user: AuthUser;

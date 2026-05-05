@@ -23,7 +23,7 @@ def _settings(**overrides: Any) -> Settings:
     """Build a Settings instance with sensible test defaults."""
     base: dict[str, Any] = {
         "secret_key": "x" * 32,
-        "base_url": "https://hc-map.example.org",
+        "base_url": "https://plus-map.example.org",
         "smtp_host": "",
         "smtp_port": 587,
         "smtp_user": "",
@@ -31,7 +31,7 @@ def _settings(**overrides: Any) -> Settings:
         "smtp_starttls": True,
         "smtp_use_tls": False,
         "smtp_from": None,
-        "smtp_from_name": "HC-Map Test",
+        "smtp_from_name": "Plus-Map Test",
     }
     base.update(overrides)
     return Settings(**base)
@@ -41,18 +41,18 @@ def _settings(**overrides: Any) -> Settings:
 
 
 def test_build_url_appends_token_query_param() -> None:
-    url = _build_url("https://hc-map.example.org", "reset-password", "abc123")
-    assert url == "https://hc-map.example.org/reset-password?token=abc123"
+    url = _build_url("https://plus-map.example.org", "reset-password", "abc123")
+    assert url == "https://plus-map.example.org/reset-password?token=abc123"
 
 
 def test_build_url_encodes_special_chars() -> None:
-    url = _build_url("https://hc-map.example.org", "reset-password", "a/b+c=d")
-    assert url == "https://hc-map.example.org/reset-password?token=a%2Fb%2Bc%3Dd"
+    url = _build_url("https://plus-map.example.org", "reset-password", "a/b+c=d")
+    assert url == "https://plus-map.example.org/reset-password?token=a%2Fb%2Bc%3Dd"
 
 
 def test_build_url_normalises_trailing_slash() -> None:
-    url = _build_url("https://hc-map.example.org/", "/reset-password", "tok")
-    assert url == "https://hc-map.example.org/reset-password?token=tok"
+    url = _build_url("https://plus-map.example.org/", "/reset-password", "tok")
+    assert url == "https://plus-map.example.org/reset-password?token=tok"
 
 
 # ---- Logging backend ------------------------------------------------------
@@ -86,12 +86,12 @@ async def test_logging_backend_verify_logs_url() -> None:
 
 
 def test_smtp_mailer_requires_host() -> None:
-    with pytest.raises(ValueError, match="HCMAP_SMTP_HOST"):
+    with pytest.raises(ValueError, match="PLUSMAP_SMTP_HOST"):
         SMTPMailer(_settings())
 
 
 def test_smtp_mailer_requires_from() -> None:
-    with pytest.raises(ValueError, match="HCMAP_SMTP_FROM"):
+    with pytest.raises(ValueError, match="PLUSMAP_SMTP_FROM"):
         SMTPMailer(_settings(smtp_host="smtp.example.org"))
 
 
@@ -100,7 +100,7 @@ def test_smtp_mailer_rejects_starttls_and_implicit_tls() -> None:
         SMTPMailer(
             _settings(
                 smtp_host="smtp.example.org",
-                smtp_from="hc-map@example.org",
+                smtp_from="plus-map@example.org",
                 smtp_starttls=True,
                 smtp_use_tls=True,
             )
@@ -117,8 +117,8 @@ def _smtp_settings(**overrides: Any) -> Settings:
         smtp_port=587,
         smtp_starttls=True,
         smtp_use_tls=False,
-        smtp_from="hc-map@example.org",
-        smtp_from_name="HC-Map",
+        smtp_from="plus-map@example.org",
+        smtp_from_name="Plus-Map",
         **overrides,
     )
 
@@ -140,11 +140,11 @@ async def test_smtp_mailer_password_reset_message(monkeypatch: pytest.MonkeyPatc
     assert kwargs["password"] is None
     message = args[0]
     assert isinstance(message, EmailMessage)
-    assert message["From"] == "HC-Map <hc-map@example.org>"
+    assert message["From"] == "Plus-Map <plus-map@example.org>"
     assert message["To"] == "alice@example.org"
-    assert message["Subject"] == "HC-Map: Passwort zuruecksetzen"
+    assert message["Subject"] == "Plus-Map: Passwort zuruecksetzen"
     body = message.get_content()
-    assert "https://hc-map.example.org/reset-password?token=reset-tok-1" in body
+    assert "https://plus-map.example.org/reset-password?token=reset-tok-1" in body
 
 
 async def test_smtp_mailer_verify_message(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -156,9 +156,9 @@ async def test_smtp_mailer_verify_message(monkeypatch: pytest.MonkeyPatch) -> No
 
     fake_send.assert_awaited_once()
     message = fake_send.call_args.args[0]
-    assert message["Subject"] == "HC-Map: E-Mail-Adresse bestaetigen"
+    assert message["Subject"] == "Plus-Map: E-Mail-Adresse bestaetigen"
     body = message.get_content()
-    assert "https://hc-map.example.org/verify?token=verify-tok-2" in body
+    assert "https://plus-map.example.org/verify?token=verify-tok-2" in body
 
 
 async def test_smtp_mailer_passes_credentials_when_user_set(
@@ -169,14 +169,14 @@ async def test_smtp_mailer_passes_credentials_when_user_set(
 
     mailer = SMTPMailer(
         _smtp_settings(
-            smtp_user="hc-map@example.org",
+            smtp_user="plus-map@example.org",
             smtp_password=SecretStr("hunter2"),
         )
     )
     await mailer.send_password_reset("alice@example.org", "tok")
 
     kwargs = fake_send.call_args.kwargs
-    assert kwargs["username"] == "hc-map@example.org"
+    assert kwargs["username"] == "plus-map@example.org"
     assert kwargs["password"] == "hunter2"
 
 
@@ -210,8 +210,8 @@ async def test_smtp_mailer_propagates_smtp_errors(
 def test_get_email_backend_uses_logging_when_host_empty(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_SECRET_KEY", "x" * 32)
-    monkeypatch.delenv("HCMAP_SMTP_HOST", raising=False)
+    monkeypatch.setenv("PLUSMAP_SECRET_KEY", "x" * 32)
+    monkeypatch.delenv("PLUSMAP_SMTP_HOST", raising=False)
     backend: EmailBackend = get_email_backend()
     assert isinstance(backend, LoggingBackend)
 
@@ -219,8 +219,8 @@ def test_get_email_backend_uses_logging_when_host_empty(
 def test_get_email_backend_uses_smtp_when_host_set(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_SECRET_KEY", "x" * 32)
-    monkeypatch.setenv("HCMAP_SMTP_HOST", "smtp.example.org")
-    monkeypatch.setenv("HCMAP_SMTP_FROM", "hc-map@example.org")
+    monkeypatch.setenv("PLUSMAP_SECRET_KEY", "x" * 32)
+    monkeypatch.setenv("PLUSMAP_SMTP_HOST", "smtp.example.org")
+    monkeypatch.setenv("PLUSMAP_SMTP_FROM", "plus-map@example.org")
     backend = get_email_backend()
     assert isinstance(backend, SMTPMailer)

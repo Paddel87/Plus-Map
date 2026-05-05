@@ -3,22 +3,22 @@
 #
 # Production topology lives in docker-compose.prod.yml (added in M10).
 
-name: hc-map
+name: plus-map
 
 services:
   db:
     image: postgis/postgis:16-3.5
     restart: unless-stopped
     environment:
-      POSTGRES_USER: ${HCMAP_DB_USER:-hcmap}
-      POSTGRES_PASSWORD: ${HCMAP_DB_PASSWORD:-hcmap}
-      POSTGRES_DB: ${HCMAP_DB_NAME:-hcmap}
+      POSTGRES_USER: ${PLUSMAP_DB_USER:-plusmap}
+      POSTGRES_PASSWORD: ${PLUSMAP_DB_PASSWORD:-plusmap}
+      POSTGRES_DB: ${PLUSMAP_DB_NAME:-plusmap}
     ports:
       - "127.0.0.1:5432:5432"
     volumes:
       - db-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${HCMAP_DB_USER:-hcmap} -d ${HCMAP_DB_NAME:-hcmap}"]
+      test: ["CMD-SHELL", "pg_isready -U ${PLUSMAP_DB_USER:-plusmap} -d ${PLUSMAP_DB_NAME:-plusmap}"]
       interval: 10s
       timeout: 5s
       retries: 10
@@ -29,9 +29,9 @@ services:
       dockerfile: docker/backend.Dockerfile
     restart: unless-stopped
     environment:
-      HCMAP_ENVIRONMENT: ${HCMAP_ENVIRONMENT:-development}
-      HCMAP_LOG_LEVEL: ${HCMAP_LOG_LEVEL:-INFO}
-      HCMAP_DATABASE_URL: postgresql+asyncpg://${HCMAP_DB_USER:-hcmap}:${HCMAP_DB_PASSWORD:-hcmap}@db:5432/${HCMAP_DB_NAME:-hcmap}
+      PLUSMAP_ENVIRONMENT: ${PLUSMAP_ENVIRONMENT:-development}
+      PLUSMAP_LOG_LEVEL: ${PLUSMAP_LOG_LEVEL:-INFO}
+      PLUSMAP_DATABASE_URL: postgresql+asyncpg://${PLUSMAP_DB_USER:-plusmap}:${PLUSMAP_DB_PASSWORD:-plusmap}@db:5432/${PLUSMAP_DB_NAME:-plusmap}
     depends_on:
       db:
         condition: service_healthy

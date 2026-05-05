@@ -35,14 +35,14 @@ In `.env.plus-map` mindestens setzen:
 
 | Variable | Wert |
 |---|---|
-| `HCMAP_DB_USER` | `plus_map` |
-| `HCMAP_DB_PASSWORD` | starkes Passwort |
-| `HCMAP_DB_NAME` | `plus_map` |
-| `HCMAP_SECRET_KEY` | mindestens 32 Zeichen Zufall |
-| `HCMAP_BASE_URL` | `https://<subdomain>` |
-| `HCMAP_MAPTILER_API_KEY` | eigener Key (Karten-Tiles) |
+| `PLUSMAP_DB_USER` | `plus_map` |
+| `PLUSMAP_DB_PASSWORD` | starkes Passwort |
+| `PLUSMAP_DB_NAME` | `plus_map` |
+| `PLUSMAP_SECRET_KEY` | mindestens 32 Zeichen Zufall |
+| `PLUSMAP_BASE_URL` | `https://<subdomain>` |
+| `PLUSMAP_MAPTILER_API_KEY` | eigener Key (Karten-Tiles) |
 
-Die `HCMAP_*`-Variablennamen sind beibehalten, weil das Backend sie als Settings-Präfix erwartet — sie sind nur intern und nicht im UI sichtbar.
+Die `PLUSMAP_*`-Variablennamen sind der Pydantic-Settings-Präfix (siehe [ADR-004](docs/decisions.md)). Wer aus einer früheren Plus-Map-Version mit `HCMAP_*`-Prefix kommt: einmalig `sed -i 's/^HCMAP_/PLUSMAP_/g' .env.plus-map` ausführen oder `.env.example` neu kopieren.
 
 ### 2. Stack starten — drei Varianten je nach Reverse-Proxy-Lage
 

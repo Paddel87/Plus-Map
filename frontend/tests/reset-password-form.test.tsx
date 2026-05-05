@@ -27,7 +27,7 @@ const originalLocation = window.location;
 let assignMock: ReturnType<typeof vi.fn>;
 
 beforeEach(() => {
-  document.cookie = "hcmap_csrf=t1; path=/";
+  document.cookie = "plusmap_csrf=t1; path=/";
   vi.stubGlobal("fetch", vi.fn());
   assignMock = vi.fn();
   Object.defineProperty(window, "location", {
@@ -42,7 +42,7 @@ afterEach(() => {
     configurable: true,
     value: originalLocation,
   });
-  document.cookie = "hcmap_csrf=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+  document.cookie = "plusmap_csrf=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
   mockSearchParams = new URLSearchParams();
 });
 

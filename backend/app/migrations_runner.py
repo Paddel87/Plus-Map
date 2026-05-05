@@ -9,10 +9,10 @@ without a re-upgrade.
 
 Default behaviour:
 
-* ``HCMAP_ENVIRONMENT == 'production'`` — run migrations under the lock.
+* ``PLUSMAP_ENVIRONMENT == 'production'`` — run migrations under the lock.
 * anything else (development/test) — skip silently. Tests own their own
   schema lifecycle (``backend/tests/conftest.py``).
-* ``HCMAP_SKIP_MIGRATIONS=1`` — operator override; skip in any environment.
+* ``PLUSMAP_SKIP_MIGRATIONS=1`` — operator override; skip in any environment.
 """
 
 from __future__ import annotations
@@ -34,9 +34,9 @@ from app.config import Settings
 logger = structlog.get_logger(__name__)
 
 
-# Stable advisory-lock id for HC-Map alembic migrations across instances.
+# Stable advisory-lock id for Plus-Map alembic migrations across instances.
 # Memorable, fits in a signed bigint, identifiable in pg_locks.
-HCMAP_MIGRATION_LOCK_ID = 47_110_815
+PLUSMAP_MIGRATION_LOCK_ID = 47_110_815
 
 
 def _to_async_dsn(url: str) -> str:
@@ -70,8 +70,8 @@ def _run_alembic_upgrade_sync(database_url: str) -> None:
 
 def _should_run(settings: Settings) -> bool:
     """Decide based on environment + override flag."""
-    if os.environ.get("HCMAP_SKIP_MIGRATIONS", "").strip() == "1":
-        logger.info("migrations.skipped", reason="HCMAP_SKIP_MIGRATIONS=1")
+    if os.environ.get("PLUSMAP_SKIP_MIGRATIONS", "").strip() == "1":
+        logger.info("migrations.skipped", reason="PLUSMAP_SKIP_MIGRATIONS=1")
         return False
     if settings.environment != "production":
         logger.debug("migrations.skipped", reason=f"environment={settings.environment}")
@@ -97,33 +97,33 @@ async def run_migrations_with_advisory_lock(settings: Settings) -> None:
             got_lock = (
                 await conn.execute(
                     text("SELECT pg_try_advisory_lock(:id)"),
-                    {"id": HCMAP_MIGRATION_LOCK_ID},
+                    {"id": PLUSMAP_MIGRATION_LOCK_ID},
                 )
             ).scalar()
 
             if got_lock:
-                logger.info("migrations.lock_acquired", lock_id=HCMAP_MIGRATION_LOCK_ID)
+                logger.info("migrations.lock_acquired", lock_id=PLUSMAP_MIGRATION_LOCK_ID)
                 try:
                     await asyncio.to_thread(_run_alembic_upgrade_sync, settings.database_url)
                     logger.info("migrations.applied")
                 finally:
                     await conn.execute(
                         text("SELECT pg_advisory_unlock(:id)"),
-                        {"id": HCMAP_MIGRATION_LOCK_ID},
+                        {"id": PLUSMAP_MIGRATION_LOCK_ID},
                     )
             else:
                 logger.info(
                     "migrations.lock_busy",
-                    lock_id=HCMAP_MIGRATION_LOCK_ID,
+                    lock_id=PLUSMAP_MIGRATION_LOCK_ID,
                     action="waiting_for_concurrent_migration",
                 )
                 await conn.execute(
                     text("SELECT pg_advisory_lock(:id)"),
-                    {"id": HCMAP_MIGRATION_LOCK_ID},
+                    {"id": PLUSMAP_MIGRATION_LOCK_ID},
                 )
                 await conn.execute(
                     text("SELECT pg_advisory_unlock(:id)"),
-                    {"id": HCMAP_MIGRATION_LOCK_ID},
+                    {"id": PLUSMAP_MIGRATION_LOCK_ID},
                 )
                 logger.info("migrations.skipped_concurrent")
     finally:

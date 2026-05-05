@@ -78,7 +78,7 @@ def register_admin(app: FastAPI, **admin_kwargs: Any) -> Admin:
         engine=get_engine(),
         session_maker=_build_session_maker(),
         base_url="/sqladmin",
-        title="HC-Map Admin",
+        title="Plus-Map Admin",
         authentication_backend=build_admin_auth_backend(),
         **admin_kwargs,
     )

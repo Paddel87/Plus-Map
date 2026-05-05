@@ -15,11 +15,11 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import type { UserRole } from "@/lib/auth";
-import type { HCMapDatabase } from "@/lib/rxdb/database";
+import type { PlusMapDatabase } from "@/lib/rxdb/database";
 import { useDatabase } from "@/lib/rxdb/provider";
 import type { PersonRead } from "@/lib/types";
 
-async function nextLocalSequence(database: HCMapDatabase, eventId: string): Promise<number> {
+async function nextLocalSequence(database: PlusMapDatabase, eventId: string): Promise<number> {
   const docs = await database.applications.find({ selector: { event_id: eventId } }).exec();
   if (docs.length === 0) return 1;
   const max = docs.reduce((acc, doc) => Math.max(acc, doc.sequence_no), 0);

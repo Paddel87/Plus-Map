@@ -73,8 +73,8 @@ beforeEach(() => {
     }),
   );
   // jsdom provides `document.cookie`; the replication's `readCsrfCookie`
-  // matches against the standard `hcmap_csrf=...` shape.
-  document.cookie = `hcmap_csrf=${encodeURIComponent(CSRF)}`;
+  // matches against the standard `plusmap_csrf=...` shape.
+  document.cookie = `plusmap_csrf=${encodeURIComponent(CSRF)}`;
   Object.defineProperty(navigator, "onLine", {
     configurable: true,
     get: () => online,

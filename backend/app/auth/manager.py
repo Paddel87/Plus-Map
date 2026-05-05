@@ -37,7 +37,7 @@ def _audit_logger() -> Any:
     See note in ``app.logging_middleware._logger`` — module-level
     ``get_logger`` would be cached before tests' capture context activates.
     """
-    return structlog.get_logger("hcmap.auth")
+    return structlog.get_logger("plusmap.auth")
 
 
 def _user_id_hash(user_id: uuid.UUID) -> str:

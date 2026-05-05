@@ -57,7 +57,7 @@ async def login(client: AsyncClient, email: str, password: str) -> str:
         data={"username": email, "password": password},
     )
     assert resp.status_code == 204, resp.text
-    csrf = resp.cookies.get("hcmap_csrf")
+    csrf = resp.cookies.get("plusmap_csrf")
     assert csrf is not None
     return csrf
 

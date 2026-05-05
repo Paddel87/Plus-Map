@@ -3,7 +3,7 @@
 DB tests use a sync engine (psycopg) for schema/RLS work and an async
 engine (asyncpg) for HTTP-level auth tests. Both engines share the same
 database. DSN resolution:
-1. ``HCMAP_TEST_DATABASE_URL`` (preferred for CI / dev with local Postgres).
+1. ``PLUSMAP_TEST_DATABASE_URL`` (preferred for CI / dev with local Postgres).
 2. testcontainers ``postgis/postgis:16-3.4`` (skipped if Docker missing).
 """
 
@@ -14,10 +14,10 @@ import os
 # These env vars must be present BEFORE the app modules are imported, because
 # fastapi-users' CookieTransport reads ``cookie_secure`` at module init time
 # (via ``app/auth/backend.py``). The runtime defaults are production-safe.
-os.environ.setdefault("HCMAP_COOKIE_SECURE", "false")
-os.environ.setdefault("HCMAP_SECRET_KEY", "test-secret-key-32-bytes-minimum-aaaaaaa")
-os.environ.setdefault("HCMAP_ARGON2_TIME_COST", "1")
-os.environ.setdefault("HCMAP_ARGON2_MEMORY_COST", "1024")
+os.environ.setdefault("PLUSMAP_COOKIE_SECURE", "false")
+os.environ.setdefault("PLUSMAP_SECRET_KEY", "test-secret-key-32-bytes-minimum-aaaaaaa")
+os.environ.setdefault("PLUSMAP_ARGON2_TIME_COST", "1")
+os.environ.setdefault("PLUSMAP_ARGON2_MEMORY_COST", "1024")
 
 from collections.abc import AsyncIterator, Iterator
 
@@ -48,7 +48,7 @@ def _to_async_url(url: str) -> str:
 
 @pytest.fixture(scope="session")
 def db_url() -> Iterator[str]:
-    env_dsn = os.environ.get("HCMAP_TEST_DATABASE_URL")
+    env_dsn = os.environ.get("PLUSMAP_TEST_DATABASE_URL")
     if env_dsn:
         yield _to_sync_url(env_dsn)
         return
@@ -56,10 +56,10 @@ def db_url() -> Iterator[str]:
     try:
         from testcontainers.postgres import PostgresContainer
     except ImportError:
-        pytest.skip("HCMAP_TEST_DATABASE_URL not set and testcontainers not installed")
+        pytest.skip("PLUSMAP_TEST_DATABASE_URL not set and testcontainers not installed")
         return
     if not os.path.exists("/var/run/docker.sock"):
-        pytest.skip("HCMAP_TEST_DATABASE_URL not set and Docker daemon is unreachable")
+        pytest.skip("PLUSMAP_TEST_DATABASE_URL not set and Docker daemon is unreachable")
         return
     with PostgresContainer("postgis/postgis:16-3.4") as pg:
         sync_url = pg.get_connection_url()  # postgresql+psycopg2://...
@@ -121,7 +121,7 @@ async def app_with_test_db(async_db_url: str, monkeypatch: pytest.MonkeyPatch):
     Argon2/cookie ENV is already set at module top so import-time consumers
     pick it up. Database URL is set per test so different DSNs work in CI.
     """
-    monkeypatch.setenv("HCMAP_DATABASE_URL", async_db_url)
+    monkeypatch.setenv("PLUSMAP_DATABASE_URL", async_db_url)
 
     from app.db import reset_engine_cache
 

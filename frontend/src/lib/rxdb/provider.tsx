@@ -16,11 +16,11 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
 
-import { getDatabase, type HCMapDatabase } from "./database";
+import { getDatabase, type PlusMapDatabase } from "./database";
 import { startReplication, type ReplicationHandles, type SyncStatus } from "./replication";
 
 interface RxdbContextValue {
-  database: HCMapDatabase | null;
+  database: PlusMapDatabase | null;
   error: Error | null;
   status: SyncStatus;
 }
@@ -32,7 +32,7 @@ const RxdbContext = createContext<RxdbContextValue>({
 });
 
 export function RxdbProvider({ children }: { children: ReactNode }) {
-  const [database, setDatabase] = useState<HCMapDatabase | null>(null);
+  const [database, setDatabase] = useState<PlusMapDatabase | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [status, setStatus] = useState<SyncStatus>("idle");
 
@@ -53,7 +53,7 @@ export function RxdbProvider({ children }: { children: ReactNode }) {
         // Visible warn — silent failures here used to hide RxDB-init
         // bugs (no DB in IndexedDB, no replication requests, but UI
         // looked fine because Provider stayed in default state).
-        console.warn("[hcmap-rxdb] provider init failed:", caught);
+        console.warn("[plusmap-rxdb] provider init failed:", caught);
         setError(caught instanceof Error ? caught : new Error(String(caught)));
       }
     })();
@@ -73,7 +73,7 @@ export function RxdbProvider({ children }: { children: ReactNode }) {
   );
 }
 
-export function useDatabase(): HCMapDatabase | null {
+export function useDatabase(): PlusMapDatabase | null {
   return useContext(RxdbContext).database;
 }
 

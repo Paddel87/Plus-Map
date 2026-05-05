@@ -1,4 +1,4 @@
-const CSRF_COOKIE_NAME = "hcmap_csrf";
+const CSRF_COOKIE_NAME = "plusmap_csrf";
 const CSRF_HEADER_NAME = "X-CSRF-Token";
 const MUTATION_METHODS = new Set(["POST", "PUT", "PATCH", "DELETE"]);
 

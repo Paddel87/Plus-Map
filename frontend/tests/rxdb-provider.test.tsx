@@ -34,7 +34,7 @@ function Probe() {
 }
 
 beforeEach(() => {
-  document.cookie = "hcmap_csrf=provider-test-csrf";
+  document.cookie = "plusmap_csrf=provider-test-csrf";
   // Stub fetch so the replication doesn't race against an unbound net
   // dependency — every URL just answers with an empty pull batch.
   vi.stubGlobal(

@@ -6,7 +6,7 @@ Two implementations exist:
   the default in development and test environments. PII handling: only the
   recipient address and the link are logged.
 - ``SMTPMailer`` sends real mail via ``aiosmtplib`` and is selected
-  automatically in production when ``HCMAP_SMTP_HOST`` is configured.
+  automatically in production when ``PLUSMAP_SMTP_HOST`` is configured.
 
 Templates are deutsch (project default language) and plain text.
 """
@@ -69,11 +69,13 @@ class SMTPMailer:
 
     def __init__(self, settings: Settings) -> None:
         if not settings.smtp_host:
-            raise ValueError("SMTPMailer requires HCMAP_SMTP_HOST to be set.")
+            raise ValueError("SMTPMailer requires PLUSMAP_SMTP_HOST to be set.")
         if settings.smtp_from is None:
-            raise ValueError("SMTPMailer requires HCMAP_SMTP_FROM to be set.")
+            raise ValueError("SMTPMailer requires PLUSMAP_SMTP_FROM to be set.")
         if settings.smtp_starttls and settings.smtp_use_tls:
-            raise ValueError("HCMAP_SMTP_STARTTLS and HCMAP_SMTP_USE_TLS are mutually exclusive.")
+            raise ValueError(
+                "PLUSMAP_SMTP_STARTTLS and PLUSMAP_SMTP_USE_TLS are mutually exclusive."
+            )
         self._settings = settings
 
     async def send_password_reset(self, email: str, token: str) -> None:
@@ -82,7 +84,7 @@ class SMTPMailer:
         )
         await self._send(
             recipient=email,
-            subject="HC-Map: Passwort zuruecksetzen",
+            subject="Plus-Map: Passwort zuruecksetzen",
             body=body,
             event="auth.mail.password_reset",
         )
@@ -93,7 +95,7 @@ class SMTPMailer:
         )
         await self._send(
             recipient=email,
-            subject="HC-Map: E-Mail-Adresse bestaetigen",
+            subject="Plus-Map: E-Mail-Adresse bestaetigen",
             body=body,
             event="auth.mail.verify",
         )
@@ -132,7 +134,7 @@ class SMTPMailer:
 def get_email_backend() -> EmailBackend:
     """FastAPI dependency for the active email backend.
 
-    Selection rule: SMTPMailer is used when ``HCMAP_SMTP_HOST`` is non-empty;
+    Selection rule: SMTPMailer is used when ``PLUSMAP_SMTP_HOST`` is non-empty;
     otherwise the LoggingBackend is returned. This makes the development
     default (no SMTP configured) safe and the production switch ENV-only.
     """

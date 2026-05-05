@@ -1,7 +1,7 @@
 {
   "title": "Application",
-  "description": "Application document replicated via /api/sync/applications. Wire-format contract shared with backend Pydantic ApplicationDoc (ADR-031). v1 added equipment_item_ids[] (M7.5, ADR-046).",
-  "version": 1,
+  "description": "Application document replicated via /api/sync/applications. Wire-format contract shared with backend Pydantic ApplicationDoc (ADR-031). v1 added equipment_item_ids[] (M7.5, ADR-046). v2 drops Welle-0/1 fields (arm_position_id, hand_position_id, hand_orientation_id, restraint_type_ids) — ADR-003.",
+  "version": 2,
   "primaryKey": "id",
   "type": "object",
   "properties": {

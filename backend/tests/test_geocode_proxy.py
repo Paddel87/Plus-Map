@@ -77,7 +77,7 @@ async def test_anonymous_request_blocked(
     client: AsyncClient,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "test-key")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "test-key")
     resp = await client.get("/api/geocode", params={"q": "Berlin"})
     assert resp.status_code == 401
 
@@ -87,7 +87,7 @@ async def test_missing_api_key_returns_503(
     async_session_factory: async_sessionmaker[AsyncSession],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "")
     await login_as(client, async_session_factory, role=UserRole.ADMIN)
     resp = await client.get("/api/geocode", params={"q": "Berlin"})
     assert resp.status_code == 503
@@ -98,7 +98,7 @@ async def test_successful_query_returns_geojson_with_cache_header(
     async_session_factory: async_sessionmaker[AsyncSession],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "test-key")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "test-key")
     fake = _FakeAsyncClient(response=_FakeResponse(200, json_payload=_sample_payload()))
     monkeypatch.setattr("app.routes.geocode._http_client", lambda: fake)
 
@@ -126,7 +126,7 @@ async def test_proximity_is_translated_to_lon_lat(
     async_session_factory: async_sessionmaker[AsyncSession],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "test-key")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "test-key")
     fake = _FakeAsyncClient(response=_FakeResponse(200, json_payload=_sample_payload()))
     monkeypatch.setattr("app.routes.geocode._http_client", lambda: fake)
 
@@ -148,7 +148,7 @@ async def test_invalid_proximity_returns_422(
     async_session_factory: async_sessionmaker[AsyncSession],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "test-key")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "test-key")
     await login_as(client, async_session_factory, role=UserRole.ADMIN)
 
     bad_inputs = ["nope", "1.0", "200,0", "0,200", "1,2,3"]
@@ -165,7 +165,7 @@ async def test_limit_out_of_range_returns_422(
     async_session_factory: async_sessionmaker[AsyncSession],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "test-key")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "test-key")
     await login_as(client, async_session_factory, role=UserRole.ADMIN)
 
     for limit in (0, 11, 99):
@@ -181,7 +181,7 @@ async def test_empty_query_rejected(
     async_session_factory: async_sessionmaker[AsyncSession],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "test-key")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "test-key")
     await login_as(client, async_session_factory, role=UserRole.ADMIN)
     resp = await client.get("/api/geocode", params={"q": ""})
     assert resp.status_code == 422
@@ -192,7 +192,7 @@ async def test_upstream_network_error_returns_502(
     async_session_factory: async_sessionmaker[AsyncSession],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "test-key")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "test-key")
     monkeypatch.setattr(
         "app.routes.geocode._http_client",
         lambda: _FakeAsyncClient(raise_exc=True),
@@ -207,7 +207,7 @@ async def test_upstream_status_4xx_returns_502(
     async_session_factory: async_sessionmaker[AsyncSession],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "test-key")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "test-key")
     monkeypatch.setattr(
         "app.routes.geocode._http_client",
         lambda: _FakeAsyncClient(response=_FakeResponse(403, raw_text="forbidden")),
@@ -222,7 +222,7 @@ async def test_upstream_invalid_json_returns_502(
     async_session_factory: async_sessionmaker[AsyncSession],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "test-key")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "test-key")
     monkeypatch.setattr(
         "app.routes.geocode._http_client",
         lambda: _FakeAsyncClient(response=_FakeResponse(200, json_payload=None)),
@@ -237,8 +237,8 @@ async def test_rate_limit_enforced_per_user(
     async_session_factory: async_sessionmaker[AsyncSession],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "test-key")
-    monkeypatch.setenv("HCMAP_GEOCODE_RATE_PER_MINUTE", "2")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "test-key")
+    monkeypatch.setenv("PLUSMAP_GEOCODE_RATE_PER_MINUTE", "2")
     monkeypatch.setattr(
         "app.routes.geocode._http_client",
         lambda: _FakeAsyncClient(response=_FakeResponse(200, json_payload=_sample_payload())),
@@ -261,8 +261,8 @@ async def test_rate_limit_disabled_when_zero(
     async_session_factory: async_sessionmaker[AsyncSession],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "test-key")
-    monkeypatch.setenv("HCMAP_GEOCODE_RATE_PER_MINUTE", "0")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "test-key")
+    monkeypatch.setenv("PLUSMAP_GEOCODE_RATE_PER_MINUTE", "0")
     monkeypatch.setattr(
         "app.routes.geocode._http_client",
         lambda: _FakeAsyncClient(response=_FakeResponse(200, json_payload=_sample_payload())),
@@ -279,8 +279,8 @@ async def test_rate_limit_window_rolls_over(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """After the 60 s window expires, the bucket frees up."""
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "test-key")
-    monkeypatch.setenv("HCMAP_GEOCODE_RATE_PER_MINUTE", "1")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "test-key")
+    monkeypatch.setenv("PLUSMAP_GEOCODE_RATE_PER_MINUTE", "1")
     monkeypatch.setattr(
         "app.routes.geocode._http_client",
         lambda: _FakeAsyncClient(response=_FakeResponse(200, json_payload=_sample_payload())),

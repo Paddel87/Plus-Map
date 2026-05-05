@@ -27,16 +27,16 @@ export type EventCollection = RxCollection<EventDocType>;
 export type ApplicationCollection = RxCollection<ApplicationDocType>;
 export type EventParticipantCollection = RxCollection<EventParticipantDocType>;
 
-export interface HCMapCollections {
+export interface PlusMapCollections {
   events: EventCollection;
   applications: ApplicationCollection;
   event_participants: EventParticipantCollection;
 }
 
-export type HCMapDatabase = RxDatabase<HCMapCollections>;
+export type PlusMapDatabase = RxDatabase<PlusMapCollections>;
 
-const DB_NAME = "hcmap";
-let dbPromise: Promise<HCMapDatabase> | null = null;
+const DB_NAME = "plusmap";
+let dbPromise: Promise<PlusMapDatabase> | null = null;
 let devPluginLoaded = false;
 
 async function loadDevPlugin(): Promise<boolean> {
@@ -63,10 +63,10 @@ async function buildStorage() {
   return wrappedValidateAjvStorage({ storage: dexieStorage });
 }
 
-async function buildDatabase(): Promise<HCMapDatabase> {
+async function buildDatabase(): Promise<PlusMapDatabase> {
   await loadDevPlugin();
   const storage = await buildStorage();
-  const db = await createRxDatabase<HCMapCollections>({
+  const db = await createRxDatabase<PlusMapCollections>({
     name: DB_NAME,
     storage,
     multiInstance: true,
@@ -99,8 +99,25 @@ async function buildDatabase(): Promise<HCMapDatabase> {
       // `equipment_item_ids` array. Existing local docs default to an
       // empty set so the next push doesn't accidentally drop server
       // restraints (LWW would replace them with []).
+      // Schema v1 → v2 (M0.4, ADR-003): drop Welle-0/1 fields
+      // (arm_position_id, hand_position_id, hand_orientation_id,
+      // restraint_type_ids) that survived in browsers initialised
+      // before ADR-001/002 ran. The values had no semantic mapping into
+      // the Outdoor-Equipment domain, so they are dropped — same logic
+      // as the backend ENUM-cast to 'other' in 20260505_1300_equipment_rename.
       migrationStrategies: {
         1: (doc: Record<string, unknown>) => ({ ...doc, equipment_item_ids: [] }),
+        2: (doc: Record<string, unknown>) => {
+          const next: Record<string, unknown> = { ...doc };
+          delete next.arm_position_id;
+          delete next.hand_position_id;
+          delete next.hand_orientation_id;
+          delete next.restraint_type_ids;
+          if (!Array.isArray(next.equipment_item_ids)) {
+            next.equipment_item_ids = [];
+          }
+          return next;
+        },
       },
     },
     event_participants: { schema: eventParticipantSchema },
@@ -113,7 +130,7 @@ async function buildDatabase(): Promise<HCMapDatabase> {
  * programming error — IndexedDB doesn't exist there. The provider gates
  * initialisation on the client mount, so callers downstream are safe.
  */
-export function getDatabase(): Promise<HCMapDatabase> {
+export function getDatabase(): Promise<PlusMapDatabase> {
   if (typeof window === "undefined") {
     return Promise.reject(new Error("RxDB is browser-only; called from server"));
   }
@@ -122,7 +139,7 @@ export function getDatabase(): Promise<HCMapDatabase> {
       // Visible warn — silent failures here used to hide RxDB-init bugs
       // (no DB in IndexedDB, no replication requests, but UI thinks
       // everything's fine because Provider stays in default state).
-      console.warn("[hcmap-rxdb] buildDatabase failed:", error);
+      console.warn("[plusmap-rxdb] buildDatabase failed:", error);
       // Reset so the next call can retry from a clean slate.
       dbPromise = null;
       throw error;

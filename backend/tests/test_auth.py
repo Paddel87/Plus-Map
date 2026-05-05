@@ -56,8 +56,8 @@ async def test_login_sets_both_cookies(
     )
     assert resp.status_code == 204, resp.text
     cookies = resp.cookies
-    assert "hcmap_session" in cookies
-    assert "hcmap_csrf" in cookies
+    assert "plusmap_session" in cookies
+    assert "plusmap_csrf" in cookies
 
 
 async def test_login_wrong_password_returns_400(
@@ -123,7 +123,7 @@ async def test_csrf_passes_with_matching_header(
         "/api/auth/login",
         data={"username": email, "password": password},
     )
-    csrf = login.cookies.get("hcmap_csrf")
+    csrf = login.cookies.get("plusmap_csrf")
     assert csrf is not None
 
     resp = await client.patch(

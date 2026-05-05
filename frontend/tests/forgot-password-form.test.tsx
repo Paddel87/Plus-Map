@@ -18,13 +18,13 @@ function Wrapper({ children }: { children: ReactNode }) {
 }
 
 beforeEach(() => {
-  document.cookie = "hcmap_csrf=t1; path=/";
+  document.cookie = "plusmap_csrf=t1; path=/";
   vi.stubGlobal("fetch", vi.fn());
 });
 
 afterEach(() => {
   vi.unstubAllGlobals();
-  document.cookie = "hcmap_csrf=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+  document.cookie = "plusmap_csrf=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
 });
 
 describe("ForgotPasswordForm", () => {

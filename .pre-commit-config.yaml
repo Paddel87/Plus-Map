@@ -1,4 +1,4 @@
-# pre-commit hooks for HC-Map.
+# pre-commit hooks for Plus-Map.
 # Install once with: pre-commit install
 # Run manually with: pre-commit run --all-files
 

@@ -1,7 +1,7 @@
 """Async SQLAlchemy engine, session factory, and FastAPI dependency.
 
 The engine is created lazily so tests can override the database URL via
-the ``HCMAP_DATABASE_URL`` environment variable before first use. Sessions
+the ``PLUSMAP_DATABASE_URL`` environment variable before first use. Sessions
 are scoped per request; commit/rollback is the caller's responsibility
 (no implicit commit on context exit).
 """

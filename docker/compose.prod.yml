@@ -1,4 +1,4 @@
-# Production compose for HC-Map (M10.5, ADR-051 §B/§F).
+# Production compose for Plus-Map (M10.5, ADR-051 §B/§F).
 #
 # This file ships ONLY the application services (db, backend, frontend).
 # A reverse-proxy is added by composing one of the overlay files:
@@ -14,13 +14,13 @@
 # ops/runbook.md (M10.8).
 #
 # Backend image runs alembic migrations under a Postgres advisory lock on
-# startup; override with HCMAP_SKIP_MIGRATIONS=1 for emergency rollbacks.
+# startup; override with PLUSMAP_SKIP_MIGRATIONS=1 for emergency rollbacks.
 # Backup service (M10.6) is the fourth default service; it requires
 # docker/secrets/{age-recipients.txt,rclone.conf} to be present and the
-# HCMAP_BACKUP_REMOTE/HCMAP_BACKUP_PREFIX env vars to be set. See
+# PLUSMAP_BACKUP_REMOTE/PLUSMAP_BACKUP_PREFIX env vars to be set. See
 # ops/runbook.md (M10.8).
 
-name: hc-map
+name: plus-map
 
 x-restart: &restart
   restart: unless-stopped
@@ -30,44 +30,44 @@ services:
     <<: *restart
     image: postgis/postgis:16-3.5
     environment:
-      POSTGRES_USER: ${HCMAP_DB_USER:?HCMAP_DB_USER is required}
-      POSTGRES_PASSWORD: ${HCMAP_DB_PASSWORD:?HCMAP_DB_PASSWORD is required}
-      POSTGRES_DB: ${HCMAP_DB_NAME:?HCMAP_DB_NAME is required}
+      POSTGRES_USER: ${PLUSMAP_DB_USER:?PLUSMAP_DB_USER is required}
+      POSTGRES_PASSWORD: ${PLUSMAP_DB_PASSWORD:?PLUSMAP_DB_PASSWORD is required}
+      POSTGRES_DB: ${PLUSMAP_DB_NAME:?PLUSMAP_DB_NAME is required}
     volumes:
       - db-data:/var/lib/postgresql/data
     networks:
       - internal
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${HCMAP_DB_USER} -d ${HCMAP_DB_NAME}"]
+      test: ["CMD-SHELL", "pg_isready -U ${PLUSMAP_DB_USER} -d ${PLUSMAP_DB_NAME}"]
       interval: 10s
       timeout: 5s
       retries: 10
 
   backend:
     <<: *restart
-    image: ghcr.io/paddel87/hc-map-backend:${HCMAP_IMAGE_TAG:-rc}
+    image: ghcr.io/paddel87/plus-map-backend:${PLUSMAP_IMAGE_TAG:-rc}
     pull_policy: always
     environment:
-      HCMAP_ENVIRONMENT: production
-      HCMAP_LOG_LEVEL: ${HCMAP_LOG_LEVEL:-INFO}
-      HCMAP_DATABASE_URL: postgresql+asyncpg://${HCMAP_DB_USER}:${HCMAP_DB_PASSWORD}@db:5432/${HCMAP_DB_NAME}
-      HCMAP_SECRET_KEY: ${HCMAP_SECRET_KEY:?HCMAP_SECRET_KEY is required (>=32 chars)}
-      HCMAP_COOKIE_SECURE: "true"
-      HCMAP_COOKIE_DOMAIN: ${HCMAP_COOKIE_DOMAIN:-}
-      HCMAP_COOKIE_LIFETIME_SECONDS: ${HCMAP_COOKIE_LIFETIME_SECONDS:-604800}
-      HCMAP_BASE_URL: ${HCMAP_BASE_URL:?HCMAP_BASE_URL is required (e.g. https://hc-map.example.org)}
-      HCMAP_SKIP_MIGRATIONS: ${HCMAP_SKIP_MIGRATIONS:-0}
-      HCMAP_MAPTILER_API_KEY: ${HCMAP_MAPTILER_API_KEY:-}
-      HCMAP_MAPTILER_STYLE: ${HCMAP_MAPTILER_STYLE:-basic-v2}
-      HCMAP_GEOCODE_RATE_PER_MINUTE: ${HCMAP_GEOCODE_RATE_PER_MINUTE:-30}
-      HCMAP_SMTP_HOST: ${HCMAP_SMTP_HOST:-}
-      HCMAP_SMTP_PORT: ${HCMAP_SMTP_PORT:-587}
-      HCMAP_SMTP_USER: ${HCMAP_SMTP_USER:-}
-      HCMAP_SMTP_PASSWORD: ${HCMAP_SMTP_PASSWORD:-}
-      HCMAP_SMTP_STARTTLS: ${HCMAP_SMTP_STARTTLS:-true}
-      HCMAP_SMTP_USE_TLS: ${HCMAP_SMTP_USE_TLS:-false}
-      HCMAP_SMTP_FROM: ${HCMAP_SMTP_FROM:-}
-      HCMAP_SMTP_FROM_NAME: ${HCMAP_SMTP_FROM_NAME:-HC-Map}
+      PLUSMAP_ENVIRONMENT: production
+      PLUSMAP_LOG_LEVEL: ${PLUSMAP_LOG_LEVEL:-INFO}
+      PLUSMAP_DATABASE_URL: postgresql+asyncpg://${PLUSMAP_DB_USER}:${PLUSMAP_DB_PASSWORD}@db:5432/${PLUSMAP_DB_NAME}
+      PLUSMAP_SECRET_KEY: ${PLUSMAP_SECRET_KEY:?PLUSMAP_SECRET_KEY is required (>=32 chars)}
+      PLUSMAP_COOKIE_SECURE: "true"
+      PLUSMAP_COOKIE_DOMAIN: ${PLUSMAP_COOKIE_DOMAIN:-}
+      PLUSMAP_COOKIE_LIFETIME_SECONDS: ${PLUSMAP_COOKIE_LIFETIME_SECONDS:-604800}
+      PLUSMAP_BASE_URL: ${PLUSMAP_BASE_URL:?PLUSMAP_BASE_URL is required (e.g. https://plus-map.example.org)}
+      PLUSMAP_SKIP_MIGRATIONS: ${PLUSMAP_SKIP_MIGRATIONS:-0}
+      PLUSMAP_MAPTILER_API_KEY: ${PLUSMAP_MAPTILER_API_KEY:-}
+      PLUSMAP_MAPTILER_STYLE: ${PLUSMAP_MAPTILER_STYLE:-basic-v2}
+      PLUSMAP_GEOCODE_RATE_PER_MINUTE: ${PLUSMAP_GEOCODE_RATE_PER_MINUTE:-30}
+      PLUSMAP_SMTP_HOST: ${PLUSMAP_SMTP_HOST:-}
+      PLUSMAP_SMTP_PORT: ${PLUSMAP_SMTP_PORT:-587}
+      PLUSMAP_SMTP_USER: ${PLUSMAP_SMTP_USER:-}
+      PLUSMAP_SMTP_PASSWORD: ${PLUSMAP_SMTP_PASSWORD:-}
+      PLUSMAP_SMTP_STARTTLS: ${PLUSMAP_SMTP_STARTTLS:-true}
+      PLUSMAP_SMTP_USE_TLS: ${PLUSMAP_SMTP_USE_TLS:-false}
+      PLUSMAP_SMTP_FROM: ${PLUSMAP_SMTP_FROM:-}
+      PLUSMAP_SMTP_FROM_NAME: ${PLUSMAP_SMTP_FROM_NAME:-Plus-Map}
     # Trust proxy headers from the reverse-proxy overlay (which is the only
     # service inside the docker network that can set them). External clients
     # cannot inject them because the backend is not exposed to the host.
@@ -81,7 +81,7 @@ services:
 
   frontend:
     <<: *restart
-    image: ghcr.io/paddel87/hc-map-frontend:${HCMAP_IMAGE_TAG:-rc}
+    image: ghcr.io/paddel87/plus-map-frontend:${PLUSMAP_IMAGE_TAG:-rc}
     pull_policy: always
     environment:
       NODE_ENV: production
@@ -102,17 +102,17 @@ services:
   # retention sweep 04:00 (14d/56d/365d).
   backup:
     <<: *restart
-    image: ghcr.io/paddel87/hc-map-backup:${HCMAP_IMAGE_TAG:-rc}
+    image: ghcr.io/paddel87/plus-map-backup:${PLUSMAP_IMAGE_TAG:-rc}
     pull_policy: always
     environment:
-      HCMAP_BACKUP_REMOTE: ${HCMAP_BACKUP_REMOTE:?HCMAP_BACKUP_REMOTE is required (rclone remote name)}
-      HCMAP_BACKUP_PREFIX: ${HCMAP_BACKUP_PREFIX:?HCMAP_BACKUP_PREFIX is required (path prefix on remote)}
-      HCMAP_BACKUP_RUN_ON_START: ${HCMAP_BACKUP_RUN_ON_START:-0}
+      PLUSMAP_BACKUP_REMOTE: ${PLUSMAP_BACKUP_REMOTE:?PLUSMAP_BACKUP_REMOTE is required (rclone remote name)}
+      PLUSMAP_BACKUP_PREFIX: ${PLUSMAP_BACKUP_PREFIX:?PLUSMAP_BACKUP_PREFIX is required (path prefix on remote)}
+      PLUSMAP_BACKUP_RUN_ON_START: ${PLUSMAP_BACKUP_RUN_ON_START:-0}
       PGHOST: db
       PGPORT: "5432"
-      PGUSER: ${HCMAP_DB_USER}
-      PGPASSWORD: ${HCMAP_DB_PASSWORD}
-      PGDATABASE: ${HCMAP_DB_NAME}
+      PGUSER: ${PLUSMAP_DB_USER}
+      PGPASSWORD: ${PLUSMAP_DB_PASSWORD}
+      PGDATABASE: ${PLUSMAP_DB_NAME}
     secrets:
       - source: age-recipients
         target: age-recipients.txt

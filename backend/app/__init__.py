@@ -1,1 +1,1 @@
-"""HC-Map backend application package."""
+"""Plus-Map backend application package."""

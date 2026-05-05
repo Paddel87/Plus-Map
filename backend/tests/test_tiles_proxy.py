@@ -40,7 +40,7 @@ async def test_anonymous_request_blocked(
     client: AsyncClient,
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "test-key")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "test-key")
     resp = await client.get("/api/tiles/3/4/5")
     assert resp.status_code == 401
 
@@ -50,7 +50,7 @@ async def test_missing_api_key_returns_503(
     async_session_factory: async_sessionmaker[AsyncSession],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "")
     await login_as(client, async_session_factory, role=UserRole.ADMIN)
     resp = await client.get("/api/tiles/3/4/5")
     assert resp.status_code == 503
@@ -61,8 +61,8 @@ async def test_successful_tile_returns_image_with_cache_header(
     async_session_factory: async_sessionmaker[AsyncSession],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "test-key")
-    monkeypatch.setenv("HCMAP_MAPTILER_STYLE", "basic-v2")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "test-key")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_STYLE", "basic-v2")
     fake = _FakeAsyncClient(
         response=_FakeResponse(200, b"\x89PNG\r\n\x1a\n--fake--", "image/png"),
     )
@@ -84,7 +84,7 @@ async def test_upstream_network_error_returns_502(
     async_session_factory: async_sessionmaker[AsyncSession],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "test-key")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "test-key")
     monkeypatch.setattr(
         "app.routes.tiles._http_client",
         lambda: _FakeAsyncClient(raise_exc=True),
@@ -99,7 +99,7 @@ async def test_upstream_status_4xx_returns_502(
     async_session_factory: async_sessionmaker[AsyncSession],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "test-key")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "test-key")
     monkeypatch.setattr(
         "app.routes.tiles._http_client",
         lambda: _FakeAsyncClient(
@@ -116,7 +116,7 @@ async def test_zoom_out_of_range_rejected(
     async_session_factory: async_sessionmaker[AsyncSession],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    monkeypatch.setenv("HCMAP_MAPTILER_API_KEY", "test-key")
+    monkeypatch.setenv("PLUSMAP_MAPTILER_API_KEY", "test-key")
     await login_as(client, async_session_factory, role=UserRole.ADMIN)
     resp = await client.get("/api/tiles/99/0/0")
     assert resp.status_code == 422

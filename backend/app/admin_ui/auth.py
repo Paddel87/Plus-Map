@@ -1,7 +1,7 @@
 """SQLAdmin auth backend that re-uses the fastapi-users cookie (ADR-049 §B).
 
 There is no separate admin login: SQLAdmin's ``authenticate`` reads the
-``hcmap_session`` cookie that ``/api/auth/login`` already issued, decodes
+``plusmap_session`` cookie that ``/api/auth/login`` already issued, decodes
 it via ``JWTStrategy.read_token`` and returns ``True`` only for
 active users with ``role = admin``. Failing requests are redirected to
 the Next.js login page; the SQLAdmin login form is therefore unreachable
@@ -25,7 +25,7 @@ from app.auth.backend import _jwt_strategy
 from app.config import get_settings
 from app.models.user import User, UserRole
 
-_AUTH_COOKIE = "hcmap_session"
+_AUTH_COOKIE = "plusmap_session"
 _LOGIN_REDIRECT = "/login"
 
 

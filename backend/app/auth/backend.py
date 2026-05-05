@@ -14,7 +14,7 @@ from app.config import get_settings
 def _cookie_transport() -> CookieTransport:
     settings = get_settings()
     return CookieTransport(
-        cookie_name="hcmap_session",
+        cookie_name="plusmap_session",
         cookie_max_age=settings.cookie_lifetime_seconds,
         cookie_secure=settings.cookie_secure,
         cookie_httponly=True,

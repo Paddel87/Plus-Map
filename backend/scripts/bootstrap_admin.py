@@ -9,7 +9,7 @@ Usage:
         --password 'a-12-char-or-more' \
         --name 'Admin Person'
 
-Or via env (HCMAP_BOOTSTRAP_EMAIL / _PASSWORD / _NAME).
+Or via env (PLUSMAP_BOOTSTRAP_EMAIL / _PASSWORD / _NAME).
 """
 
 from __future__ import annotations
@@ -61,16 +61,16 @@ async def _bootstrap(email: str, password: str, person_name: str) -> int:
 
 def _parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Create the first admin user. Idempotent.")
-    parser.add_argument("--email", default=os.environ.get("HCMAP_BOOTSTRAP_EMAIL"))
-    parser.add_argument("--password", default=os.environ.get("HCMAP_BOOTSTRAP_PASSWORD"))
+    parser.add_argument("--email", default=os.environ.get("PLUSMAP_BOOTSTRAP_EMAIL"))
+    parser.add_argument("--password", default=os.environ.get("PLUSMAP_BOOTSTRAP_PASSWORD"))
     parser.add_argument(
         "--name",
-        default=os.environ.get("HCMAP_BOOTSTRAP_NAME", "Admin"),
+        default=os.environ.get("PLUSMAP_BOOTSTRAP_NAME", "Admin"),
         help="Display name of the admin's Person record.",
     )
     args = parser.parse_args(argv)
     if not args.email or not args.password:
-        parser.error("--email and --password (or HCMAP_BOOTSTRAP_* env) required")
+        parser.error("--email and --password (or PLUSMAP_BOOTSTRAP_* env) required")
     if len(args.password) < 12:
         parser.error("password must be at least 12 characters")
     return args

@@ -1,6 +1,6 @@
 """Alembic environment supporting sync (psycopg) and async (asyncpg) DSNs.
 
-The DSN comes from ``HCMAP_DATABASE_URL`` so dev/test/prod stay aligned
+The DSN comes from ``PLUSMAP_DATABASE_URL`` so dev/test/prod stay aligned
 with the runtime app config. Async DSNs use ``async_engine_from_config``;
 sync DSNs use the regular ``engine_from_config`` so callers (e.g. pytest
 fixtures) can run migrations from inside a running event loop.
@@ -26,7 +26,7 @@ if config.config_file_name is not None:
 # Use the DSN already set in the Alembic config (caller may have overridden
 # it, e.g. test fixtures running migrations on a sync URL). Fall back to
 # runtime settings only when the config still holds the placeholder default.
-_placeholder = "postgresql+psycopg://hcmap:hcmap@db:5432/hcmap"
+_placeholder = "postgresql+psycopg://plusmap:plusmap@db:5432/plusmap"
 if config.get_main_option("sqlalchemy.url") in (None, _placeholder):
     settings = get_settings()
     config.set_main_option("sqlalchemy.url", settings.database_url)

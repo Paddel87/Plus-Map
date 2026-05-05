@@ -4,7 +4,7 @@ This package wires the SQLAdmin instance to the existing FastAPI app so
 admins can pick stable URLs and a single auth path:
 
 * ``auth.AdminAuthBackend`` reuses the fastapi-users JWT cookie
-  (``hcmap_session``) and rejects anyone who is not an active admin.
+  (``plusmap_session``) and rejects anyone who is not an active admin.
 * ``register_admin`` builds the ``Admin`` and registers each ModelView
   from ``views``.
 

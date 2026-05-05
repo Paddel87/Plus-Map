@@ -19,7 +19,7 @@ function jsonResponse(payload: unknown, status = 200): Response {
 
 beforeEach(() => {
   calls = [];
-  document.cookie = "hcmap_csrf=token-abc; path=/";
+  document.cookie = "plusmap_csrf=token-abc; path=/";
   fetchMock = vi.fn(async (url: string, init: RequestInit = {}) => {
     calls.push({ url, init });
     return jsonResponse({ ok: true });
@@ -29,7 +29,7 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.unstubAllGlobals();
-  document.cookie = "hcmap_csrf=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+  document.cookie = "plusmap_csrf=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
 });
 
 describe("apiFetch", () => {

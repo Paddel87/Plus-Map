@@ -38,7 +38,7 @@ import { useDatabase } from "@/lib/rxdb/provider";
 import type { ApplicationDocType, EventDocType } from "@/lib/rxdb/types";
 import { coerceNumber, type EventDetail, type PersonRead, type TimePrecision } from "@/lib/types";
 
-const RECIPIENT_DRAFT_PREFIX = "hcmap:event-recipient:";
+const RECIPIENT_DRAFT_PREFIX = "plusmap:event-recipient:";
 
 export interface EventDetailViewProps {
   user: AuthUser;

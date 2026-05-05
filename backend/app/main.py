@@ -45,7 +45,7 @@ class HealthResponse(BaseModel):
 def _csrf_cookie_setter(
     settings_secure: bool, lifetime: int
 ) -> Callable[[Request, Callable[[Request], Awaitable[Response]]], Awaitable[Response]]:
-    """Issue a fresh CSRF cookie alongside ``Set-Cookie: hcmap_session``.
+    """Issue a fresh CSRF cookie alongside ``Set-Cookie: plusmap_session``.
 
     fastapi-users sets the auth cookie inside its ``/login`` handler. We
     inspect the response right after the route runs and, if a new
@@ -80,7 +80,7 @@ def _build_lifespan(
 ) -> Callable[[FastAPI], AbstractAsyncContextManager[None]]:
     """Lifespan that auto-runs alembic migrations on production startup.
 
-    Gated by ``HCMAP_ENVIRONMENT`` and ``HCMAP_SKIP_MIGRATIONS`` (see
+    Gated by ``PLUSMAP_ENVIRONMENT`` and ``PLUSMAP_SKIP_MIGRATIONS`` (see
     ``app.migrations_runner``). Tests skip via the environment guard so
     they continue to own their own schema lifecycle.
     """
@@ -102,7 +102,7 @@ def create_app() -> FastAPI:
     )
 
     app = FastAPI(
-        title="HC-Map API",
+        title="Plus-Map API",
         version="0.0.0",
         docs_url="/api/docs",
         openapi_url="/api/openapi.json",

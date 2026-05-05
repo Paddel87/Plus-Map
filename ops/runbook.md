@@ -29,12 +29,12 @@ cp .env.example .env.plus-map
 
 In `.env.plus-map` mindestens setzen:
 
-- `HCMAP_DB_USER=plus_map`
-- `HCMAP_DB_PASSWORD=<starkes-passwort>`
-- `HCMAP_DB_NAME=plus_map`
-- `HCMAP_SECRET_KEY=<32+ Zeichen>`
-- `HCMAP_BASE_URL=https://plus-map.<deine-domain>`
-- `HCMAP_MAPTILER_API_KEY=<eigener-key>` (für Karten-Tiles)
+- `PLUSMAP_DB_USER=plus_map`
+- `PLUSMAP_DB_PASSWORD=<starkes-passwort>`
+- `PLUSMAP_DB_NAME=plus_map`
+- `PLUSMAP_SECRET_KEY=<32+ Zeichen>`
+- `PLUSMAP_BASE_URL=https://plus-map.<deine-domain>`
+- `PLUSMAP_MAPTILER_API_KEY=<eigener-key>` (für Karten-Tiles)
 
 ### 3. Stack starten
 

@@ -40,7 +40,7 @@ export function rasterTileStyle(
     version: 8,
     glyphs: absoluteTileUrl(glyphsUrl),
     sources: {
-      "hcmap-raster": {
+      "plusmap-raster": {
         type: "raster",
         tiles: [absoluteTileUrl(tileUrl)],
         tileSize: 256,
@@ -50,9 +50,9 @@ export function rasterTileStyle(
     },
     layers: [
       {
-        id: "hcmap-raster",
+        id: "plusmap-raster",
         type: "raster",
-        source: "hcmap-raster",
+        source: "plusmap-raster",
         minzoom: 0,
         maxzoom: 22,
       },

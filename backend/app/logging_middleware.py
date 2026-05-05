@@ -34,7 +34,7 @@ def _logger() -> Any:
     Return type is ``Any`` because the bound-logger class is configured
     globally via ``structlog.configure()`` and therefore not statically known.
     """
-    return structlog.get_logger("hcmap.http")
+    return structlog.get_logger("plusmap.http")
 
 
 def _route_template(request: Request) -> str:

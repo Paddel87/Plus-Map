@@ -1,7 +1,7 @@
 /**
  * IndexedDB persistence for the App-PIN (ADR-023 §Storage-Layout).
  *
- * Database: ``hcmap-pin``, store: ``pin``, key: ``pin_v1``. Schema is
+ * Database: ``plusmap-pin``, store: ``pin``, key: ``pin_v1``. Schema is
  * versioned via {@link PinRecord.version} so a later migration to
  * Argon2id (ADR-023 §Späterer Algorithmus-Wechsel) can keep the old
  * record verifiable while writing the new one.
@@ -9,7 +9,7 @@
 
 import type { PinRecord } from "@/lib/pin";
 
-const DB_NAME = "hcmap-pin";
+const DB_NAME = "plusmap-pin";
 const DB_VERSION = 1;
 const STORE = "pin";
 const KEY = "pin_v1";

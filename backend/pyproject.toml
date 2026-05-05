@@ -1,7 +1,7 @@
 [project]
-name = "hc-map-backend"
+name = "plus-map-backend"
 version = "0.0.0"
-description = "HC-Map backend (FastAPI). Self-hosted, geo-referenced bondage event log."
+description = "Plus-Map backend (FastAPI). Self-hosted, geo-referenced outdoor tour log."
 requires-python = ">=3.12,<3.13"
 license = "AGPL-3.0-only"
 dependencies = [

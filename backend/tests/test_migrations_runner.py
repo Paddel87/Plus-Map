@@ -9,7 +9,7 @@ from unittest.mock import patch
 import pytest
 from app.config import Settings
 from app.migrations_runner import (
-    HCMAP_MIGRATION_LOCK_ID,
+    PLUSMAP_MIGRATION_LOCK_ID,
     _should_run,
     _to_async_dsn,
     _to_sync_dsn,
@@ -60,24 +60,24 @@ def _settings(env: str = "production") -> Settings:
 
 def test_should_run_true_in_production_default() -> None:
     with patch.dict(os.environ, {}, clear=False):
-        os.environ.pop("HCMAP_SKIP_MIGRATIONS", None)
+        os.environ.pop("PLUSMAP_SKIP_MIGRATIONS", None)
         assert _should_run(_settings("production")) is True
 
 
 def test_should_run_false_when_skip_flag_set() -> None:
-    with patch.dict(os.environ, {"HCMAP_SKIP_MIGRATIONS": "1"}):
+    with patch.dict(os.environ, {"PLUSMAP_SKIP_MIGRATIONS": "1"}):
         assert _should_run(_settings("production")) is False
 
 
 def test_should_run_false_in_development() -> None:
     with patch.dict(os.environ, {}, clear=False):
-        os.environ.pop("HCMAP_SKIP_MIGRATIONS", None)
+        os.environ.pop("PLUSMAP_SKIP_MIGRATIONS", None)
         assert _should_run(_settings("development")) is False
 
 
 def test_should_run_false_in_test_env() -> None:
     with patch.dict(os.environ, {}, clear=False):
-        os.environ.pop("HCMAP_SKIP_MIGRATIONS", None)
+        os.environ.pop("PLUSMAP_SKIP_MIGRATIONS", None)
         assert _should_run(_settings("test")) is False
 
 
@@ -88,12 +88,12 @@ def test_should_run_false_in_test_env() -> None:
 
 def test_lock_id_is_signed_bigint_safe() -> None:
     """Postgres pg_advisory_lock takes a signed bigint (-2^63 .. 2^63-1)."""
-    assert -(2**63) <= HCMAP_MIGRATION_LOCK_ID < 2**63
+    assert -(2**63) <= PLUSMAP_MIGRATION_LOCK_ID < 2**63
 
 
 def test_lock_id_is_stable_constant() -> None:
     # Document the exact value so any accidental change shows up in diff.
-    assert HCMAP_MIGRATION_LOCK_ID == 47_110_815
+    assert PLUSMAP_MIGRATION_LOCK_ID == 47_110_815
 
 
 # ---------------------------------------------------------------------------
@@ -111,7 +111,7 @@ async def test_skip_returns_without_engine() -> None:
         database_url="postgresql+asyncpg://nope:nope@nonexistent-host:1/nope",
     )
     with patch.dict(os.environ, {}, clear=False):
-        os.environ.pop("HCMAP_SKIP_MIGRATIONS", None)
+        os.environ.pop("PLUSMAP_SKIP_MIGRATIONS", None)
         # Should return cleanly without raising connection errors.
         await run_migrations_with_advisory_lock(settings)
 
@@ -123,7 +123,7 @@ async def test_skip_flag_short_circuits_in_production() -> None:
         secret_key="test-secret-key-32-bytes-minimum-aaaaaaa",
         database_url="postgresql+asyncpg://nope:nope@nonexistent-host:1/nope",
     )
-    with patch.dict(os.environ, {"HCMAP_SKIP_MIGRATIONS": "1"}):
+    with patch.dict(os.environ, {"PLUSMAP_SKIP_MIGRATIONS": "1"}):
         await run_migrations_with_advisory_lock(settings)
 
 
@@ -143,8 +143,8 @@ async def test_advisory_lock_round_trip_runs_alembic(
     asserts that the runner completes without raising and that the lock
     is released afterwards (i.e. a second `pg_try_advisory_lock` succeeds).
     """
-    monkeypatch.setenv("HCMAP_DATABASE_URL", async_db_url)
-    monkeypatch.delenv("HCMAP_SKIP_MIGRATIONS", raising=False)
+    monkeypatch.setenv("PLUSMAP_DATABASE_URL", async_db_url)
+    monkeypatch.delenv("PLUSMAP_SKIP_MIGRATIONS", raising=False)
 
     settings = Settings(
         environment="production",
@@ -161,13 +161,13 @@ async def test_advisory_lock_round_trip_runs_alembic(
             got: Any = (
                 await conn.execute(
                     text("SELECT pg_try_advisory_lock(:id)"),
-                    {"id": HCMAP_MIGRATION_LOCK_ID},
+                    {"id": PLUSMAP_MIGRATION_LOCK_ID},
                 )
             ).scalar()
             assert got is True, "Migration lock leaked beyond runner"
             await conn.execute(
                 text("SELECT pg_advisory_unlock(:id)"),
-                {"id": HCMAP_MIGRATION_LOCK_ID},
+                {"id": PLUSMAP_MIGRATION_LOCK_ID},
             )
     finally:
         await engine.dispose()
@@ -186,8 +186,8 @@ async def test_concurrent_runner_waits_then_skips(
     """
     import asyncio
 
-    monkeypatch.setenv("HCMAP_DATABASE_URL", async_db_url)
-    monkeypatch.delenv("HCMAP_SKIP_MIGRATIONS", raising=False)
+    monkeypatch.setenv("PLUSMAP_DATABASE_URL", async_db_url)
+    monkeypatch.delenv("PLUSMAP_SKIP_MIGRATIONS", raising=False)
 
     settings = Settings(
         environment="production",
@@ -202,14 +202,14 @@ async def test_concurrent_runner_waits_then_skips(
     try:
         await holder_conn.execute(
             text("SELECT pg_advisory_lock(:id)"),
-            {"id": HCMAP_MIGRATION_LOCK_ID},
+            {"id": PLUSMAP_MIGRATION_LOCK_ID},
         )
 
         async def release_after_delay() -> None:
             await asyncio.sleep(0.5)
             await holder_conn.execute(
                 text("SELECT pg_advisory_unlock(:id)"),
-                {"id": HCMAP_MIGRATION_LOCK_ID},
+                {"id": PLUSMAP_MIGRATION_LOCK_ID},
             )
 
         # Run the runner and the releaser concurrently. Runner blocks

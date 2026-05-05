@@ -1,12 +1,12 @@
-# Traefik reverse-proxy overlay for HC-Map (M10.5, ADR-051 §B).
+# Traefik reverse-proxy overlay for Plus-Map (M10.5, ADR-051 §B).
 #
 # Usage:
 #   docker compose -f docker/compose.prod.yml -f docker/compose.traefik.yml \
 #     --env-file .env.prod up -d
 #
 # Required env (see .env.example "Production / Reverse-Proxy" block):
-#   HCMAP_DOMAIN         e.g. hc-map.example.org
-#   HCMAP_ACME_EMAIL     contact for Let's Encrypt registration
+#   PLUSMAP_DOMAIN         e.g. plus-map.example.org
+#   PLUSMAP_ACME_EMAIL     contact for Let's Encrypt registration
 #
 # Static + dynamic config live next to this file at
 # docker/traefik/traefik.yml + docker/traefik/dynamic.yml — both are
@@ -22,8 +22,8 @@ services:
       - "80:80"
       - "443:443"
     environment:
-      HCMAP_DOMAIN: ${HCMAP_DOMAIN:?HCMAP_DOMAIN is required for the Traefik overlay}
-      HCMAP_ACME_EMAIL: ${HCMAP_ACME_EMAIL:?HCMAP_ACME_EMAIL is required for Let's Encrypt}
+      PLUSMAP_DOMAIN: ${PLUSMAP_DOMAIN:?PLUSMAP_DOMAIN is required for the Traefik overlay}
+      PLUSMAP_ACME_EMAIL: ${PLUSMAP_ACME_EMAIL:?PLUSMAP_ACME_EMAIL is required for Let's Encrypt}
     volumes:
       - ./traefik/traefik.yml:/etc/traefik/traefik.yml:ro
       - ./traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
@@ -44,21 +44,21 @@ services:
   backend:
     labels:
       - "traefik.enable=true"
-      - "traefik.http.services.hcmap-backend.loadbalancer.server.port=8000"
-      - "traefik.http.routers.hcmap-backend-api.rule=Host(`${HCMAP_DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/sqladmin`))"
-      - "traefik.http.routers.hcmap-backend-api.entrypoints=websecure"
-      - "traefik.http.routers.hcmap-backend-api.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.hcmap-backend-api.service=hcmap-backend"
+      - "traefik.http.services.plusmap-backend.loadbalancer.server.port=8000"
+      - "traefik.http.routers.plusmap-backend-api.rule=Host(`${PLUSMAP_DOMAIN}`) && (PathPrefix(`/api`) || PathPrefix(`/sqladmin`))"
+      - "traefik.http.routers.plusmap-backend-api.entrypoints=websecure"
+      - "traefik.http.routers.plusmap-backend-api.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.plusmap-backend-api.service=plusmap-backend"
 
   frontend:
     labels:
       - "traefik.enable=true"
-      - "traefik.http.services.hcmap-frontend.loadbalancer.server.port=3000"
-      - "traefik.http.routers.hcmap-frontend.rule=Host(`${HCMAP_DOMAIN}`)"
-      - "traefik.http.routers.hcmap-frontend.entrypoints=websecure"
-      - "traefik.http.routers.hcmap-frontend.tls.certresolver=letsencrypt"
-      - "traefik.http.routers.hcmap-frontend.service=hcmap-frontend"
-      - "traefik.http.routers.hcmap-frontend.priority=1"
+      - "traefik.http.services.plusmap-frontend.loadbalancer.server.port=3000"
+      - "traefik.http.routers.plusmap-frontend.rule=Host(`${PLUSMAP_DOMAIN}`)"
+      - "traefik.http.routers.plusmap-frontend.entrypoints=websecure"
+      - "traefik.http.routers.plusmap-frontend.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.plusmap-frontend.service=plusmap-frontend"
+      - "traefik.http.routers.plusmap-frontend.priority=1"
 
 volumes:
   traefik-acme:
