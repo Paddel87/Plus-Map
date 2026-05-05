@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 
-import { RestraintPicker } from "@/components/catalog/restraint-picker";
+import { EquipmentPicker } from "@/components/catalog/equipment-picker";
 import { RecipientPicker } from "@/components/person/recipient-picker";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -31,7 +31,7 @@ export interface ApplicationStartSheetProps {
   onOpenChange: (open: boolean) => void;
   eventId: string;
   performerPersonId: string;
-  /** Drives the Quick-Propose copy in the embedded RestraintPicker. */
+  /** Drives the Quick-Propose copy in the embedded EquipmentPicker. */
   currentUserRole: UserRole;
   defaultRecipient: PersonRead | null;
   onCreated: () => void;
@@ -49,14 +49,14 @@ export function ApplicationStartSheet({
   const database = useDatabase();
   const [recipient, setRecipient] = useState<PersonRead | null>(defaultRecipient);
   const [note, setNote] = useState("");
-  const [restraintTypeIds, setRestraintTypeIds] = useState<string[]>([]);
+  const [restraintTypeIds, setEquipmentItemIds] = useState<string[]>([]);
   const [pending, setPending] = useState(false);
 
   useEffect(() => {
     if (open) {
       setRecipient(defaultRecipient);
       setNote("");
-      setRestraintTypeIds([]);
+      setEquipmentItemIds([]);
     }
   }, [open, defaultRecipient]);
 
@@ -89,7 +89,7 @@ export function ApplicationStartSheet({
         updated_at: now,
         deleted_at: null,
         _deleted: false,
-        restraint_type_ids: restraintTypeIds,
+        equipment_item_ids: restraintTypeIds,
       });
       toast.success("Stopp gestartet", {
         description: `Sequenz #${localSeq} (lokal). Sync setzt die endgültige Nummer.`,
@@ -125,9 +125,9 @@ export function ApplicationStartSheet({
           </div>
           <div className="flex flex-col gap-2">
             <Label>Ausrüstung (optional)</Label>
-            <RestraintPicker
+            <EquipmentPicker
               value={restraintTypeIds}
-              onChange={setRestraintTypeIds}
+              onChange={setEquipmentItemIds}
               isAdmin={currentUserRole === "admin"}
             />
           </div>

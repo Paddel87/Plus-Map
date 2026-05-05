@@ -19,7 +19,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
-import { RestraintPicker } from "@/components/catalog/restraint-picker";
+import { EquipmentPicker } from "@/components/catalog/equipment-picker";
 import { RecipientPicker } from "@/components/person/recipient-picker";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -201,7 +201,7 @@ export function EventBackfillForm({ user }: EventBackfillFormProps) {
           updated_at: now,
           deleted_at: null,
           _deleted: false,
-          restraint_type_ids: original.restraintTypeIds,
+          equipment_item_ids: original.restraintTypeIds,
         });
       }
       toast.success("Tour erfasst", {
@@ -549,7 +549,7 @@ export function EventBackfillForm({ user }: EventBackfillFormProps) {
                 </div>
                 <div className="flex flex-col gap-1">
                   <Label>Ausrüstung (optional)</Label>
-                  <RestraintPicker
+                  <EquipmentPicker
                     value={row.restraintTypeIds}
                     onChange={(next) => updateApplication(row.uiId, { restraintTypeIds: next })}
                     isAdmin={user.role === "admin"}

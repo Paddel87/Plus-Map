@@ -44,7 +44,7 @@ export interface ApplicationRead {
   note: string | null;
   created_at: string;
   updated_at: string | null;
-  restraint_type_ids: string[];
+  equipment_item_ids: string[];
 }
 
 export interface Page<T> {
@@ -68,7 +68,7 @@ export interface ApplicationLiveStartPayload {
   performer_id?: string;
   recipient_id?: string;
   note?: string;
-  restraint_type_ids?: string[];
+  equipment_item_ids?: string[];
 }
 
 export function coerceNumber(value: number | string): number {

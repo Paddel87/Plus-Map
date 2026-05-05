@@ -10,7 +10,7 @@
  * are tiny in Pfad A).
  */
 
-import { RestraintTypeForm } from "@/components/catalog/restraint-type-form";
+import { EquipmentItemForm } from "@/components/catalog/equipment-item-form";
 import { useCatalogEntry } from "@/lib/catalog/api";
 import type { CatalogKind } from "@/lib/catalog/types";
 
@@ -46,8 +46,8 @@ export function CatalogFormPage({
         </div>
       );
     }
-    return <RestraintTypeForm mode={{ type: "edit", entry: entryQuery.data }} isAdmin={isAdmin} />;
+    return <EquipmentItemForm mode={{ type: "edit", entry: entryQuery.data }} isAdmin={isAdmin} />;
   }
 
-  return <RestraintTypeForm mode={{ type: "create" }} isAdmin={isAdmin} />;
+  return <EquipmentItemForm mode={{ type: "create" }} isAdmin={isAdmin} />;
 }

@@ -5,8 +5,7 @@ import type { ReactNode } from "react";
 import { StatusBadge } from "@/components/catalog/status-badge";
 import {
   entryLabel,
-  MECHANICAL_TYPE_LABELS,
-  RESTRAINT_CATEGORY_LABELS,
+  EQUIPMENT_CATEGORY_LABELS,
   type AnyCatalogEntry,
   type CatalogKind,
 } from "@/lib/catalog/types";
@@ -21,10 +20,9 @@ function formatDate(iso: string): string {
 }
 
 function metaSubtitle(entry: AnyCatalogEntry): string | null {
-  const parts: string[] = [RESTRAINT_CATEGORY_LABELS[entry.category]];
+  const parts: string[] = [EQUIPMENT_CATEGORY_LABELS[entry.category]];
   if (entry.brand) parts.push(entry.brand);
   if (entry.model) parts.push(entry.model);
-  if (entry.mechanical_type) parts.push(MECHANICAL_TYPE_LABELS[entry.mechanical_type]);
   return parts.join(" · ");
 }
 

@@ -1,10 +1,10 @@
 "use client";
 
 /**
- * Multi-Select-Picker mit Typeahead für approved RestraintTypes (M7.5, ADR-046).
+ * Multi-Select-Picker mit Typeahead für approved EquipmentItems (M7.5, ADR-046).
  *
  * Liest die Liste über den TanStack-Query-Cache aus M7.x
- * (`useCatalogList("restraint-types", { status: "approved" })`) und
+ * (`useCatalogList("equipment-items", { status: "approved" })`) und
  * filtert client-seitig auf approved (Editor sieht via RLS auch eigene
  * pending; die wären aber nicht via Sync-Push verlinkbar — wir blenden
  * sie hier zusätzlich aus, damit der Picker nicht zur Konflikt-Falle
@@ -32,21 +32,19 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   useCatalogList,
   useCreateCatalogEntry,
-  type RestraintTypeCreatePayload,
+  type EquipmentItemCreatePayload,
 } from "@/lib/catalog/api";
 import {
-  MECHANICAL_TYPE_LABELS,
-  RESTRAINT_CATEGORY_LABELS,
-  type RestraintCategory,
-  type RestraintMechanicalType,
-  type RestraintTypeEntry,
+  EQUIPMENT_CATEGORY_LABELS,
+  type EquipmentCategory,
+  type EquipmentItemEntry,
 } from "@/lib/catalog/types";
 import { cn } from "@/lib/cn";
 
 const SELECT_CLASS =
   "flex h-9 w-full rounded-md border border-slate-200 bg-white px-2 py-1 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-800 dark:bg-slate-950 dark:focus-visible:ring-slate-300";
 
-export interface RestraintPickerProps {
+export interface EquipmentPickerProps {
   /** Currently selected restraint-type IDs (set semantics; order ignored). */
   value: readonly string[];
   /** Called whenever the selection changes. */
@@ -59,8 +57,7 @@ export interface RestraintPickerProps {
 
 interface QuickProposeState {
   open: boolean;
-  category: RestraintCategory;
-  mechanicalType: RestraintMechanicalType | "";
+  category: EquipmentCategory;
   brand: string;
   model: string;
   displayName: string;
@@ -69,43 +66,41 @@ interface QuickProposeState {
 
 const INITIAL_QUICK: QuickProposeState = {
   open: false,
-  category: "rope",
-  mechanicalType: "",
+  category: "tools",
   brand: "",
   model: "",
   displayName: "",
   attemptedSubmit: false,
 };
 
-function entrySubtitle(entry: RestraintTypeEntry): string {
-  const parts: string[] = [RESTRAINT_CATEGORY_LABELS[entry.category]];
+function entrySubtitle(entry: EquipmentItemEntry): string {
+  const parts: string[] = [EQUIPMENT_CATEGORY_LABELS[entry.category]];
   if (entry.brand) parts.push(entry.brand);
   if (entry.model) parts.push(entry.model);
-  if (entry.mechanical_type) parts.push(MECHANICAL_TYPE_LABELS[entry.mechanical_type]);
   return parts.join(" · ");
 }
 
-function matchesNeedle(entry: RestraintTypeEntry, needle: string): boolean {
+function matchesNeedle(entry: EquipmentItemEntry, needle: string): boolean {
   if (!needle) return true;
   const haystack = [
     entry.display_name,
     entry.brand ?? "",
     entry.model ?? "",
-    RESTRAINT_CATEGORY_LABELS[entry.category],
+    EQUIPMENT_CATEGORY_LABELS[entry.category],
   ]
     .join(" ")
     .toLowerCase();
   return haystack.includes(needle);
 }
 
-export function RestraintPicker({ value, onChange, isAdmin, id }: RestraintPickerProps) {
+export function EquipmentPicker({ value, onChange, isAdmin, id }: EquipmentPickerProps) {
   const reactId = useId();
-  const baseId = id ?? `restraint-picker-${reactId}`;
+  const baseId = id ?? `equipment-picker-${reactId}`;
   const [filter, setFilter] = useState("");
   const [quick, setQuick] = useState<QuickProposeState>(INITIAL_QUICK);
 
-  const list = useCatalogList("restraint-types", { status: "approved", limit: 200 });
-  const create = useCreateCatalogEntry("restraint-types");
+  const list = useCatalogList("equipment-items", { status: "approved", limit: 200 });
+  const create = useCreateCatalogEntry("equipment-items");
 
   const approved = useMemo(() => {
     const items = list.data?.items ?? [];
@@ -113,7 +108,7 @@ export function RestraintPicker({ value, onChange, isAdmin, id }: RestraintPicke
   }, [list.data]);
 
   const byId = useMemo(() => {
-    const map = new Map<string, RestraintTypeEntry>();
+    const map = new Map<string, EquipmentItemEntry>();
     approved.forEach((entry) => map.set(entry.id, entry));
     return map;
   }, [approved]);
@@ -144,11 +139,10 @@ export function RestraintPicker({ value, onChange, isAdmin, id }: RestraintPicke
       setQuick((q) => ({ ...q, attemptedSubmit: true }));
       return;
     }
-    const body: RestraintTypeCreatePayload = {
+    const body: EquipmentItemCreatePayload = {
       category: quick.category,
       brand: quick.brand.trim() === "" ? null : quick.brand.trim(),
       model: quick.model.trim() === "" ? null : quick.model.trim(),
-      mechanical_type: quick.mechanicalType === "" ? null : quick.mechanicalType,
       display_name: trimmed,
       note: null,
     };
@@ -172,12 +166,12 @@ export function RestraintPicker({ value, onChange, isAdmin, id }: RestraintPicke
   };
 
   return (
-    <div className="flex flex-col gap-2" data-testid="restraint-picker">
+    <div className="flex flex-col gap-2" data-testid="equipment-picker">
       {selected.size > 0 ? (
         <ul
           className="flex flex-wrap gap-1.5"
           aria-label="Ausgewählte Ausrüstung"
-          data-testid="restraint-picker-selected"
+          data-testid="equipment-picker-selected"
         >
           {Array.from(selected).map((entryId) => {
             const entry = byId.get(entryId);
@@ -238,7 +232,7 @@ export function RestraintPicker({ value, onChange, isAdmin, id }: RestraintPicke
 
       <div
         className="max-h-56 overflow-y-auto rounded-md border border-slate-200 dark:border-slate-800"
-        data-testid="restraint-picker-list"
+        data-testid="equipment-picker-list"
       >
         {list.isPending ? (
           <div className="flex flex-col gap-2 p-3">
@@ -270,7 +264,7 @@ export function RestraintPicker({ value, onChange, isAdmin, id }: RestraintPicke
                     role="option"
                     aria-selected={isSelected}
                     onClick={() => toggle(entry.id)}
-                    data-testid="restraint-picker-option"
+                    data-testid="equipment-picker-option"
                     data-selected={isSelected ? "true" : "false"}
                     className={cn(
                       "flex w-full items-center gap-3 px-3 py-2 text-left text-sm",
@@ -310,14 +304,14 @@ export function RestraintPicker({ value, onChange, isAdmin, id }: RestraintPicke
           size="sm"
           onClick={() => setQuick((q) => ({ ...q, open: true }))}
           className="justify-start"
-          data-testid="restraint-picker-propose-toggle"
+          data-testid="equipment-picker-propose-toggle"
         >
           <Plus aria-hidden /> {isAdmin ? "Neuen Eintrag anlegen" : "Neuen Vorschlag einreichen"}
         </Button>
       ) : (
         <div
           className="flex flex-col gap-2 rounded-md border border-slate-200 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-900/50"
-          data-testid="restraint-picker-propose-form"
+          data-testid="equipment-picker-propose-form"
         >
           <div className="flex flex-col gap-1">
             <Label htmlFor={`${baseId}-display-name`}>Display-Name *</Label>
@@ -347,32 +341,11 @@ export function RestraintPicker({ value, onChange, isAdmin, id }: RestraintPicke
                 id={`${baseId}-category`}
                 value={quick.category}
                 onChange={(e) =>
-                  setQuick((q) => ({ ...q, category: e.target.value as RestraintCategory }))
+                  setQuick((q) => ({ ...q, category: e.target.value as EquipmentCategory }))
                 }
                 className={SELECT_CLASS}
               >
-                {Object.entries(RESTRAINT_CATEGORY_LABELS).map(([key, label]) => (
-                  <option key={key} value={key}>
-                    {label}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div className="flex flex-col gap-1">
-              <Label htmlFor={`${baseId}-mechanical`}>Bauart</Label>
-              <select
-                id={`${baseId}-mechanical`}
-                value={quick.mechanicalType}
-                onChange={(e) =>
-                  setQuick((q) => ({
-                    ...q,
-                    mechanicalType: e.target.value as RestraintMechanicalType | "",
-                  }))
-                }
-                className={SELECT_CLASS}
-              >
-                <option value="">— keine —</option>
-                {Object.entries(MECHANICAL_TYPE_LABELS).map(([key, label]) => (
+                {Object.entries(EQUIPMENT_CATEGORY_LABELS).map(([key, label]) => (
                   <option key={key} value={key}>
                     {label}
                   </option>
@@ -415,7 +388,7 @@ export function RestraintPicker({ value, onChange, isAdmin, id }: RestraintPicke
               className="flex-1"
               onClick={submitQuick}
               disabled={create.isPending}
-              data-testid="restraint-picker-propose-submit"
+              data-testid="equipment-picker-propose-submit"
             >
               {create.isPending ? <Loader2 className="animate-spin" aria-hidden /> : null}
               {isAdmin ? "Anlegen" : "Vorschlagen"}

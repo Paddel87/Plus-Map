@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * TanStack-Query hooks for the RestraintType (equipment) catalog.
+ * TanStack-Query hooks for the EquipmentItem (equipment) catalog.
  *
  * Cache-Key shape: `["catalog", kind, { status }]` — mutations
  * invalidate `["catalog", kind]` to cover every filter variant.
@@ -12,7 +12,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { apiFetch } from "@/lib/api";
 import type { Page } from "@/lib/types";
 
-import type { AnyCatalogEntry, CatalogKind, CatalogStatus, RestraintTypeEntry } from "./types";
+import type { AnyCatalogEntry, CatalogKind, CatalogStatus, EquipmentItemEntry } from "./types";
 
 export interface CatalogListParams {
   status?: CatalogStatus;
@@ -56,27 +56,26 @@ export function useCatalogList(kind: CatalogKind, params: CatalogListParams = {}
 }
 
 /**
- * RestraintType create body. The backend accepts the same body for
+ * EquipmentItem create body. The backend accepts the same body for
  * both editor proposals and admin direct-approve creates; the route
  * promotes admin-created entries to `status='approved'` automatically
  * (ADR-042 §F).
  */
-export interface RestraintTypeCreatePayload {
+export interface EquipmentItemCreatePayload {
   category: string;
   brand?: string | null;
   model?: string | null;
-  mechanical_type?: string | null;
   display_name: string;
   note?: string | null;
 }
 
-export type CatalogCreatePayload<K extends CatalogKind> = K extends "restraint-types"
-  ? RestraintTypeCreatePayload
+export type CatalogCreatePayload<K extends CatalogKind> = K extends "equipment-items"
+  ? EquipmentItemCreatePayload
   : never;
 
-export type RestraintTypeUpdatePayload = Partial<RestraintTypeCreatePayload>;
-export type CatalogUpdatePayload<K extends CatalogKind> = K extends "restraint-types"
-  ? RestraintTypeUpdatePayload
+export type EquipmentItemUpdatePayload = Partial<EquipmentItemCreatePayload>;
+export type CatalogUpdatePayload<K extends CatalogKind> = K extends "equipment-items"
+  ? EquipmentItemUpdatePayload
   : never;
 
 export function useCreateCatalogEntry<K extends CatalogKind>(kind: K) {
@@ -163,7 +162,7 @@ export function useWithdrawCatalogEntry<K extends CatalogKind>(kind: K) {
 export async function fetchCatalogEntry(
   kind: CatalogKind,
   id: string,
-): Promise<RestraintTypeEntry> {
+): Promise<EquipmentItemEntry> {
   // The list endpoint is the only read path the API exposes, so we
   // page-scan with a status-agnostic call and pick the matching row.
   // Catalog tables are tiny (<200 rows in Pfad A), so a single

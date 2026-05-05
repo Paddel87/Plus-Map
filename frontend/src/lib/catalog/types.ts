@@ -1,35 +1,36 @@
 /**
- * Frontend types for the RestraintType (equipment) catalog.
+ * Frontend types for the EquipmentItem (outdoor-equipment) catalog.
  *
  * Mirrors the backend `app/schemas/catalog.py` shape. Catalog data is
  * intentionally not synced via RxDB (ADR-042 §E); we read it via
- * TanStack-Query against `/api/restraint-types` and re-fetch on
+ * TanStack-Query against `/api/equipment-items` and re-fetch on
  * mutations.
  */
 
 export type CatalogStatus = "approved" | "pending" | "rejected";
 
-export type CatalogKind = "restraint-types";
+export type CatalogKind = "equipment-items";
 
-export const CATALOG_KINDS: readonly CatalogKind[] = ["restraint-types"] as const;
+export const CATALOG_KINDS: readonly CatalogKind[] = ["equipment-items"] as const;
 
 export const CATALOG_KIND_LABELS: Record<CatalogKind, string> = {
-  "restraint-types": "Ausrüstung",
+  "equipment-items": "Ausrüstung",
 };
 
-export type RestraintCategory =
-  | "handcuffs"
-  | "thumbcuffs"
-  | "legcuffs"
-  | "cuffs_leather"
-  | "rope"
-  | "tape"
-  | "cable_tie"
-  | "cloth"
-  | "strap"
+export type EquipmentCategory =
+  | "navigation"
+  | "lighting"
+  | "hydration"
+  | "nutrition"
+  | "safety"
+  | "tools"
+  | "documentation"
+  | "comfort"
+  | "mobility"
+  | "carrying"
+  | "clothing"
+  | "shelter"
   | "other";
-
-export type RestraintMechanicalType = "chain" | "hinged" | "rigid";
 
 interface CatalogAuditFields {
   id: string;
@@ -43,20 +44,19 @@ interface CatalogAuditFields {
   updated_at: string | null;
 }
 
-export interface RestraintTypeEntry extends CatalogAuditFields {
-  category: RestraintCategory;
+export interface EquipmentItemEntry extends CatalogAuditFields {
+  category: EquipmentCategory;
   brand: string | null;
   model: string | null;
-  mechanical_type: RestraintMechanicalType | null;
   display_name: string;
   note: string | null;
 }
 
-export type CatalogEntry<K extends CatalogKind = CatalogKind> = K extends "restraint-types"
-  ? RestraintTypeEntry
+export type CatalogEntry<K extends CatalogKind = CatalogKind> = K extends "equipment-items"
+  ? EquipmentItemEntry
   : never;
 
-export type AnyCatalogEntry = RestraintTypeEntry;
+export type AnyCatalogEntry = EquipmentItemEntry;
 
 /** Display label for an entry. */
 export function entryLabel(entry: AnyCatalogEntry): string {
@@ -69,21 +69,18 @@ export const STATUS_LABELS: Record<CatalogStatus, string> = {
   rejected: "Abgelehnt",
 };
 
-export const RESTRAINT_CATEGORY_LABELS: Record<RestraintCategory, string> = {
-  handcuffs: "Handschellen",
-  thumbcuffs: "Daumenschellen",
-  legcuffs: "Fußschellen",
-  cuffs_leather: "Lederschellen",
-  rope: "Seil",
-  tape: "Tape",
-  cable_tie: "Kabelbinder",
-  cloth: "Stoff",
-  strap: "Riemen",
+export const EQUIPMENT_CATEGORY_LABELS: Record<EquipmentCategory, string> = {
+  navigation: "Navigation",
+  lighting: "Beleuchtung",
+  hydration: "Trinkwasser",
+  nutrition: "Verpflegung",
+  safety: "Sicherheit",
+  tools: "Werkzeug",
+  documentation: "Dokumentation",
+  comfort: "Komfort",
+  mobility: "Fortbewegung",
+  carrying: "Tragen",
+  clothing: "Bekleidung",
+  shelter: "Unterkunft",
   other: "Sonstiges",
-};
-
-export const MECHANICAL_TYPE_LABELS: Record<RestraintMechanicalType, string> = {
-  chain: "Chain",
-  hinged: "Hinged",
-  rigid: "Rigid",
 };
