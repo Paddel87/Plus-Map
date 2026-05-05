@@ -120,8 +120,7 @@ def upgrade() -> None:
     # 9. Rename the audit FK constraints + the (auto-named) PK to keep
     #    names in lockstep with the table.
     op.execute(
-        "ALTER TABLE equipment_item RENAME CONSTRAINT "
-        "pk_restraint_type TO pk_equipment_item"
+        "ALTER TABLE equipment_item RENAME CONSTRAINT pk_restraint_type TO pk_equipment_item"
     )
     op.execute(
         "ALTER TABLE equipment_item RENAME CONSTRAINT "
@@ -343,8 +342,7 @@ def downgrade() -> None:
         "fk_equipment_item_suggested_by_user TO fk_restraint_type_suggested_by_user"
     )
     op.execute(
-        "ALTER TABLE equipment_item RENAME CONSTRAINT "
-        "pk_equipment_item TO pk_restraint_type"
+        "ALTER TABLE equipment_item RENAME CONSTRAINT pk_equipment_item TO pk_restraint_type"
     )
     op.rename_table("equipment_item", "restraint_type")
     op.execute("ALTER INDEX ix_equipment_item_brand RENAME TO ix_restraint_type_brand")
@@ -370,9 +368,7 @@ def downgrade() -> None:
         """
     )
     op.execute("DROP TYPE equipment_category")
-    op.execute(
-        "CREATE TYPE restraint_mechanical_type AS ENUM ('chain', 'hinged', 'rigid')"
-    )
+    op.execute("CREATE TYPE restraint_mechanical_type AS ENUM ('chain', 'hinged', 'rigid')")
 
     # 5. Re-add the mechanical_type column and the original identity
     #    constraint (4 columns, NULLS NOT DISTINCT).

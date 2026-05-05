@@ -58,5 +58,3 @@ async def test_admin_approves_equipment_item(
     approve = await post_with_csrf(client, csrf_admin, f"/api/equipment-items/{rt_id}/approve")
     assert approve.status_code == 200, approve.text
     assert approve.json()["status"] == "approved"
-
-
